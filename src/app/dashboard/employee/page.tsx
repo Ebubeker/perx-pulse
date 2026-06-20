@@ -131,12 +131,20 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
         <span className="text-coral">→</span>
       </Link>
 
+      {/* Daily Spin — free coins */}
+      <Link href="/dashboard/employee/spin" className="mt-3.5 flex items-center gap-3 rounded-[var(--r-lg)] border border-[#E3EBBE] bg-lime-soft p-4">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-lime text-ink"><Icon name="sparkles" size={20} /></span>
+        <div className="flex-1"><div className="font-bold">Daily Spin</div><div className="text-[13px] text-muted">Free PerxCoin — spin once a day</div></div>
+        <span className="font-bold text-[var(--lime-deep)]">Spin →</span>
+      </Link>
+
       {/* Quick links + latest pack */}
       <div className="mt-3.5 grid grid-cols-2 gap-3">
+        <Link href="/dashboard/employee/achievements" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="medal" size={20} /><span>Achievements</span></Link>
         <Link href="/dashboard/employee/passport" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="passport" size={20} /><span>Passport</span></Link>
         <Link href="/dashboard/leaderboard" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="trophy" size={20} /><span>Leaderboard</span></Link>
         <Link href="/dashboard/team" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="team" size={20} /><span>Team packs</span></Link>
-        <Link href="/dashboard/employee/genie" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="genie" size={20} /><span>Perx Genie</span></Link>
+        <Link href="/dashboard/employee/genie" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold col-span-2"><Icon name="genie" size={20} /><span>Perx Genie</span></Link>
       </div>
 
       {latest && (

@@ -21,7 +21,7 @@ export const ROLE_HOME: Record<Role, string> = {
 // Bottom tab bar (mobile) + top of the sidebar.
 export const NAV_PRIMARY: Record<Role, NavItem[]> = {
   employee: [
-    { key: "home", labelKey: "nav.home", href: "/dashboard/employee", match: "exact", icon: "home", also: ["/dashboard/employee/passport", "/dashboard/employee/discover", "/dashboard/employee/pulse", "/dashboard/employee/package", "/dashboard/employee/offer", "/dashboard/employee/provider"] },
+    { key: "home", labelKey: "nav.home", href: "/dashboard/employee", match: "exact", icon: "home", also: ["/dashboard/employee/passport", "/dashboard/employee/achievements", "/dashboard/employee/spin", "/dashboard/employee/discover", "/dashboard/employee/pulse", "/dashboard/employee/package", "/dashboard/employee/offer", "/dashboard/employee/provider"] },
     { key: "coins", labelKey: "nav.coins", href: "/dashboard/recognition", match: "prefix", icon: "coin", also: ["/dashboard/employee/drops", "/dashboard/leaderboard"] },
     { key: "team", labelKey: "nav.team", href: "/dashboard/team", match: "prefix", icon: "team" },
   ],
@@ -78,6 +78,8 @@ const TITLES: { prefix: string; key: string }[] = [
   { prefix: "/dashboard/employee/genie", key: "nav.genie" },
   { prefix: "/dashboard/employee/drops", key: "nav.drops" },
   { prefix: "/dashboard/employee/passport", key: "nav.passport" },
+  { prefix: "/dashboard/employee/achievements", key: "nav.achievements" },
+  { prefix: "/dashboard/employee/spin", key: "nav.spin" },
   { prefix: "/dashboard/employee", key: "nav.home" },
   { prefix: "/dashboard/company/approvals", key: "nav.approvals" },
   { prefix: "/dashboard/company/insights", key: "nav.insights" },

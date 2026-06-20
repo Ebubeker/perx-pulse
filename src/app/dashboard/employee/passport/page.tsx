@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
@@ -7,12 +8,6 @@ import { Icon } from "@/components/Icon";
 import { passportFor, ALL_CATEGORIES } from "@/lib/passport";
 
 export const dynamic = "force-dynamic";
-
-const DISC = [
-  { bg: "var(--coral)", color: "#fff" },
-  { bg: "var(--lime)", color: "var(--ink)" },
-  { bg: "var(--ink)", color: "#fff" },
-] as const;
 
 export default async function PassportPage() {
   const m = await getMembership();
@@ -36,6 +31,7 @@ export default async function PassportPage() {
         <div className="greet"><div className="day">Your year so far</div><h1>Passport</h1></div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <Mascot mood={full ? "celebrate" : "cool"} size={58} className="float" />
+          <Link href="/dashboard/employee/achievements" className="btn-icon" aria-label="Achievements"><Icon name="medal" size={18} /></Link>
         </div>
       </div>
 
@@ -60,15 +56,14 @@ export default async function PassportPage() {
         </div>
       </div>
 
-      <div className="sec"><h3>Stamps</h3><span className="link">{have} / {ALL_CATEGORIES.length} collected</span></div>
+      <div className="sec"><h3>Awards</h3><Link href="/dashboard/employee/achievements" className="link">All achievements →</Link></div>
       <div className="stamp-grid">
-        {ALL_CATEGORIES.map((c, i) => {
+        {ALL_CATEGORIES.map((c) => {
           const got = collected.has(c.key);
-          const disc = DISC[i % DISC.length]!;
           return (
-            <Link key={c.key} href={`/dashboard/employee?cat=${c.key}#browse`} className={`stamp ${got ? "got" : "lock"}`}>
-              <div className="disc" style={got ? { background: disc.bg, color: disc.color } : undefined}>{got ? <Icon name={c.icon} size={24} /> : <Icon name="lock" size={22} />}</div>
-              <div className="nm">{c.label}</div>
+            <Link key={c.key} href={`/dashboard/employee?cat=${c.key}#browse`} className={`astamp ${got ? "" : "lock"}`}>
+              <Image src={`/perx/awards/award-${c.key}.png`} alt={c.label} width={104} height={104} unoptimized />
+              <div className="nm">{c.label}{!got && <Icon name="lock" size={11} />}</div>
             </Link>
           );
         })}

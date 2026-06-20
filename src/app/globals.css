@@ -296,7 +296,8 @@ h1,h2,h3,h4 { font-family: var(--f-display); font-weight: 700; letter-spacing: -
 .reward{flex:1;background:var(--ink);color:#fff;border-radius:var(--r-lg);padding:16px;text-align:center}
 .reward .big{font-family:var(--f-display);font-size:24px;font-weight:700;color:var(--lime)}
 .stampwin{display:flex;align-items:center;gap:12px;background:var(--coral);color:#fff;border-radius:var(--r-lg);padding:16px;text-align:left}
-.check{width:78px;height:78px;border-radius:50%;background:var(--lime);display:grid;place-items:center;font-size:38px;color:var(--ink)}
+.check{width:78px;height:78px;border-radius:50%;background:var(--lime);display:grid;place-items:center;color:var(--ink);animation:checkPop .5s both}
+@keyframes checkPop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1)}}
 
 /* wallet (17) */
 .wcard .lab{font-size:13px;color:var(--txt-on-dark-mut);display:flex;align-items:center;gap:7px}
@@ -383,6 +384,36 @@ h1,h2,h3,h4 { font-family: var(--f-display); font-weight: 700; letter-spacing: -
 .pcard .ph{height:80px;border-radius:var(--r-md);display:grid;place-items:center;margin-bottom:12px}
 .pcard .nm{font-weight:700;font-size:16px}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+
+/* award-badge stamps (achievements / passport) */
+.astamp{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;transition:transform .12s}
+.astamp:active{transform:scale(.95)}
+.astamp img{width:100%;max-width:104px;aspect-ratio:1;object-fit:contain;display:block}
+.astamp .nm{font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:3px}
+.astamp.lock img{filter:grayscale(1) opacity(.34)}
+.astamp.lock .nm{color:var(--txt-mut)}
+
+/* daily spin */
+.spinview{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 6px;background:radial-gradient(120% 46% at 50% 6%, #EEF6C9 0%, transparent 62%)}
+.spinview .bal{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border-radius:var(--r-pill);padding:9px 16px;font-weight:700;margin-top:4px}
+.spinview .bal .v{color:var(--lime);font-family:var(--f-display)}
+.spinview h1{font-family:var(--f-display);font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:18px}
+.spinview .lead{color:var(--txt-mut);font-size:14px;margin-top:6px;max-width:280px}
+.stagewrap{position:relative;width:280px;height:280px;margin:14px auto 4px;display:grid;place-items:center}
+.glow{position:absolute;width:230px;height:230px;border-radius:50%;background:radial-gradient(closest-side,#C7E63F55,transparent)}
+.ptr{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:3;width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:22px solid var(--ink)}
+#rotor{transform-box:fill-box;transform-origin:center}
+.spinner{filter:drop-shadow(0 12px 22px rgba(27,26,22,.22));cursor:pointer}
+.spinner.idle #rotor{animation:spinIdle 6s linear infinite}
+@keyframes spinIdle{to{transform:rotate(360deg)}}
+.streak{display:flex;gap:7px;justify-content:center;margin-top:14px}
+.streak i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--cream-2);border:1px solid var(--paper-line);color:var(--txt-mut);font-style:normal}
+.streak i.on{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.spinreward{position:fixed;inset:0;background:rgba(27,26,22,.5);display:flex;align-items:center;justify-content:center;z-index:60;animation:rwFade .25s both;padding:24px}
+@keyframes rwFade{from{opacity:0}to{opacity:1}}
+.spinreward .panel{background:var(--cream);border-radius:var(--r-xl);padding:28px 26px;width:100%;max-width:320px;text-align:center;animation:rwPop .4s both}
+@keyframes rwPop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+.spinreward .big{font-family:var(--f-display);font-size:46px;font-weight:800;color:var(--lime-deep);margin:6px 0;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 
 /* ---- animation helpers ---- */
 .float{animation:float 3.4s ease-in-out infinite}
