@@ -21,9 +21,10 @@ export const ROLE_HOME: Record<Role, string> = {
 // Bottom tab bar (mobile) + top of the sidebar.
 export const NAV_PRIMARY: Record<Role, NavItem[]> = {
   employee: [
-    { key: "home", labelKey: "nav.home", href: "/dashboard/employee", match: "exact", icon: "home", also: ["/dashboard/employee/passport", "/dashboard/employee/achievements", "/dashboard/employee/spin", "/dashboard/employee/discover", "/dashboard/employee/pulse", "/dashboard/employee/package", "/dashboard/employee/offer", "/dashboard/employee/provider"] },
-    { key: "coins", labelKey: "nav.coins", href: "/dashboard/recognition", match: "prefix", icon: "coin", also: ["/dashboard/employee/drops", "/dashboard/leaderboard"] },
+    { key: "home", labelKey: "nav.home", href: "/dashboard/employee", match: "exact", icon: "home", also: ["/dashboard/employee/discover", "/dashboard/employee/pulse", "/dashboard/employee/package", "/dashboard/employee/offer", "/dashboard/employee/provider"] },
+    { key: "coins", labelKey: "nav.coins", href: "/dashboard/recognition", match: "prefix", icon: "coin", also: ["/dashboard/leaderboard"] },
     { key: "team", labelKey: "nav.team", href: "/dashboard/team", match: "prefix", icon: "team" },
+    { key: "more", labelKey: "nav.more", href: "/dashboard/employee/more", match: "prefix", icon: "more", also: ["/dashboard/employee/wallet", "/dashboard/employee/drops", "/dashboard/employee/passport", "/dashboard/employee/achievements", "/dashboard/employee/spin", "/dashboard/employee/genie"] },
   ],
   company: [
     { key: "overview", labelKey: "nav.overview", href: "/dashboard/company", match: "exact", icon: "grid" },
@@ -41,8 +42,10 @@ export const NAV_PRIMARY: Record<Role, NavItem[]> = {
 export const NAV_SECONDARY: Record<Role, NavItem[]> = {
   employee: [
     { key: "wallet", labelKey: "nav.wallet", href: "/dashboard/employee/wallet", match: "prefix", icon: "card" },
+    { key: "spin", labelKey: "nav.spin", href: "/dashboard/employee/spin", match: "prefix", icon: "sparkles" },
     { key: "drops", labelKey: "nav.drops", href: "/dashboard/employee/drops", match: "prefix", icon: "bolt" },
     { key: "leaderboard", labelKey: "nav.leaderboard", href: "/dashboard/leaderboard", match: "prefix", icon: "trophy" },
+    { key: "achievements", labelKey: "nav.achievements", href: "/dashboard/employee/achievements", match: "prefix", icon: "medal" },
     { key: "passport", labelKey: "nav.passport", href: "/dashboard/employee/passport", match: "prefix", icon: "passport" },
     { key: "genie", labelKey: "nav.genie", href: "/dashboard/employee/genie", match: "prefix", icon: "genie" },
   ],
@@ -80,6 +83,7 @@ const TITLES: { prefix: string; key: string }[] = [
   { prefix: "/dashboard/employee/passport", key: "nav.passport" },
   { prefix: "/dashboard/employee/achievements", key: "nav.achievements" },
   { prefix: "/dashboard/employee/spin", key: "nav.spin" },
+  { prefix: "/dashboard/employee/more", key: "nav.more" },
   { prefix: "/dashboard/employee", key: "nav.home" },
   { prefix: "/dashboard/company/approvals", key: "nav.approvals" },
   { prefix: "/dashboard/company/insights", key: "nav.insights" },
