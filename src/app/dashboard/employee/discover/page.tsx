@@ -8,13 +8,10 @@ import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
 import { Mascot } from "@/components/Mascot";
 import { Icon } from "@/components/Icon";
-import { ChooseButton } from "./ChooseButton";
+import { ChoosePackCard } from "./ChoosePackCard";
 
 export const dynamic = "force-dynamic";
 
-// pack-top accent + kicker copy, cycling per the design (11-results.html)
-const PACK_TOP = ["coral", "lime", "ink"] as const;
-const PACK_KK = ["REST & RESET", "PEOPLE & PLACES", "STRETCH YOUR LEK"] as const;
 const PACK_IMG = ["pack-sleepy", "pack-excited", "pack-mischief", "pack-love", "pack-happy", "pack-cool"] as const;
 const MODE_LABEL: Record<string, string> = {
   SPEND_ALL: "Spend for me",
@@ -66,41 +63,22 @@ export default async function DiscoverPage() {
         <Icon name="chevronRight" size={14} className="rotate-90 text-muted" />
       </Link>
 
-      <div className="mt-4 space-y-4">
+      {/* same image-card carousel as the home Discover Weekly */}
+      <div className="hscroll mt-4">
         {withItems.map(({ rec, items }, i) => {
-          const top = PACK_TOP[i % PACK_TOP.length];
-          const kk = PACK_KK[i % PACK_KK.length];
-          const taxFree = items.length > 0 && items.every((o) => o.taxFree);
           const packImg = PACK_IMG[i % PACK_IMG.length];
           return (
-            <div key={rec.id} className="pack fade-up" style={{ animationDelay: `${i * 0.06}s` }}>
-              <div className={`pack-top ${top}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "14px" }}>
-                <div className="pt-txt min-w-0">
-                  <div className="kk">{kk}</div>
-                  <h2 className="truncate">{rec.label}</h2>
-                </div>
-                <span className="packfig filled float" style={{ animationDelay: `${i * 0.4}s` }}>
-                  <Image src={`/perx/packs/${packImg}.png`} alt="" width={70} height={96} unoptimized className="absolute inset-0 h-full w-full object-cover" />
-                </span>
+            <ChoosePackCard key={rec.id} recId={rec.id} className="relative block h-[320px] w-[248px] overflow-hidden rounded-xl md:w-[268px]">
+              <Image src={`/perx/packs/${packImg}.png`} alt="" fill sizes="268px" unoptimized className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+              <span className="absolute right-3 top-3 z-[2] inline-flex items-center rounded-full bg-coral px-3 py-1.5 font-display text-sm font-bold text-white shadow-[var(--sh-press)]">
+                <Coins amount={toCoins(rec.totalLek)} />
+              </span>
+              <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                <div className="font-mono text-[10px] uppercase tracking-[.16em] text-white/75">AI Pick · {items.length} providers</div>
+                <h2 className="mt-0.5 font-display text-[22px] font-bold leading-tight">{rec.label}</h2>
               </div>
-              <div className="pack-body">
-                <div className="why"><span className="spark"><Icon name="sparkles" size={15} /></span><span>{rec.rationale}</span></div>
-                <div className="chip-row" style={{ marginBottom: "14px" }}>
-                  {items.map((o) => (
-                    <Link key={o.id} href={`/dashboard/employee/offer/${o.id}`} className="provchip">{o.providerName}</Link>
-                  ))}
-                </div>
-                <div className="pack-foot">
-                  <span className="muted">
-                    {items.length} providers{taxFree && <> · <span className="badge badge-tax">TAX-FREE</span></>}
-                  </span>
-                  <span className="price"><Coins amount={toCoins(rec.totalLek)} /></span>
-                </div>
-                <div className="mt-3">
-                  <ChooseButton recId={rec.id} />
-                </div>
-              </div>
-            </div>
+            </ChoosePackCard>
           );
         })}
       </div>
