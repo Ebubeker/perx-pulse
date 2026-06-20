@@ -14,7 +14,6 @@ import { BrowseOffers } from "./BrowseOffers";
 
 export const dynamic = "force-dynamic";
 
-const PACK_BG = ["var(--coral)", "var(--lime)", "var(--ink)"] as const;
 const PACK_IMG = ["pack-sleepy", "pack-excited", "pack-mischief", "pack-love", "pack-happy", "pack-cool"] as const;
 
 export default async function EmployeeHome({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -40,79 +39,73 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
   const employerName = m.company.brandName || m.company.name;
 
   return (
-    <main className="mx-auto max-w-md px-5 py-5 md:max-w-6xl md:px-8 md:py-7">
-      {/* greeting + big mascot + wallet button */}
+    <main className="mx-auto max-w-md px-5 py-5 md:max-w-5xl md:px-8 md:py-7">
+      {/* header — character on top, name below */}
       <div className="flex items-start justify-between gap-3">
-        <div className="greet">
-          <div className="day">Welcome back</div>
-          <h1>{m.displayName}</h1>
-        </div>
-        <div className="flex shrink-0 items-center gap-2.5">
-          <Mascot mood="charged" size={104} className="float" />
-          <Link href="/dashboard/employee/wallet" className="grid size-11 shrink-0 place-items-center rounded-full bg-coral text-white shadow-[var(--sh-press)]" aria-label="Wallet">
-            <Icon name="ticket" size={20} />
-          </Link>
-        </div>
+        <Mascot mood="charged" size={96} className="float" />
+        <Link href="/dashboard/employee/wallet" className="grid size-11 shrink-0 place-items-center rounded-full bg-coral text-white shadow-[var(--sh-press)]" aria-label="Wallet">
+          <Icon name="ticket" size={20} />
+        </Link>
+      </div>
+      <div className="greet mt-1">
+        <div className="day">Welcome back</div>
+        <h1>{m.displayName}</h1>
       </div>
 
-      {/* desktop: balance + discover side by side; mobile: stacked */}
-      <div className="mt-4 grid gap-5 md:grid-cols-[minmax(0,360px)_1fr]">
-        {/* balance — kept deliberately simple */}
-        <div className="card-dark self-start">
-          <div className="blob" />
-          <div className="relative z-[2]">
+      {/* balance — on top, full width, simple */}
+      <div className="card-dark mt-4">
+        <div className="blob" />
+        <div className="relative z-[2] flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
             <div className="kicker text-[var(--txt-on-dark-mut)]">PerxCoin balance</div>
-            <div className="mt-1 flex items-end gap-2 font-display text-[44px] font-bold leading-none text-[var(--txt-on-dark)]">
+            <div className="mt-1 flex items-end gap-2 font-display text-[46px] font-bold leading-none text-[var(--txt-on-dark)]">
               {balance.toLocaleString("en-US")}<CoinIcon className="mb-1.5 size-7 text-lime" />
             </div>
-            <div className="mt-3 text-[13px] text-[var(--txt-on-dark-mut)]">+{allowance} added every month by {employerName}</div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link href="/dashboard/employee/spin" className="coin"><Icon name="sparkles" size={16} />Earn more</Link>
-              <Link href="/dashboard/employee/wallet" className="rounded-full border border-white/20 px-3.5 py-1.5 text-sm font-semibold text-[var(--txt-on-dark)]">Vouchers</Link>
-            </div>
+            <div className="mt-2 text-[13px] text-[var(--txt-on-dark-mut)]">+{allowance} added every month by {employerName}</div>
           </div>
-        </div>
-
-        {/* Discover Weekly — image cards with overlay */}
-        <div className="min-w-0">
-          {recs.length > 0 ? (
-            <>
-              <div className="sec mt-0"><h3>Discover Weekly</h3><Link href="/dashboard/employee/pulse" className="link">Retake →</Link></div>
-              <div className="hscroll -mx-5 px-5 md:mx-0 md:px-0">
-                {packs.map(({ rec, items }, i) => {
-                  const bg = PACK_BG[i % PACK_BG.length];
-                  const packImg = PACK_IMG[i % PACK_IMG.length];
-                  const taxFree = items.length > 0 && items.every((o) => o.taxFree);
-                  return (
-                    <div key={rec.id} className="relative flex h-[320px] w-[262px] flex-col justify-end overflow-hidden rounded-[var(--r-lg)] shadow-soft md:w-[300px]" style={{ background: bg }}>
-                      <Image src={`/perx/packs/${packImg}.png`} alt="" fill sizes="300px" unoptimized className="object-contain p-7" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-                      <div className="relative z-[2] p-5 text-white">
-                        <div className="font-mono text-[11px] uppercase tracking-[.16em] text-white/80">AI Pick · {items.length} providers</div>
-                        <h2 className="mt-1 font-display text-[26px] font-bold leading-[1.05]">{rec.label}</h2>
-                        <div className="mt-3 flex items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-2">
-                            {taxFree && <span className="badge badge-tax">Tax-free</span>}
-                            <span className="inline-flex items-center font-display text-lg font-bold"><Coins amount={toCoins(rec.totalLek)} /></span>
-                          </span>
-                          <ChooseButton recId={rec.id} />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            <Link href="/dashboard/employee/pulse" className="ready">
-              <div><div className="kk">READY</div><div className="t">Build your AI packs</div></div>
-              <span className="go">→</span>
-            </Link>
-          )}
+          <div className="flex flex-wrap gap-2">
+            <Link href="/dashboard/employee/spin" className="coin"><Icon name="sparkles" size={16} />Earn more</Link>
+            <Link href="/dashboard/employee/wallet" className="rounded-full border border-white/20 px-3.5 py-1.5 text-sm font-semibold text-[var(--txt-on-dark)]">Vouchers</Link>
+          </div>
         </div>
       </div>
 
-      {/* Browse all perks — fills the width */}
+      {/* Discover Weekly — the pack image IS the card */}
+      {recs.length > 0 ? (
+        <>
+          <div className="sec"><h3>Discover Weekly</h3><Link href="/dashboard/employee/pulse" className="link">Retake →</Link></div>
+          <div className="hscroll -mx-5 px-5 md:mx-0 md:px-0">
+            {packs.map(({ rec, items }, i) => {
+              const packImg = PACK_IMG[i % PACK_IMG.length];
+              const taxFree = items.length > 0 && items.every((o) => o.taxFree);
+              return (
+                <div key={rec.id} className="relative h-[320px] w-[248px] overflow-hidden rounded-xl md:w-[268px]">
+                  <Image src={`/perx/packs/${packImg}.png`} alt="" fill sizes="268px" unoptimized className="object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                    <div className="font-mono text-[10px] uppercase tracking-[.16em] text-white/75">AI Pick · {items.length} providers</div>
+                    <h2 className="mt-0.5 font-display text-[22px] font-bold leading-tight">{rec.label}</h2>
+                    <div className="mt-2.5 flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1.5">
+                        {taxFree && <span className="badge badge-tax">Tax-free</span>}
+                        <span className="inline-flex items-center font-display text-base font-bold"><Coins amount={toCoins(rec.totalLek)} /></span>
+                      </span>
+                      <ChooseButton recId={rec.id} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <Link href="/dashboard/employee/pulse" className="ready mt-4">
+          <div><div className="kk">READY</div><div className="t">Build your AI packs</div></div>
+          <span className="go">→</span>
+        </Link>
+      )}
+
+      {/* Browse all perks */}
       <div id="browse" className="mt-7 scroll-mt-16">
         <div className="sec"><h3>Browse all perks</h3></div>
         <BrowseOffers offers={catalog} initialCategory={initialCategory} />

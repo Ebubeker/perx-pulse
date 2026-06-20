@@ -55,13 +55,13 @@ export function BrowseOffers({ offers, initialCategory = "all" }: { offers: Cata
 
       <p className="mt-3 text-xs text-muted">{filtered.length} of {offers.length} perks</p>
 
-      {/* voucher cards (2:1) */}
-      <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {/* voucher cards — 2 columns, taller */}
+      <div className="mt-2 grid grid-cols-2 gap-3 md:gap-4">
         {filtered.map((o) => (
           <Link
             key={o.id}
             href={`/dashboard/employee/offer/${o.id}`}
-            className="relative flex aspect-[2/1] flex-col justify-end overflow-hidden rounded-[var(--r-md)] shadow-soft transition active:scale-[.99]"
+            className="relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-[var(--r-md)] shadow-soft transition active:scale-[.99]"
             style={{ background: CAT_COLOR[o.category] ?? "var(--coral)" }}
           >
             <Icon name={CAT_ICON[o.category] ?? "gift"} size={104} className="pointer-events-none absolute -right-3 -top-3 text-white/15" />
