@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
@@ -47,10 +48,21 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
     <main className="mx-auto max-w-md px-5 py-5">
       {/* ── Product hero ── */}
       <div className="pack">
-        <div className="pack-top coral">
-          <div className="kk">{CAT_LABEL[offer.category] ?? offer.category}{offer.area ? ` · ${offer.area}` : ""}</div>
-          <h2>{offer.title}</h2>
-        </div>
+        {offer.imageUrl ? (
+          <div className="relative h-56 w-full overflow-hidden">
+            <Image src={offer.imageUrl} alt="" fill sizes="448px" unoptimized priority className="object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10" />
+            <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+              <div className="font-mono text-[11px] uppercase tracking-[.16em] text-white/80">{CAT_LABEL[offer.category] ?? offer.category}{offer.area ? ` · ${offer.area}` : ""}</div>
+              <h2 className="mt-1 font-display text-2xl font-bold leading-tight">{offer.title}</h2>
+            </div>
+          </div>
+        ) : (
+          <div className="pack-top coral">
+            <div className="kk">{CAT_LABEL[offer.category] ?? offer.category}{offer.area ? ` · ${offer.area}` : ""}</div>
+            <h2>{offer.title}</h2>
+          </div>
+        )}
         <div className="pack-body">
           <p className="text-sm text-muted">
             <Link href={`/dashboard/employee/provider/${offer.providerId}`} className="font-semibold text-ink underline-offset-2 hover:underline">

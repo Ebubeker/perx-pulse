@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
 import { Icon, type IconName } from "@/components/Icon";
@@ -64,8 +65,12 @@ export function BrowseOffers({ offers, initialCategory = "all" }: { offers: Cata
             className="relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-[var(--r-md)] shadow-soft transition active:scale-[.99]"
             style={{ background: CAT_COLOR[o.category] ?? "var(--coral)" }}
           >
-            <Icon name={CAT_ICON[o.category] ?? "gift"} size={104} className="pointer-events-none absolute -right-3 -top-3 text-white/15" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+            {o.imageUrl ? (
+              <Image src={o.imageUrl} alt="" fill sizes="(min-width:768px) 320px, 50vw" unoptimized className="object-cover" />
+            ) : (
+              <Icon name={CAT_ICON[o.category] ?? "gift"} size={104} className="pointer-events-none absolute -right-3 -top-3 text-white/15" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/5" />
             <div className="absolute left-3 top-3 z-[2] flex flex-wrap gap-1.5">
               {o.taxFree && <span className="badge badge-tax">Tax-free</span>}
               {o.discountPct > 0 && <span className="badge badge-new">−{o.discountPct}%</span>}

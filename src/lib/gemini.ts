@@ -20,6 +20,7 @@ export interface CatalogOffer {
   effLek: number; // effective price after discount (Lek) — what's actually charged
   area: string | null;
   providerName: string;
+  imageUrl: string | null;
   taxFree: boolean;
 }
 
@@ -40,6 +41,7 @@ export async function getCatalog(): Promise<CatalogOffer[]> {
     effLek: effectiveLek(o.priceLek, o.discountPct),
     area: o.area,
     providerName: o.provider.businessName,
+    imageUrl: o.imageUrl,
     taxFree: o.taxFree,
   }));
 }
@@ -52,7 +54,7 @@ export async function resolveOffers(ids: string[]): Promise<CatalogOffer[]> {
   return ids
     .map((id) => byId.get(id))
     .filter((o): o is NonNullable<typeof o> => !!o)
-    .map((o) => ({ id: o.id, title: o.title, description: o.description, category: o.category, priceLek: o.priceLek, discountPct: o.discountPct, effLek: effectiveLek(o.priceLek, o.discountPct), area: o.area, providerName: o.provider.businessName, taxFree: o.taxFree }));
+    .map((o) => ({ id: o.id, title: o.title, description: o.description, category: o.category, priceLek: o.priceLek, discountPct: o.discountPct, effLek: effectiveLek(o.priceLek, o.discountPct), area: o.area, providerName: o.provider.businessName, imageUrl: o.imageUrl, taxFree: o.taxFree }));
 }
 
 export interface RecPack {
