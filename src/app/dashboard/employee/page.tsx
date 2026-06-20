@@ -76,12 +76,13 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
           <div className="sec"><h3>Discover Weekly</h3><Link href="/dashboard/employee/pulse" className="link">Retake →</Link></div>
           <div className="hscroll -mx-5 px-5 md:mx-0 md:px-0">
             {packs.map(({ rec, items }, i) => {
-              const packImg = PACK_IMG[i % PACK_IMG.length];
+              const photos = items.map((o) => o.imageUrl).filter((u): u is string => !!u);
+              const heroImg = photos[0] ?? `/perx/packs/${PACK_IMG[i % PACK_IMG.length]}.png`;
               const taxFree = items.length > 0 && items.every((o) => o.taxFree);
               return (
                 <div key={rec.id} className="relative h-[320px] w-[248px] overflow-hidden rounded-xl md:w-[268px]">
-                  <Image src={`/perx/packs/${packImg}.png`} alt="" fill sizes="268px" unoptimized className="object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                  <Image src={heroImg} alt="" fill sizes="268px" unoptimized className="object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/15" />
                   <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                     <div className="font-mono text-[10px] uppercase tracking-[.16em] text-white/75">AI Pick · {items.length} providers</div>
                     <h2 className="mt-0.5 font-display text-[22px] font-bold leading-tight">{rec.label}</h2>
