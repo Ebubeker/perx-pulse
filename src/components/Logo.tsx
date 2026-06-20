@@ -5,7 +5,7 @@ import Image from "next/image";
 export function Logo({ onDark = false, className = "" }: { onDark?: boolean; className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 font-display text-[26px] font-extrabold tracking-tight ${onDark ? "text-[#F6F1E5]" : "text-ink"} ${className}`}>
-      <Image src="/perx/characters/perx-logo.png" alt="Perx" width={33} height={46} priority unoptimized className="mascot-img" />
+      <Image src="/perx/characters/perx-logo.png" alt="Perx" width={26} height={36} priority unoptimized className="mascot-img my-1.5" />
       Perx
     </span>
   );
