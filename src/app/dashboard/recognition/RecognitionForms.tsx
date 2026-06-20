@@ -104,8 +104,6 @@ export function RecognitionForms({ colleagues, balance, isAdmin }: { colleagues:
           placeholder="Say why — “thanks for covering my shift!”"
         />
 
-        <p className="mt-2 text-xs text-[var(--txt-on-dark-mut)]">Moves {amount} coins from your wallet to {toName ?? "them"} — nothing is minted out of thin air.</p>
-
         <button
           type="button"
           onClick={sendKudos}
