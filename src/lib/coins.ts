@@ -1,18 +1,11 @@
 import { prisma } from "./prisma";
+import { toLek } from "./currency";
+import { getCatalog, type CatalogOffer } from "./gemini";
 
-/** Start of the current calendar month — the window the kudos allowance refreshes on. */
+/** Start of the current calendar month — the window monthly stats roll up over. */
 export function monthStart(): Date {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), 1);
-}
-
-/** Coins this person can still GIVE this month = monthly allowance − kudos sent since the 1st. */
-export async function kudosRemainingFor(employeeId: string, monthlyAllowance: number): Promise<number> {
-  const agg = await prisma.coinTxn.aggregate({
-    where: { fromEmployeeId: employeeId, kind: "KUDOS", createdAt: { gte: monthStart() } },
-    _sum: { amount: true },
-  });
-  return Math.max(0, monthlyAllowance - (agg._sum.amount ?? 0));
 }
 
 /** Recent recognition across the company — the culture wall (kudos + company awards). */
@@ -23,4 +16,78 @@ export async function companyRecognitionFeed(companyId: string, take = 15) {
     orderBy: { createdAt: "desc" },
     take,
   });
+}
+
+export type HistoryKind = "spin" | "monthly" | "award" | "kudos-in" | "kudos-out" | "spend" | "adjust";
+export interface HistoryRow {
+  id: string;
+  kind: HistoryKind;
+  label: string;
+  memo: string | null;
+  amount: number; // always positive
+  signed: number; // + earned, − spent/given
+  at: Date;
+}
+
+/** The full personal coin ledger for one employee — every coin in and out, newest first. */
+export async function walletHistory(employeeId: string, take = 60): Promise<HistoryRow[]> {
+  const txns = await prisma.coinTxn.findMany({
+    where: { OR: [{ toEmployeeId: employeeId }, { fromEmployeeId: employeeId }] },
+    include: { from: { select: { displayName: true } }, to: { select: { displayName: true } } },
+    orderBy: { createdAt: "desc" },
+    take,
+  });
+  return txns.map((t) => {
+    const incoming = t.toEmployeeId === employeeId;
+    let kind: HistoryKind;
+    let label: string;
+    if (t.kind === "GRANT") {
+      if (t.memo === "Daily Spin" || /spin/i.test(t.memo ?? "")) { kind = "spin"; label = "Spin reward"; }
+      else if (/month|allowance|weekly|week/i.test(t.memo ?? "")) { kind = "monthly"; label = t.memo || "Allowance top-up"; }
+      else { kind = "award"; label = t.memo || "Company award"; }
+    } else if (t.kind === "KUDOS") {
+      if (incoming) { kind = "kudos-in"; label = `Kudos from ${t.from?.displayName ?? "a colleague"}`; }
+      else { kind = "kudos-out"; label = `Kudos to ${t.to?.displayName ?? "a colleague"}`; }
+    } else if (t.kind === "SPEND") {
+      kind = "spend"; label = t.memo || "Redeemed a perk";
+    } else {
+      kind = "adjust"; label = t.memo || "Adjustment";
+    }
+    return { id: t.id, kind, label, memo: t.memo, amount: t.amount, signed: (incoming ? 1 : -1) * t.amount, at: t.createdAt };
+  });
+}
+
+export interface CoinSummary {
+  earnedThisMonth: number; // grants/awards/spin received
+  spentThisMonth: number; // perks + drops
+  givenThisMonth: number; // kudos sent
+  receivedThisMonth: number; // kudos received
+}
+
+/** This calendar month's coin flow for one employee. */
+export async function coinSummary(employeeId: string): Promise<CoinSummary> {
+  const since = monthStart();
+  const [earned, spent, given, received] = await Promise.all([
+    prisma.coinTxn.aggregate({ where: { toEmployeeId: employeeId, kind: "GRANT", createdAt: { gte: since } }, _sum: { amount: true } }),
+    prisma.coinTxn.aggregate({ where: { fromEmployeeId: employeeId, kind: "SPEND", createdAt: { gte: since } }, _sum: { amount: true } }),
+    prisma.coinTxn.aggregate({ where: { fromEmployeeId: employeeId, kind: "KUDOS", createdAt: { gte: since } }, _sum: { amount: true } }),
+    prisma.coinTxn.aggregate({ where: { toEmployeeId: employeeId, kind: "KUDOS", createdAt: { gte: since } }, _sum: { amount: true } }),
+  ]);
+  return {
+    earnedThisMonth: earned._sum.amount ?? 0,
+    spentThisMonth: spent._sum.amount ?? 0,
+    givenThisMonth: given._sum.amount ?? 0,
+    receivedThisMonth: received._sum.amount ?? 0,
+  };
+}
+
+/** Best-value perks to spend coins on — biggest discount first, affordable within the wallet. */
+export async function bestValueOffers(balanceCoins: number, take = 4): Promise<CatalogOffer[]> {
+  const catalog = await getCatalog();
+  const balanceLek = toLek(balanceCoins);
+  const affordable = catalog.filter((o) => o.effLek <= balanceLek);
+  const pool = affordable.length >= take ? affordable : catalog;
+  return [...pool]
+    .sort((a, b) => b.discountPct - a.discountPct || a.effLek - b.effLek)
+    .slice(0, take);
 }

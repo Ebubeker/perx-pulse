@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { giveKudos, grantCoins } from "@/lib/coin-actions";
 import { Avatar } from "@/components/Avatar";
 import { CoinIcon } from "@/components/CoinIcon";
+import { Mascot } from "@/components/Mascot";
 
 type Colleague = { id: string; displayName: string; role: string };
 
 const AMOUNTS = [5, 10, 20, 50];
 
-export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleagues: Colleague[]; remaining: number; isAdmin: boolean }) {
+export function RecognitionForms({ colleagues, balance, isAdmin }: { colleagues: Colleague[]; balance: number; isAdmin: boolean }) {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState(10);
   const [memo, setMemo] = useState("");
@@ -23,19 +24,24 @@ export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleague
     startTransition(async () => {
       const res = await giveKudos(to, amount, memo);
       if (res.error) setMsg({ text: res.error });
-      else { setMsg({ ok: true, text: "Kudos sent" }); setMemo(""); router.refresh(); }
+      else { setMsg({ ok: true, text: `Sent ${amount} coins ✓` }); setMemo(""); setTo(""); router.refresh(); }
     });
   }
 
-  const canGive = remaining > 0;
+  const canGive = balance > 0;
+  const tooMuch = amount > balance;
   const toName = colleagues.find((c) => c.id === to)?.displayName;
 
   return (
-    <div className="mt-4 space-y-4">
-      {/* Send kudos header */}
-      <div className="sec !mb-3">
-        <h3>Send kudos</h3>
-        <span className="link">{remaining} left this month</span>
+    <div className="space-y-4">
+      {/* Big mascot presence for sending kudos */}
+      <div className="flex items-center gap-3.5">
+        <Mascot mood="love" size={92} className="float shrink-0" />
+        <div className="min-w-0">
+          <div className="kicker">Send kudos</div>
+          <h3 className="font-display text-xl font-extrabold leading-tight">Recognize a teammate</h3>
+          <p className="mt-0.5 text-[13px] text-muted">Straight from your wallet · <b className="text-ink">{balance}</b> coins to give</p>
+        </div>
       </div>
 
       {/* Recipient picker — HORIZONTAL scroll strip of illustrated coworker avatars (.kudos > .k) */}
@@ -76,7 +82,7 @@ export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleague
               key={a}
               type="button"
               onClick={() => setAmount(a)}
-              disabled={a > remaining}
+              disabled={a > balance}
               className={`chip lime disabled:opacity-30 ${amount === a ? "on lime" : "!border-white/15 !bg-white/10 !text-[var(--txt-on-dark)]"}`}
             >
               {a}
@@ -90,13 +96,15 @@ export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleague
           placeholder="Say why — “thanks for covering my shift!”"
         />
 
+        <p className="mt-2 text-xs text-[var(--txt-on-dark-mut)]">Moves {amount} coins from your wallet to {toName ?? "them"} — nothing is minted out of thin air.</p>
+
         <button
           type="button"
           onClick={sendKudos}
-          disabled={pending || !to || !canGive}
+          disabled={pending || !to || !canGive || tooMuch}
           className="btn btn-lime btn-lg mt-3 w-full disabled:opacity-50"
         >
-          {pending ? "Sending…" : !to ? "Pick someone above" : canGive ? `Send kudos →` : "No coins left this month"}
+          {pending ? "Sending…" : !to ? "Pick someone above" : !canGive ? "Your wallet is empty" : tooMuch ? "Not enough coins" : "Send kudos →"}
         </button>
         {msg && <p className={`mt-2 text-sm ${msg.ok ? "text-lime" : "text-coral"}`}>{msg.text}</p>}
       </div>

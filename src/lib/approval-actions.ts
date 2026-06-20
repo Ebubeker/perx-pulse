@@ -71,6 +71,10 @@ export async function approvePackage(packageId: string): Promise<{ error?: strin
       if (debit === 0) throw new ApproveError("NO_FUNDS");
 
       await tx.order.createMany({ data: orderData });
+      // Record the spend on the personal ledger so it shows in the employee's coin history.
+      await tx.coinTxn.create({
+        data: { companyId: pkg.companyId, kind: "SPEND", fromEmployeeId: pkg.employeeProfileId, toEmployeeId: null, amount: costCoins, memo: pkg.label },
+      });
     });
   } catch (e) {
     if (e instanceof ApproveError) {
