@@ -60,6 +60,32 @@ export async function choosePackage(recId: string): Promise<void> {
   redirect(`/dashboard/employee/package/${pkg.id}`);
 }
 
+/** Employee hand-picks offers from the full catalog → a draft pack they can submit to HR. */
+export async function requestOffers(offerIds: string[]): Promise<void> {
+  const m = await requireMembership();
+  const ids = [...new Set(offerIds)].slice(0, 8);
+  if (!ids.length) redirect("/dashboard/employee");
+
+  const offers = await prisma.offer.findMany({ where: { id: { in: ids }, active: true } });
+  if (!offers.length) redirect("/dashboard/employee");
+  const byId = new Map(offers.map((o) => [o.id, o] as const));
+  const ordered = ids.map((id) => byId.get(id)).filter((o): o is NonNullable<typeof o> => !!o);
+  const total = ordered.reduce((s, o) => s + o.priceLek, 0);
+
+  const pkg = await prisma.perkPackage.create({
+    data: {
+      companyId: m.companyId,
+      employeeProfileId: m.id,
+      label: ordered.length === 1 ? ordered[0]!.title : "My picks",
+      rationale: "Hand-picked from the marketplace.",
+      itemOfferIds: ordered.map((o) => o.id),
+      totalLek: total,
+      status: "DRAFT",
+    },
+  });
+  redirect(`/dashboard/employee/package/${pkg.id}`);
+}
+
 export async function submitPackage(id: string): Promise<void> {
   const m = await requireMembership();
   await prisma.perkPackage.updateMany({

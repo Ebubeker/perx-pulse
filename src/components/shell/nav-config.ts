@@ -21,8 +21,7 @@ export const ROLE_HOME: Record<Role, string> = {
 // Bottom tab bar (mobile) + top of the sidebar.
 export const NAV_PRIMARY: Record<Role, NavItem[]> = {
   employee: [
-    { key: "home", labelKey: "nav.home", href: "/dashboard/employee", match: "exact", icon: "home", also: ["/dashboard/employee/passport"] },
-    { key: "discover", labelKey: "nav.discover", href: "/dashboard/employee/discover", match: "prefix", icon: "discover", also: ["/dashboard/employee/pulse", "/dashboard/employee/package"] },
+    { key: "home", labelKey: "nav.home", href: "/dashboard/employee", match: "exact", icon: "home", also: ["/dashboard/employee/passport", "/dashboard/employee/discover", "/dashboard/employee/pulse", "/dashboard/employee/package"] },
     { key: "coins", labelKey: "nav.coins", href: "/dashboard/recognition", match: "prefix", icon: "coin", also: ["/dashboard/employee/drops", "/dashboard/leaderboard"] },
     { key: "team", labelKey: "nav.team", href: "/dashboard/team", match: "prefix", icon: "team" },
   ],
@@ -90,7 +89,7 @@ const TITLES: { prefix: string; key: string }[] = [
 
 // Explicit back targets for detail/stack routes (everything else falls back to the role home).
 const PARENTS: { prefix: string; back: string }[] = [
-  { prefix: "/dashboard/employee/package", back: "/dashboard/employee/discover" },
+  { prefix: "/dashboard/employee/package", back: "/dashboard/employee" },
   { prefix: "/dashboard/company/approvals/", back: "/dashboard/company/approvals" },
   { prefix: "/dashboard/company/billing/success", back: "/dashboard/company/billing" },
 ];
