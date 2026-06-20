@@ -10,7 +10,8 @@
     "postinstall": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:demo": "tsx prisma/seed-demo.ts",
-    "db:seed:pending": "tsx prisma/seed-pending.ts"
+    "db:seed:pending": "tsx prisma/seed-pending.ts",
+    "db:seed:descriptions": "tsx prisma/seed-descriptions.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

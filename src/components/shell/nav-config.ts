@@ -21,7 +21,7 @@ export const ROLE_HOME: Record<Role, string> = {
 // Bottom tab bar (mobile) + top of the sidebar.
 export const NAV_PRIMARY: Record<Role, NavItem[]> = {
   employee: [
-    { key: "home", labelKey: "nav.home", href: "/dashboard/employee", match: "exact", icon: "home", also: ["/dashboard/employee/passport", "/dashboard/employee/discover", "/dashboard/employee/pulse", "/dashboard/employee/package"] },
+    { key: "home", labelKey: "nav.home", href: "/dashboard/employee", match: "exact", icon: "home", also: ["/dashboard/employee/passport", "/dashboard/employee/discover", "/dashboard/employee/pulse", "/dashboard/employee/package", "/dashboard/employee/offer"] },
     { key: "coins", labelKey: "nav.coins", href: "/dashboard/recognition", match: "prefix", icon: "coin", also: ["/dashboard/employee/drops", "/dashboard/leaderboard"] },
     { key: "team", labelKey: "nav.team", href: "/dashboard/team", match: "prefix", icon: "team" },
   ],
@@ -71,6 +71,7 @@ const TITLES: { prefix: string; key: string }[] = [
   { prefix: "/dashboard/employee/pulse", key: "page.pulse" },
   { prefix: "/dashboard/employee/discover", key: "nav.discover" },
   { prefix: "/dashboard/employee/package", key: "page.pack" },
+  { prefix: "/dashboard/employee/offer", key: "page.offer" },
   { prefix: "/dashboard/employee/genie", key: "nav.genie" },
   { prefix: "/dashboard/employee/drops", key: "nav.drops" },
   { prefix: "/dashboard/employee/passport", key: "nav.passport" },

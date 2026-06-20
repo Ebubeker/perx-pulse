@@ -45,6 +45,7 @@ const en: Dict = {
   "nav.back": "Back",
   "page.pulse": "Weekly Pulse",
   "page.pack": "Your pack",
+  "page.offer": "Offer",
   "action.signout": "Sign out",
 };
 
@@ -87,6 +88,7 @@ const sq: Dict = {
   "nav.back": "Mbrapa",
   "page.pulse": "Pulse javor",
   "page.pack": "Paketa jote",
+  "page.offer": "Oferta",
   "action.signout": "Dil",
 };
 

@@ -12,6 +12,7 @@ function ai(): GoogleGenAI {
 export interface CatalogOffer {
   id: string;
   title: string;
+  description: string | null;
   category: string;
   priceLek: number;
   area: string | null;
@@ -29,6 +30,7 @@ export async function getCatalog(): Promise<CatalogOffer[]> {
   return offers.map((o) => ({
     id: o.id,
     title: o.title,
+    description: o.description,
     category: o.category,
     priceLek: o.priceLek,
     area: o.area,
@@ -45,7 +47,7 @@ export async function resolveOffers(ids: string[]): Promise<CatalogOffer[]> {
   return ids
     .map((id) => byId.get(id))
     .filter((o): o is NonNullable<typeof o> => !!o)
-    .map((o) => ({ id: o.id, title: o.title, category: o.category, priceLek: o.priceLek, area: o.area, providerName: o.provider.businessName, taxFree: o.taxFree }));
+    .map((o) => ({ id: o.id, title: o.title, description: o.description, category: o.category, priceLek: o.priceLek, area: o.area, providerName: o.provider.businessName, taxFree: o.taxFree }));
 }
 
 export interface RecPack {

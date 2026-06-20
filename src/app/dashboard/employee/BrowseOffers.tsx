@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { requestOffers } from "@/lib/pulse-actions";
 import type { CatalogOffer } from "@/lib/gemini";
 
@@ -96,13 +97,13 @@ export function BrowseOffers({ offers }: { offers: CatalogOffer[] }) {
               key={o.id}
               className={`flex items-center justify-between gap-3 rounded-xl border bg-paper px-4 py-3 ${on ? "border-primary" : "border-line"}`}
             >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{o.title}</p>
+              <Link href={`/dashboard/employee/offer/${o.id}`} className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium underline-offset-2 hover:underline">{o.title}</p>
                 <p className="truncate text-xs text-muted">
                   {o.providerName}{o.area ? ` · ${o.area}` : ""} · {CAT_LABEL[o.category] ?? o.category}
                   {o.taxFree ? " · tax-free" : ""}
                 </p>
-              </div>
+              </Link>
               <div className="flex shrink-0 items-center gap-3">
                 <span className="text-sm font-semibold text-ink-soft">{o.priceLek.toLocaleString("en-US")} L</span>
                 <button

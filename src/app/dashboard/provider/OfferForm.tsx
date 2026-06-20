@@ -20,6 +20,7 @@ export function OfferForm({ providerCategory }: { providerCategory: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [category, setCategory] = useState(providerCategory);
   const [priceLek, setPriceLek] = useState("");
   const [area, setArea] = useState("");
@@ -30,12 +31,13 @@ export function OfferForm({ providerCategory }: { providerCategory: string }) {
     e.preventDefault();
     setMsg(null);
     startTransition(async () => {
-      const res = await createOffer({ title, category, priceLek, area, taxFree });
+      const res = await createOffer({ title, description, category, priceLek, area, taxFree });
       if ("error" in res) {
         setMsg({ error: res.error });
       } else {
         setMsg({ ok: true });
         setTitle("");
+        setDescription("");
         setPriceLek("");
         setArea("");
         setTaxFree(false);
@@ -47,6 +49,7 @@ export function OfferForm({ providerCategory }: { providerCategory: string }) {
   return (
     <form onSubmit={submit} className="space-y-3">
       <input className={inputCls} placeholder="Offer title (e.g. 60-min massage)" value={title} onChange={(e) => setTitle(e.target.value)} required />
+      <textarea className={`${inputCls} min-h-20`} placeholder="Describe what's included — what the employee actually gets" value={description} onChange={(e) => setDescription(e.target.value)} />
       <div className="flex gap-3">
         <select className={inputCls} value={category} onChange={(e) => setCategory(e.target.value)}>
           {CATEGORIES.map(([v, l]) => (

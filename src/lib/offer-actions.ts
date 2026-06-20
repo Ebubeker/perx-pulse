@@ -11,6 +11,7 @@ const CATEGORIES = ["wellness", "fitness", "food", "health", "travel", "learning
 
 const OfferInput = z.object({
   title: z.string().trim().min(2, "Title is required"),
+  description: z.string().trim().max(600).optional(),
   category: z.enum(CATEGORIES).optional(),
   priceLek: z.coerce.number().int().min(0).max(10_000_000),
   area: z.string().trim().optional(),
@@ -28,6 +29,7 @@ export async function createOffer(input: unknown): Promise<OfferResult> {
       data: {
         providerId: provider.id,
         title: d.title,
+        description: d.description || null,
         category: d.category ?? provider.category,
         priceLek: d.priceLek,
         area: d.area || provider.city || null,

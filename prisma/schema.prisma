@@ -166,15 +166,16 @@ model Provider {
 
 /// An offer/deal listed by a provider.
 model Offer {
-  id         String        @id @default(cuid())
-  providerId String
-  title      String
-  category   OfferCategory
-  priceLek   Int
-  area       String?
-  taxFree    Boolean       @default(false)
-  active     Boolean       @default(true)
-  createdAt  DateTime      @default(now())
+  id          String        @id @default(cuid())
+  providerId  String
+  title       String
+  description String?
+  category    OfferCategory
+  priceLek    Int
+  area        String?
+  taxFree     Boolean       @default(false)
+  active      Boolean       @default(true)
+  createdAt   DateTime      @default(now())
 
   provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
   orders   Order[]
