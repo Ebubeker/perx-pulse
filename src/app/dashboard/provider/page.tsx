@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireProvider } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { setOfferActive, deleteOffer } from "@/lib/offer-actions";
+import { toCoins, effectiveLek } from "@/lib/currency";
 import { OfferForm } from "./OfferForm";
 import { RedeemButton } from "./RedeemButton";
 
@@ -94,7 +95,7 @@ export default async function ProviderDashboard() {
                   {o.title} {!o.active && <span className="text-xs text-muted">(hidden)</span>}
                 </p>
                 <p className="text-sm text-muted">
-                  {o.priceLek.toLocaleString("en-US")} L · {o.category}
+                  {toCoins(effectiveLek(o.priceLek, o.discountPct)).toLocaleString("en-US")} 🪙{o.discountPct > 0 ? ` (−${o.discountPct}%)` : ""} · {o.category}
                   {o.area ? ` · ${o.area}` : ""}
                   {o.taxFree ? " · tax-free" : ""}
                 </p>

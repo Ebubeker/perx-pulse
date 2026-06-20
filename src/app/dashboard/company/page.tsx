@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireCompanyAdmin } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
+import { toCoins } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +36,8 @@ export default async function CompanyDashboard() {
           <p className="text-xs text-muted">people</p>
         </div>
         <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold text-primary">{settled.toLocaleString("en-US")}</p>
-          <p className="text-xs text-muted">L settled</p>
+          <p className="text-2xl font-bold text-primary">{toCoins(settled).toLocaleString("en-US")} 🪙</p>
+          <p className="text-xs text-muted">coins settled</p>
         </div>
         <div className="rounded-2xl border border-line bg-paper p-4">
           <p className="text-2xl font-bold text-accent">{pendingCount}</p>

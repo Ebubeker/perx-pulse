@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
+import { toCoins, effectiveLek } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +32,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
   const hours = provider.openingHours && typeof provider.openingHours === "object" && !Array.isArray(provider.openingHours)
     ? Object.entries(provider.openingHours as Record<string, unknown>).map(([k, v]) => [k, String(v)] as const)
     : [];
-  const priceFrom = provider.offers.length ? Math.min(...provider.offers.map((o) => o.priceLek)) : null;
+  const priceFrom = provider.offers.length ? Math.min(...provider.offers.map((o) => effectiveLek(o.priceLek, o.discountPct))) : null;
 
   return (
     <main className="mx-auto max-w-md px-6 py-8">
@@ -44,7 +46,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
           <p className="text-xs text-muted">offers available</p>
         </div>
         <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold text-primary">{priceFrom !== null ? `${priceFrom.toLocaleString("en-US")} L` : "—"}</p>
+          <p className="text-2xl font-bold text-primary">{priceFrom !== null ? <Coins amount={toCoins(priceFrom)} /> : "—"}</p>
           <p className="text-xs text-muted">from</p>
         </div>
       </div>
@@ -86,9 +88,9 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
               <Link href={`/dashboard/employee/offer/${o.id}`} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-paper px-4 py-3">
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium">{o.title}</span>
-                  <span className="block truncate text-xs text-muted">{CAT_LABEL[o.category] ?? o.category}{o.area ? ` · ${o.area}` : ""}{o.taxFree ? " · tax-free" : ""}</span>
+                  <span className="block truncate text-xs text-muted">{CAT_LABEL[o.category] ?? o.category}{o.area ? ` · ${o.area}` : ""}{o.taxFree ? " · tax-free" : ""}{o.discountPct > 0 ? ` · −${o.discountPct}%` : ""}</span>
                 </span>
-                <span className="shrink-0 text-sm font-semibold text-ink-soft">{o.priceLek.toLocaleString("en-US")} L</span>
+                <span className="shrink-0 text-sm font-semibold text-ink-soft"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /></span>
               </Link>
             </li>
           ))}

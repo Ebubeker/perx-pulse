@@ -4,6 +4,8 @@ import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { resolveOffers } from "@/lib/gemini";
 import { submitPackage } from "@/lib/pulse-actions";
+import { toCoins } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 import { SwapButton } from "./SwapButton";
 
 export const dynamic = "force-dynamic";
@@ -43,14 +45,14 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
               <p className="truncate text-xs text-muted">{o.providerName}{o.area ? ` · ${o.area}` : ""}</p>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <span className="text-sm font-semibold text-ink-soft">{o.priceLek.toLocaleString("en-US")} L</span>
+              <span className="text-sm font-semibold text-ink-soft"><Coins amount={toCoins(o.effLek)} /></span>
               {isDraft && <SwapButton packageId={pkg.id} offerId={o.id} />}
             </div>
           </li>
         ))}
         <li className="flex items-center justify-between px-4 py-3">
-          <span className="text-sm text-muted">Total · paid by your employer</span>
-          <span className="text-lg font-bold">{pkg.totalLek.toLocaleString("en-US")} L</span>
+          <span className="text-sm text-muted">Total · spent from your coins</span>
+          <span className="text-lg font-bold text-gold-ink"><Coins amount={toCoins(pkg.totalLek)} /></span>
         </li>
       </ul>
 

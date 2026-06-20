@@ -105,8 +105,8 @@ model EmployeeProfile {
   jobTitle            String?
   workArea            String?
   avatarUrl           String?
-  perksBudgetLek      Int         @default(12000)
-  recognitionCoins    Int         @default(0) // cached balance of coins received (ledger is source of truth)
+  perksBudgetLek      Int         @default(12000) // monthly employer coin allowance, in Lek (=120 coins)
+  recognitionCoins    Int         @default(120) // the unified spendable PerxCoin wallet (allowance + earned − spent)
   kudosMonthlyAllowance Int       @default(100) // coins this person can GIVE per calendar month
   preferredCategories String[]
   dietary             String[]
@@ -171,7 +171,8 @@ model Offer {
   title       String
   description String?
   category    OfferCategory
-  priceLek    Int
+  priceLek    Int // list price (Lek); coins shown = priceLek / 100
+  discountPct Int           @default(0) // % off; effective price = priceLek * (100-discountPct)/100
   area        String?
   taxFree     Boolean       @default(false)
   active      Boolean       @default(true)

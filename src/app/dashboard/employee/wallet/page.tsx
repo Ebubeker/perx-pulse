@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
+import { toCoins } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 
 export const dynamic = "force-dynamic";
 
@@ -88,7 +90,7 @@ export default async function WalletPage() {
               <li key={p.id}>
                 <Link href={`/dashboard/employee/package/${p.id}`} className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-paper p-4">
                   <span className="min-w-0 truncate text-sm font-medium">{p.label}</span>
-                  <span className="shrink-0 text-sm"><span className="text-ink-soft">{p.totalLek.toLocaleString("en-US")} L</span> <span className="font-semibold text-accent">⏳</span></span>
+                  <span className="shrink-0 text-sm"><span className="text-ink-soft"><Coins amount={toCoins(p.totalLek)} /></span> <span className="font-semibold text-accent">⏳</span></span>
                 </Link>
               </li>
             ))}

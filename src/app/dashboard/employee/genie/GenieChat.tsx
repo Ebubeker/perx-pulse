@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { genieAsk, type GenieResult } from "@/lib/genie-actions";
+import { toCoins } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 
 type Msg = { role: "user" | "genie"; text: string; offers?: GenieResult["offers"] };
 
@@ -42,7 +44,7 @@ export function GenieChat() {
                   {msg.offers.map((o) => (
                     <li key={o.id} className="rounded-lg bg-cream px-3 py-2 text-xs">
                       <span className="font-semibold">{o.title}</span> · {o.providerName}
-                      <span className="float-right font-bold text-ink-soft">{o.priceLek.toLocaleString("en-US")} L</span>
+                      <span className="float-right font-bold text-ink-soft"><Coins amount={toCoins(o.effLek)} /></span>
                     </li>
                   ))}
                 </ul>

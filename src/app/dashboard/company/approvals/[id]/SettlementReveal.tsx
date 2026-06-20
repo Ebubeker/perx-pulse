@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toCoins } from "@/lib/currency";
 
 type Payout = { name: string; gross: number; fee: number; net: number };
 const lek = (n: number) => `${n.toLocaleString("en-US")} L`;
@@ -24,8 +25,9 @@ export function SettlementReveal({ employer, payouts, fee, net }: { employer: nu
     <div className="mt-6">
       {/* Source */}
       <div className={`rounded-2xl bg-primary px-5 py-4 text-white ${row(step >= 1)}`}>
-        <p className="text-xs uppercase tracking-wide text-white/70">Your budget paid</p>
-        <p className="text-2xl font-bold">{lek(employer)}</p>
+        <p className="text-xs uppercase tracking-wide text-white/70">PerxCoins spent</p>
+        <p className="text-2xl font-bold">{toCoins(employer).toLocaleString("en-US")} 🪙</p>
+        <p className="text-xs text-white/70">settled as {lek(employer)} cash to providers</p>
       </div>
 
       {/* Flow */}

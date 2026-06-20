@@ -14,6 +14,7 @@ const OfferInput = z.object({
   description: z.string().trim().max(600).optional(),
   category: z.enum(CATEGORIES).optional(),
   priceLek: z.coerce.number().int().min(0).max(10_000_000),
+  discountPct: z.coerce.number().int().min(0).max(90).optional(),
   area: z.string().trim().optional(),
   taxFree: z.boolean().optional(),
 });
@@ -32,6 +33,7 @@ export async function createOffer(input: unknown): Promise<OfferResult> {
         description: d.description || null,
         category: d.category ?? provider.category,
         priceLek: d.priceLek,
+        discountPct: d.discountPct ?? 0,
         area: d.area || provider.city || null,
         taxFree: d.taxFree ?? false,
         active: true,

@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 import { prisma } from "./prisma";
 import type { BudgetMode } from "@prisma/client";
+import { effectiveLek } from "./currency";
 
 let _ai: GoogleGenAI | null = null;
 function ai(): GoogleGenAI {
@@ -14,7 +15,9 @@ export interface CatalogOffer {
   title: string;
   description: string | null;
   category: string;
-  priceLek: number;
+  priceLek: number; // list price (Lek)
+  discountPct: number;
+  effLek: number; // effective price after discount (Lek) — what's actually charged
   area: string | null;
   providerName: string;
   taxFree: boolean;
@@ -33,6 +36,8 @@ export async function getCatalog(): Promise<CatalogOffer[]> {
     description: o.description,
     category: o.category,
     priceLek: o.priceLek,
+    discountPct: o.discountPct,
+    effLek: effectiveLek(o.priceLek, o.discountPct),
     area: o.area,
     providerName: o.provider.businessName,
     taxFree: o.taxFree,
@@ -47,7 +52,7 @@ export async function resolveOffers(ids: string[]): Promise<CatalogOffer[]> {
   return ids
     .map((id) => byId.get(id))
     .filter((o): o is NonNullable<typeof o> => !!o)
-    .map((o) => ({ id: o.id, title: o.title, description: o.description, category: o.category, priceLek: o.priceLek, area: o.area, providerName: o.provider.businessName, taxFree: o.taxFree }));
+    .map((o) => ({ id: o.id, title: o.title, description: o.description, category: o.category, priceLek: o.priceLek, discountPct: o.discountPct, effLek: effectiveLek(o.priceLek, o.discountPct), area: o.area, providerName: o.provider.businessName, taxFree: o.taxFree }));
 }
 
 export interface RecPack {
@@ -85,10 +90,10 @@ function modeGuidance(mode: BudgetMode): string {
 function build(p: { label: string; rationale: string; offerIds: string[] }, byId: Map<string, CatalogOffer>, budget: number): RecPack | null {
   const items = p.offerIds.map((id) => byId.get(id)).filter((o): o is CatalogOffer => !!o);
   if (!items.length) return null;
-  let total = items.reduce((s, o) => s + o.priceLek, 0);
+  let total = items.reduce((s, o) => s + o.effLek, 0);
   while (total > budget && items.length > 1) {
     items.pop();
-    total = items.reduce((s, o) => s + o.priceLek, 0);
+    total = items.reduce((s, o) => s + o.effLek, 0);
   }
   if (total > budget) return null;
   return { label: p.label, rationale: p.rationale, itemOfferIds: items.map((o) => o.id), totalLek: total };
@@ -106,7 +111,7 @@ export async function recommendPackages(opts: {
   const budget = effectiveBudget(opts.budgetMode, opts.budgetLek);
 
   const menu = catalog
-    .map((o) => `${o.id} | ${o.title} | ${o.category} | ${o.priceLek} Lek | ${o.area ?? ""}${o.taxFree ? " | tax-free" : ""} | ${o.providerName}`)
+    .map((o) => `${o.id} | ${o.title} | ${o.category} | ${o.effLek} Lek | ${o.area ?? ""}${o.taxFree ? " | tax-free" : ""} | ${o.providerName}`)
     .join("\n");
 
   const prompt =
@@ -195,9 +200,9 @@ function fallback(catalog: CatalogOffer[], opts: { answers: Record<string, strin
     for (const o of sorted) {
       if (skip.has(o.id)) continue;
       if (items.some((i) => i.providerName === o.providerName)) continue;
-      if (total + o.priceLek <= budget) {
+      if (total + o.effLek <= budget) {
         items.push(o);
-        total += o.priceLek;
+        total += o.effLek;
       }
       if (items.length >= 3) break;
     }

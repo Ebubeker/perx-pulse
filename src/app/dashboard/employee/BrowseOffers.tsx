@@ -3,6 +3,8 @@
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { requestOffers } from "@/lib/pulse-actions";
+import { toCoins } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 import type { CatalogOffer } from "@/lib/gemini";
 
 const CAT_LABEL: Record<string, string> = {
@@ -39,7 +41,7 @@ export function BrowseOffers({ offers, initialCategory = "all" }: { offers: Cata
 
   const selTotal = useMemo(() => {
     const set = new Set(selected);
-    return offers.filter((o) => set.has(o.id)).reduce((s, o) => s + o.priceLek, 0);
+    return offers.filter((o) => set.has(o.id)).reduce((s, o) => s + o.effLek, 0);
   }, [offers, selected]);
 
   const toggle = (id: string) =>
@@ -70,7 +72,7 @@ export function BrowseOffers({ offers, initialCategory = "all" }: { offers: Cata
       {selected.length > 0 && (
         <div className="sticky top-16 z-20 mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary-soft px-4 py-2.5">
           <span className="text-sm font-semibold text-primary">
-            {selected.length} selected · {selTotal.toLocaleString("en-US")} L
+            {selected.length} selected · <Coins amount={toCoins(selTotal)} />
           </span>
           <div className="flex items-center gap-2">
             <button type="button" onClick={() => setSelected([])} className="text-xs font-semibold text-muted">
@@ -102,10 +104,14 @@ export function BrowseOffers({ offers, initialCategory = "all" }: { offers: Cata
                 <p className="truncate text-xs text-muted">
                   {o.providerName}{o.area ? ` · ${o.area}` : ""} · {CAT_LABEL[o.category] ?? o.category}
                   {o.taxFree ? " · tax-free" : ""}
+                  {o.discountPct > 0 ? ` · −${o.discountPct}%` : ""}
                 </p>
               </Link>
               <div className="flex shrink-0 items-center gap-3">
-                <span className="text-sm font-semibold text-ink-soft">{o.priceLek.toLocaleString("en-US")} L</span>
+                <span className="text-right text-sm">
+                  {o.discountPct > 0 && <Coins amount={toCoins(o.priceLek)} strike className="mr-1 text-xs" />}
+                  <Coins amount={toCoins(o.effLek)} className="font-semibold text-ink-soft" />
+                </span>
                 <button
                   type="button"
                   onClick={() => toggle(o.id)}

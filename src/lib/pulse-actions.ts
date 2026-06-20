@@ -6,6 +6,7 @@ import type { BudgetMode } from "@prisma/client";
 import { prisma } from "./prisma";
 import { requireMembership } from "./account";
 import { recommendPackages } from "./gemini";
+import { effectiveLek, toLek } from "./currency";
 
 export async function runPulse(answers: Record<string, string>, budgetMode: BudgetMode): Promise<void> {
   const m = await requireMembership();
@@ -70,7 +71,7 @@ export async function requestOffers(offerIds: string[]): Promise<void> {
   if (!offers.length) redirect("/dashboard/employee");
   const byId = new Map(offers.map((o) => [o.id, o] as const));
   const ordered = ids.map((id) => byId.get(id)).filter((o): o is NonNullable<typeof o> => !!o);
-  const total = ordered.reduce((s, o) => s + o.priceLek, 0);
+  const total = ordered.reduce((s, o) => s + effectiveLek(o.priceLek, o.discountPct), 0);
 
   const pkg = await prisma.perkPackage.create({
     data: {
@@ -104,20 +105,22 @@ export async function swapItem(packageId: string, offerId: string): Promise<void
   const current = await prisma.offer.findUnique({ where: { id: offerId }, select: { category: true } });
   if (!current) return;
 
-  const packOffers = await prisma.offer.findMany({ where: { id: { in: pkg.itemOfferIds } }, select: { id: true, priceLek: true } });
-  const baseTotal = packOffers.reduce((s, o) => s + o.priceLek, 0) - (packOffers.find((o) => o.id === offerId)?.priceLek ?? 0);
+  const packOffers = await prisma.offer.findMany({ where: { id: { in: pkg.itemOfferIds } }, select: { id: true, priceLek: true, discountPct: true } });
+  const eff = (o: { priceLek: number; discountPct: number }) => effectiveLek(o.priceLek, o.discountPct);
+  const baseTotal = packOffers.reduce((s, o) => s + eff(o), 0) - (packOffers.find((o) => o.id === offerId) ? eff(packOffers.find((o) => o.id === offerId)!) : 0);
 
   const candidates = await prisma.offer.findMany({
     where: { active: true, category: current.category, id: { notIn: pkg.itemOfferIds } },
     orderBy: { priceLek: "asc" },
   });
-  const replacement = candidates.find((o) => baseTotal + o.priceLek <= m.perksBudgetLek);
+  const cap = toLek(m.recognitionCoins); // can't assemble a pack beyond your coin wallet
+  const replacement = candidates.find((o) => baseTotal + eff(o) <= cap);
   if (!replacement) return;
 
   const newIds = pkg.itemOfferIds.map((id) => (id === offerId ? replacement.id : id));
   await prisma.perkPackage.update({
     where: { id: pkg.id },
-    data: { itemOfferIds: newIds, totalLek: baseTotal + replacement.priceLek },
+    data: { itemOfferIds: newIds, totalLek: baseTotal + eff(replacement) },
   });
   revalidatePath(`/dashboard/employee/package/${packageId}`);
 }

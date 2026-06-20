@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireCompanyAdmin } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
-import { BudgetRing } from "@/components/BudgetRing";
+import { toCoins } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 
 export const dynamic = "force-dynamic";
 
@@ -34,19 +35,13 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
       <h1 className="text-2xl font-bold">{member.displayName}</h1>
       {member.jobTitle && <p className="text-muted">{member.jobTitle}</p>}
 
-      <div className="mt-5 flex items-center gap-4 rounded-2xl border border-line bg-paper p-5">
-        <BudgetRing used={used} total={member.perksBudgetLek} />
-        <div>
-          <p className="text-sm text-muted">Budget used</p>
-          <p className="text-lg font-bold">{used.toLocaleString("en-US")} / {member.perksBudgetLek.toLocaleString("en-US")} L</p>
-        </div>
+      <div className="mt-5 rounded-2xl border border-gold-ink/25 bg-gold-soft p-5">
+        <p className="text-sm font-medium text-gold-ink/80">PerxCoin balance</p>
+        <p className="mt-0.5 text-3xl font-bold text-gold-ink"><Coins amount={member.recognitionCoins} /></p>
+        <p className="mt-1 text-xs text-muted">{toCoins(member.perksBudgetLek)} 🪙/mo allowance · {toCoins(used)} 🪙 spent on approved perks</p>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold text-gold-ink">{member.recognitionCoins}</p>
-          <p className="text-xs text-muted">coins</p>
-        </div>
+      <div className="mt-3 grid grid-cols-2 gap-3">
         <div className="rounded-2xl border border-line bg-paper p-4">
           <p className="text-2xl font-bold">{givenAgg._sum.amount ?? 0}</p>
           <p className="text-xs text-muted">kudos given</p>
@@ -77,7 +72,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
             <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3">
               <span className="min-w-0 truncate text-sm font-medium">{p.label}</span>
               <span className="shrink-0 text-sm">
-                <span className="text-ink-soft">{p.totalLek.toLocaleString("en-US")} L</span>
+                <span className="text-ink-soft"><Coins amount={toCoins(p.totalLek)} /></span>
                 <span className={`ml-2 font-semibold ${STATUS_CLR[p.status]}`}>{STATUS_LABEL[p.status]}</span>
               </span>
             </li>

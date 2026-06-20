@@ -22,7 +22,8 @@ export function OfferForm({ providerCategory }: { providerCategory: string }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(providerCategory);
-  const [priceLek, setPriceLek] = useState("");
+  const [priceCoins, setPriceCoins] = useState("");
+  const [discountPct, setDiscountPct] = useState("");
   const [area, setArea] = useState("");
   const [taxFree, setTaxFree] = useState(false);
   const [msg, setMsg] = useState<{ ok?: boolean; error?: string } | null>(null);
@@ -31,14 +32,15 @@ export function OfferForm({ providerCategory }: { providerCategory: string }) {
     e.preventDefault();
     setMsg(null);
     startTransition(async () => {
-      const res = await createOffer({ title, description, category, priceLek, area, taxFree });
+      const res = await createOffer({ title, description, category, priceLek: Number(priceCoins || 0) * 100, discountPct, area, taxFree });
       if ("error" in res) {
         setMsg({ error: res.error });
       } else {
         setMsg({ ok: true });
         setTitle("");
         setDescription("");
-        setPriceLek("");
+        setPriceCoins("");
+        setDiscountPct("");
         setArea("");
         setTaxFree(false);
         router.refresh();
@@ -58,9 +60,12 @@ export function OfferForm({ providerCategory }: { providerCategory: string }) {
             </option>
           ))}
         </select>
-        <input className={inputCls} type="number" placeholder="Price (Lek)" value={priceLek} onChange={(e) => setPriceLek(e.target.value)} required />
+        <input className={inputCls} type="number" min={0} placeholder="Price (coins)" value={priceCoins} onChange={(e) => setPriceCoins(e.target.value)} required />
       </div>
-      <input className={inputCls} placeholder="Area (e.g. Blloku)" value={area} onChange={(e) => setArea(e.target.value)} />
+      <div className="flex gap-3">
+        <input className={inputCls} placeholder="Area (e.g. Blloku)" value={area} onChange={(e) => setArea(e.target.value)} />
+        <input className={inputCls} type="number" min={0} max={90} placeholder="Discount %" value={discountPct} onChange={(e) => setDiscountPct(e.target.value)} />
+      </div>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={taxFree} onChange={(e) => setTaxFree(e.target.checked)} /> Tax-free benefit
       </label>

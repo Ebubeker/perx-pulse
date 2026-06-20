@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { resolveOffers } from "@/lib/gemini";
+import { toCoins } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 import { ChooseButton } from "./ChooseButton";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +45,7 @@ export default async function DiscoverPage() {
             <div key={rec.id} className="rounded-2xl border border-line bg-paper p-5">
               <div className="flex items-baseline justify-between gap-3">
                 <h2 className="text-lg font-bold">{rec.label}</h2>
-                <span className="font-bold">{rec.totalLek.toLocaleString("en-US")} L</span>
+                <span className="font-bold text-gold-ink"><Coins amount={toCoins(rec.totalLek)} /></span>
               </div>
               <p className="mt-1 text-sm text-ink-soft">{rec.rationale}</p>
 
@@ -54,7 +56,7 @@ export default async function DiscoverPage() {
                       <span className="font-medium">{o.title}</span>{" "}
                       <span className="text-muted">· {o.providerName}{o.area ? ` · ${o.area}` : ""}</span>
                     </span>
-                    <span className="shrink-0 font-semibold text-ink-soft">{o.priceLek.toLocaleString("en-US")} L</span>
+                    <span className="shrink-0 font-semibold text-ink-soft"><Coins amount={toCoins(o.effLek)} /></span>
                   </li>
                 ))}
               </ul>

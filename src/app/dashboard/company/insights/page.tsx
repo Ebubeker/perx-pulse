@@ -1,6 +1,7 @@
 import { requireCompanyAdmin } from "@/lib/account";
 import { companyInsights } from "@/lib/insights";
 import { ALL_CATEGORIES } from "@/lib/passport";
+import { toCoins } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
 
@@ -104,7 +105,7 @@ export default async function InsightsPage() {
       <h2 className="mb-2 mt-8 text-sm font-semibold text-muted">Budget utilization</h2>
       <div className="rounded-2xl border border-line bg-paper p-5">
         <div className="flex items-baseline justify-between text-sm">
-          <span className="text-muted">{ins.budgetUsed.toLocaleString("en-US")} L used of {ins.budgetTotal.toLocaleString("en-US")} L</span>
+          <span className="text-muted">{toCoins(ins.budgetUsed).toLocaleString("en-US")} 🪙 used of {toCoins(ins.budgetTotal).toLocaleString("en-US")} 🪙</span>
           <span className="font-bold">{budgetPct}%</span>
         </div>
         <div className="mt-2 h-3 overflow-hidden rounded-full bg-cream">

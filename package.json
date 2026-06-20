@@ -11,7 +11,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:demo": "tsx prisma/seed-demo.ts",
     "db:seed:pending": "tsx prisma/seed-pending.ts",
-    "db:seed:descriptions": "tsx prisma/seed-descriptions.ts"
+    "db:seed:descriptions": "tsx prisma/seed-descriptions.ts",
+    "db:seed:coins": "tsx prisma/seed-coins.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

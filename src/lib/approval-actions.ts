@@ -5,21 +5,22 @@ import { redirect } from "next/navigation";
 import { prisma } from "./prisma";
 import { requireCompanyAdmin } from "./account";
 import { splitFor, voucherCode } from "./payments";
+import { effectiveLek, toCoins } from "./currency";
 
 /**
- * HR approves a pending package. This is the marketplace settlement:
- * the employer's budget is split across the providers behind each offer,
- * Perx records its take-rate, and the employee gets redemption codes.
+ * HR approves a pending package. The employee's PerxCoins are spent, and the cash
+ * equivalent is split across the providers behind each offer (Perx records its take-rate).
  */
-export async function approvePackage(packageId: string): Promise<void> {
+export async function approvePackage(packageId: string): Promise<{ error?: string }> {
   const m = await requireCompanyAdmin();
 
   const pkg = await prisma.perkPackage.findFirst({
     where: { id: packageId, companyId: m.companyId, status: "PENDING" },
+    include: { employee: { select: { id: true, displayName: true, recognitionCoins: true } } },
   });
   if (!pkg) redirect("/dashboard/company/approvals");
 
-  // Resolve the offers behind the pack to the providers that get paid.
+  // Resolve the offers behind the pack to the providers that get paid (effective/discounted price).
   const offers = await prisma.offer.findMany({
     where: { id: { in: pkg.itemOfferIds } },
     include: { provider: { select: { id: true, takeRatePct: true } } },
@@ -30,7 +31,8 @@ export async function approvePackage(packageId: string): Promise<void> {
     .map((id) => byId.get(id))
     .filter((o): o is NonNullable<typeof o> => !!o)
     .map((o) => {
-      const { feeLek, netLek } = splitFor(o.priceLek, o.provider.takeRatePct);
+      const gross = effectiveLek(o.priceLek, o.discountPct);
+      const { feeLek, netLek } = splitFor(gross, o.provider.takeRatePct);
       return {
         packageId: pkg.id,
         companyId: pkg.companyId,
@@ -38,7 +40,7 @@ export async function approvePackage(packageId: string): Promise<void> {
         offerId: o.id,
         employeeProfileId: pkg.employeeProfileId,
         title: o.title,
-        grossLek: o.priceLek,
+        grossLek: gross,
         takeRatePct: o.provider.takeRatePct,
         feeLek,
         netLek,
@@ -46,12 +48,19 @@ export async function approvePackage(packageId: string): Promise<void> {
       };
     });
 
+  // Spend = the actual settled (effective) total, so the debit matches what providers receive.
+  const costCoins = toCoins(orderData.reduce((s, o) => s + o.grossLek, 0));
+  if (pkg.employee.recognitionCoins < costCoins) {
+    return { error: `${pkg.employee.displayName} needs ${costCoins} coins but has ${pkg.employee.recognitionCoins}.` };
+  }
+
   await prisma.$transaction([
     prisma.perkPackage.update({
       where: { id: pkg.id },
       data: { status: "APPROVED", decidedByClerkUserId: m.clerkUserId, decidedAt: new Date() },
     }),
     prisma.order.createMany({ data: orderData }),
+    prisma.employeeProfile.update({ where: { id: pkg.employeeProfileId }, data: { recognitionCoins: { decrement: costCoins } } }),
   ]);
 
   revalidatePath("/dashboard/company/approvals");

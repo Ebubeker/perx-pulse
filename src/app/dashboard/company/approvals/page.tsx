@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireCompanyAdmin } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { resolveOffers } from "@/lib/gemini";
+import { toCoins } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 import { ApprovalActions } from "./ApprovalActions";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +36,7 @@ export default async function ApprovalsPage() {
       <p className="mt-1 text-sm text-muted">
         {pending.length === 0
           ? "No packs waiting. You're all caught up."
-          : `${pending.length} pack${pending.length > 1 ? "s" : ""} waiting · ${pendingTotal.toLocaleString("en-US")} L to settle`}
+          : `${pending.length} pack${pending.length > 1 ? "s" : ""} waiting · ${toCoins(pendingTotal).toLocaleString("en-US")} 🪙 to settle`}
       </p>
 
       <div className="mt-6 space-y-4">
@@ -45,7 +47,7 @@ export default async function ApprovalsPage() {
                 <h2 className="truncate text-lg font-bold">{pkg.label}</h2>
                 <p className="text-sm text-muted">for {pkg.employee.displayName}</p>
               </div>
-              <span className="shrink-0 font-bold">{pkg.totalLek.toLocaleString("en-US")} L</span>
+              <span className="shrink-0 font-bold text-gold-ink"><Coins amount={toCoins(pkg.totalLek)} /></span>
             </div>
             <ul className="mt-3 space-y-1.5">
               {items.map((o) => (
@@ -54,7 +56,7 @@ export default async function ApprovalsPage() {
                     <span className="font-medium">{o.title}</span>{" "}
                     <span className="text-muted">· {o.providerName}</span>
                   </span>
-                  <span className="shrink-0 text-ink-soft">{o.priceLek.toLocaleString("en-US")} L</span>
+                  <span className="shrink-0 text-ink-soft"><Coins amount={toCoins(o.effLek)} /></span>
                 </li>
               ))}
             </ul>

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
+import { toCoins, effectiveLek } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 import { AddOfferButton } from "./AddOfferButton";
 
 export const dynamic = "force-dynamic";
@@ -44,8 +46,14 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
         {offer.area ? ` · ${offer.area}` : ""}
       </p>
 
-      <div className="mt-4 flex items-center gap-3">
-        <span className="text-3xl font-bold">{offer.priceLek.toLocaleString("en-US")} L</span>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <span className="text-3xl font-bold text-gold-ink"><Coins amount={toCoins(effectiveLek(offer.priceLek, offer.discountPct))} /></span>
+        {offer.discountPct > 0 && (
+          <>
+            <Coins amount={toCoins(offer.priceLek)} strike className="text-base" />
+            <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-bold text-white">−{offer.discountPct}%</span>
+          </>
+        )}
         {offer.taxFree && <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary">Tax-free</span>}
       </div>
 
@@ -99,7 +107,7 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
               <li key={o.id}>
                 <Link href={`/dashboard/employee/offer/${o.id}`} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-paper px-4 py-3">
                   <span className="min-w-0 truncate text-sm font-medium">{o.title}</span>
-                  <span className="shrink-0 text-sm font-semibold text-ink-soft">{o.priceLek.toLocaleString("en-US")} L</span>
+                  <span className="shrink-0 text-sm font-semibold text-ink-soft"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /></span>
                 </Link>
               </li>
             ))}
