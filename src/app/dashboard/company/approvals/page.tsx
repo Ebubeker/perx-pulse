@@ -31,25 +31,35 @@ export default async function ApprovalsPage() {
   const pendingTotal = pending.reduce((s, p) => s + p.totalLek, 0);
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-10">
-      <h1 className="mt-1 text-2xl font-bold">Approvals</h1>
+    <main className="mx-auto max-w-2xl px-4 py-5">
+      <div className="kicker text-coral">
+        {pending.length === 0
+          ? "All caught up"
+          : `${pending.length} pending · ${toCoins(pendingTotal).toLocaleString("en-US")} coins to settle`}
+      </div>
+      <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">Approvals inbox</h1>
       <p className="mt-1 text-sm text-muted">
         {pending.length === 0
           ? "No packs waiting. You're all caught up."
-          : `${pending.length} pack${pending.length > 1 ? "s" : ""} waiting · ${toCoins(pendingTotal).toLocaleString("en-US")} 🪙 to settle`}
+          : "All within budget & tax-free unless flagged. One tap to fund."}
       </p>
 
       <div className="mt-6 space-y-4">
         {pendingWithItems.map(({ pkg, items }) => (
-          <div key={pkg.id} className="rounded-2xl border border-line bg-paper p-5">
-            <div className="flex items-baseline justify-between gap-3">
-              <div className="min-w-0">
-                <h2 className="truncate text-lg font-bold">{pkg.label}</h2>
+          <div key={pkg.id} className="card">
+            <div className="flex items-center gap-3">
+              <span className="avatar">{pkg.employee.displayName.charAt(0).toUpperCase()}</span>
+              <div className="min-w-0 flex-1">
+                <h2 className="truncate font-display text-lg font-bold">{pkg.label}</h2>
                 <p className="text-sm text-muted">for {pkg.employee.displayName}</p>
               </div>
-              <span className="shrink-0 font-bold text-gold-ink"><Coins amount={toCoins(pkg.totalLek)} /></span>
+              <span className="shrink-0 font-display text-lg font-bold text-lime-deep"><Coins amount={toCoins(pkg.totalLek)} /></span>
             </div>
-            <ul className="mt-3 space-y-1.5">
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="badge badge-tax">Tax-free</span>
+              <span className="pill pill-pending"><span className="dot" />Pending</span>
+            </div>
+            <ul className="mt-3 space-y-1.5 border-t border-line pt-3">
               {items.map((o) => (
                 <li key={o.id} className="flex items-center justify-between gap-3 text-sm">
                   <span className="min-w-0 truncate">
@@ -66,26 +76,27 @@ export default async function ApprovalsPage() {
       </div>
 
       {decided.length > 0 && (
-        <div className="mt-8">
-          <h2 className="mb-2 text-sm font-semibold text-muted">Recent decisions</h2>
-          <ul className="divide-y divide-line rounded-2xl border border-line bg-paper">
+        <>
+          <div className="sec"><h3>Recent decisions</h3></div>
+          <div>
             {decided.map((p) => (
-              <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
-                <span className="min-w-0 truncate">
-                  <span className="font-medium">{p.label}</span>{" "}
-                  <span className="text-muted">· {p.employee.displayName}</span>
-                </span>
+              <div key={p.id} className="row">
+                <span className={`ico ${p.status === "APPROVED" ? "coral" : ""}`}>{p.status === "APPROVED" ? "✓" : "✕"}</span>
+                <div className="grow">
+                  <div className="t truncate">{p.label}</div>
+                  <div className="s">{p.employee.displayName}</div>
+                </div>
                 {p.status === "APPROVED" ? (
-                  <Link href={`/dashboard/company/approvals/${p.id}`} className="shrink-0 font-semibold text-primary">
-                    ✓ settled →
+                  <Link href={`/dashboard/company/approvals/${p.id}`} className="pill pill-approved shrink-0">
+                    <span className="dot" />Settled →
                   </Link>
                 ) : (
-                  <span className="shrink-0 text-muted">declined</span>
+                  <span className="pill pill-redeemed shrink-0"><span className="dot" />Declined</span>
                 )}
-              </li>
+              </div>
             ))}
-          </ul>
-        </div>
+          </div>
+        </>
       )}
     </main>
   );

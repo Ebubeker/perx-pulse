@@ -8,7 +8,7 @@ import { Coins } from "@/components/Coins";
 export const dynamic = "force-dynamic";
 
 const STATUS_LABEL: Record<string, string> = { DRAFT: "draft", PENDING: "awaiting approval", APPROVED: "approved", REJECTED: "declined" };
-const STATUS_CLR: Record<string, string> = { DRAFT: "text-muted", PENDING: "text-accent", APPROVED: "text-primary", REJECTED: "text-muted" };
+const STATUS_PILL: Record<string, string> = { DRAFT: "pill-redeemed", PENDING: "pill-pending", APPROVED: "pill-ready", REJECTED: "pill-redeemed" };
 
 export default async function MemberPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -30,59 +30,70 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
   const tags = [...member.preferredCategories, ...member.interests, ...member.wellnessGoals].slice(0, 8);
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-8">
-      <p className="text-sm text-muted">{member.role}{member.department ? ` · ${member.department.name}` : ""}</p>
-      <h1 className="text-2xl font-bold">{member.displayName}</h1>
-      {member.jobTitle && <p className="text-muted">{member.jobTitle}</p>}
+    <main className="mx-auto max-w-2xl px-4 py-5">
+      <Link href="/dashboard/company/people" className="link text-sm font-semibold text-muted">← All people</Link>
 
-      <div className="mt-5 rounded-2xl border border-gold-ink/25 bg-gold-soft p-5">
-        <p className="text-sm font-medium text-gold-ink/80">PerxCoin balance</p>
-        <p className="mt-0.5 text-3xl font-bold text-gold-ink"><Coins amount={member.recognitionCoins} /></p>
-        <p className="mt-1 text-xs text-muted">{toCoins(member.perksBudgetLek)} 🪙/mo allowance · {toCoins(used)} 🪙 spent on approved perks</p>
+      {/* Profile header */}
+      <div className="mt-4 flex items-center gap-4">
+        <span className="avatar" style={{ width: 64, height: 64, fontSize: 24 }}>{(member.displayName || "?").charAt(0).toUpperCase()}</span>
+        <div className="min-w-0">
+          <div className="kicker">{member.role}{member.department ? ` · ${member.department.name}` : ""}</div>
+          <h1 className="mt-0.5 font-display text-2xl font-bold tracking-tight">{member.displayName}</h1>
+          {member.jobTitle && <p className="text-muted">{member.jobTitle}</p>}
+        </div>
+      </div>
+
+      {/* PerxCoin balance — dark card */}
+      <div className="card-dark mt-4">
+        <div className="blob" />
+        <div className="relative z-[2]">
+          <div className="text-[13px] text-[var(--txt-on-dark-mut)]">PerxCoin balance</div>
+          <div className="mt-1 font-display text-3xl font-bold text-[var(--txt-on-dark)]"><Coins amount={member.recognitionCoins} /></div>
+          <div className="mt-2 text-[13px] text-[var(--txt-on-dark-mut)]">
+            <Coins amount={toCoins(member.perksBudgetLek)} />/mo allowance · <Coins amount={toCoins(used)} /> spent on approved perks
+          </div>
+        </div>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold">{givenAgg._sum.amount ?? 0}</p>
-          <p className="text-xs text-muted">kudos given</p>
+        <div className="stat">
+          <div className="v">{givenAgg._sum.amount ?? 0}</div>
+          <div className="d">kudos given</div>
         </div>
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold">{pulseCount}</p>
-          <p className="text-xs text-muted">pulses</p>
+        <div className="stat">
+          <div className="v">{pulseCount}</div>
+          <div className="d">pulses</div>
         </div>
       </div>
 
       {tags.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-sm font-semibold text-muted">Interests</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="kicker mb-2">Interests</div>
+          <div className="chip-row">
             {tags.map((tg, i) => (
-              <span key={`${tg}-${i}`} className="rounded-full bg-cream px-3 py-1 text-xs font-medium text-ink-soft">{tg}</span>
+              <span key={`${tg}-${i}`} className="chip">{tg}</span>
             ))}
           </div>
         </div>
       )}
 
-      <h2 className="mb-2 mt-8 font-semibold">Packages ({packages.length})</h2>
+      <div className="sec"><h3>Packages ({packages.length})</h3></div>
       {packages.length === 0 ? (
-        <p className="rounded-xl border border-line bg-paper px-4 py-6 text-center text-sm text-muted">No packages yet.</p>
+        <div className="card text-center text-sm text-muted">No packages yet.</div>
       ) : (
-        <ul className="divide-y divide-line rounded-xl border border-line bg-paper">
+        <div>
           {packages.map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3">
-              <span className="min-w-0 truncate text-sm font-medium">{p.label}</span>
-              <span className="shrink-0 text-sm">
-                <span className="text-ink-soft"><Coins amount={toCoins(p.totalLek)} /></span>
-                <span className={`ml-2 font-semibold ${STATUS_CLR[p.status]}`}>{STATUS_LABEL[p.status]}</span>
-              </span>
-            </li>
+            <div key={p.id} className="row">
+              <span className="ico coral">🎁</span>
+              <div className="grow">
+                <div className="t truncate">{p.label}</div>
+                <span className={`pill ${STATUS_PILL[p.status]} mt-1`}>{STATUS_LABEL[p.status]}</span>
+              </div>
+              <span className="amt"><Coins amount={toCoins(p.totalLek)} /></span>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
-
-      <div className="mt-6">
-        <Link href="/dashboard/company/people" className="text-sm font-semibold text-muted">← All people</Link>
-      </div>
     </main>
   );
 }

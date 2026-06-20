@@ -23,11 +23,14 @@ export function SettlementReveal({ employer, payouts, fee, net }: { employer: nu
 
   return (
     <div className="mt-6">
-      {/* Source */}
-      <div className={`rounded-2xl bg-primary px-5 py-4 text-white ${row(step >= 1)}`}>
-        <p className="text-xs uppercase tracking-wide text-white/70">PerxCoins spent</p>
-        <p className="text-2xl font-bold">{toCoins(employer).toLocaleString("en-US")} 🪙</p>
-        <p className="text-xs text-white/70">settled as {lek(employer)} cash to providers</p>
+      {/* Source — coins spent from budget */}
+      <div className={`card-dark ${row(step >= 1)}`}>
+        <div className="blob" />
+        <div className="relative z-[2]">
+          <p className="kicker text-lime-deep">PerxCoins spent</p>
+          <p className="mt-1 font-display text-3xl font-bold text-lime">{toCoins(employer).toLocaleString("en-US")} coins</p>
+          <p className="mt-1 text-xs text-[var(--txt-on-dark-mut)]">settled as {lek(employer)} cash to providers</p>
+        </div>
       </div>
 
       {/* Flow */}
@@ -35,26 +38,26 @@ export function SettlementReveal({ employer, payouts, fee, net }: { employer: nu
         <div className={`h-6 w-px bg-line transition-opacity duration-500 ${step >= 2 ? "opacity-100" : "opacity-0"}`} />
       </div>
 
-      {/* Provider payouts */}
+      {/* Provider payouts (real cash, in Lek) */}
       <div className="space-y-2">
         {payouts.map((p, i) => (
-          <div key={p.name} className={`flex items-center justify-between gap-3 rounded-xl border border-line bg-paper px-4 py-3 ${row(step >= i + 2)}`}>
-            <div className="min-w-0">
+          <div key={p.name} className={`flex items-center gap-3 rounded-[18px] border border-line bg-paper px-4 py-3 ${row(step >= i + 2)}`}>
+            <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{p.name}</p>
               <p className="text-xs text-muted">{lek(p.gross)} − Perx {lek(p.fee)}</p>
             </div>
-            <span className="shrink-0 text-lg font-bold text-primary">{lek(p.net)}</span>
+            <span className="shrink-0 font-display text-lg font-bold text-coral">{lek(p.net)}</span>
           </div>
         ))}
       </div>
 
       {/* Perx take */}
-      <div className={`mt-3 flex items-center justify-between rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 ${row(step >= payouts.length + 2)}`}>
+      <div className={`mt-3 flex items-center justify-between gap-3 rounded-[18px] border border-coral/30 bg-coral-soft px-4 py-3 ${row(step >= payouts.length + 2)}`}>
         <div>
-          <p className="text-sm font-semibold text-accent">Perx take-rate</p>
+          <p className="text-sm font-semibold text-coral-deep">Perx take-rate</p>
           <p className="text-xs text-muted">{lek(net)} to providers · {lek(fee)} to Perx</p>
         </div>
-        <span className="text-lg font-bold text-accent">{lek(fee)}</span>
+        <span className="font-display text-lg font-bold text-coral-deep">{lek(fee)}</span>
       </div>
     </div>
   );

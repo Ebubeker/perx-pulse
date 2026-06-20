@@ -2,6 +2,7 @@
 
 import { useState, useTransition, type ReactNode } from "react";
 import { completeEmployeeOnboarding } from "@/lib/onboarding-actions";
+import { Mascot } from "@/components/Mascot";
 
 const CATEGORIES: [string, string][] = [
   ["wellness", "Wellness"],
@@ -18,7 +19,6 @@ const GOALS = ["Reduce stress", "More energy", "Get fit", "Better sleep", "Eat h
 const DIETARY = ["Vegetarian", "Vegan", "Gluten-free", "Halal", "No restrictions"];
 const LANGS = ["Albanian", "English", "Italian", "German"];
 const STEPS = ["You", "What you like", "Wellness & diet"];
-const inputCls = "w-full rounded-lg border border-line bg-paper px-3 py-2 text-[15px] outline-none focus:border-primary";
 
 export function EmployeeWizard({ companyName }: { companyName: string }) {
   const [step, setStep] = useState(0);
@@ -56,31 +56,45 @@ export function EmployeeWizard({ companyName }: { companyName: string }) {
     });
   }
 
-  return (
-    <main className="mx-auto flex min-h-dvh max-w-lg flex-col px-6 py-10">
-      <p className="text-sm text-muted">
-        Step {step + 1} of {STEPS.length} · {STEPS[step]}
-      </p>
-      <div className="mt-2 h-1.5 w-full rounded-full bg-line">
-        <div className="h-1.5 rounded-full bg-primary transition-all" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
-      </div>
-      <h1 className="mt-5 text-2xl font-bold">Welcome to {companyName}</h1>
-      <p className="mt-1 text-sm text-muted">A few taps so Perx can build perks you&apos;ll actually use.</p>
+  const pct = Math.round(((step + 1) / STEPS.length) * 100);
 
-      <div className="mt-5 space-y-5">
+  return (
+    <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-cream px-5 py-8">
+      <div className="flex items-center justify-between gap-3">
+        <button type="button" disabled={step === 0 || pending} onClick={() => setStep(step - 1)} className="btn-icon disabled:opacity-40" aria-label="Back">←</button>
+        <Mascot mood="love" size={48} className="float" />
+      </div>
+
+      <div className="mt-6 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.12em] text-coral">
+        <span>Step {step + 1} of {STEPS.length} · {STEPS[step]}</span>
+        <span>{pct}%</span>
+      </div>
+      <div className="bar mt-2.5">
+        <i style={{ width: `${pct}%` }} />
+      </div>
+      <h1 className="mt-5 font-display text-3xl font-bold tracking-tight">Welcome to {companyName}</h1>
+      <p className="mt-1.5 text-muted">A few taps so Perx can build perks you&apos;ll actually use.</p>
+
+      {step === 0 && (
+        <div className="speech mt-5 self-start rounded-[18px] border border-line bg-paper px-4 py-3 text-sm font-semibold shadow-soft">
+          Hi 👋 Tell me your vibe — I&apos;ll do the rest.
+        </div>
+      )}
+
+      <div className="mt-6 space-y-5">
         {step === 0 && (
           <>
             <Field label="Your name *">
-              <input className={inputCls} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+              <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
             </Field>
             <Field label="Job title">
-              <input className={inputCls} value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} placeholder="Software Engineer" />
+              <input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} placeholder="Software Engineer" />
             </Field>
             <Field label="Where do you work?" hint="Office area">
-              <input className={inputCls} value={workArea} onChange={(e) => setWorkArea(e.target.value)} placeholder="Blloku" />
+              <input value={workArea} onChange={(e) => setWorkArea(e.target.value)} placeholder="Blloku" />
             </Field>
             <Field label="Where do you live?" hint="For perks near home">
-              <input className={inputCls} value={homeArea} onChange={(e) => setHomeArea(e.target.value)} placeholder="Yzberisht" />
+              <input value={homeArea} onChange={(e) => setHomeArea(e.target.value)} placeholder="Yzberisht" />
             </Field>
           </>
         )}
@@ -99,19 +113,16 @@ export function EmployeeWizard({ companyName }: { companyName: string }) {
         )}
       </div>
 
-      {error && <p className="mt-4 text-sm font-medium text-accent">{error}</p>}
+      {error && <p className="mt-2 text-sm font-medium text-coral">{error}</p>}
 
-      <div className="mt-6 flex items-center justify-between">
-        <button type="button" disabled={step === 0 || pending} onClick={() => setStep(step - 1)} className="rounded-lg px-4 py-2 text-sm font-semibold text-muted disabled:opacity-40">
-          Back
-        </button>
+      <div className="mt-auto pt-8">
         {step < last ? (
-          <button type="button" disabled={!stepValid} onClick={() => setStep(step + 1)} className="rounded-lg bg-primary px-5 py-2.5 font-semibold text-white disabled:opacity-40">
+          <button type="button" disabled={!stepValid} onClick={() => setStep(step + 1)} className="btn btn-dark btn-lg disabled:opacity-40">
             Continue
           </button>
         ) : (
-          <button type="button" disabled={!stepValid || pending} onClick={submit} className="rounded-lg bg-primary px-5 py-2.5 font-semibold text-white disabled:opacity-50">
-            {pending ? "Finishing…" : "Finish"}
+          <button type="button" disabled={!stepValid || pending} onClick={submit} className="btn btn-primary btn-lg disabled:opacity-50">
+            {pending ? "Finishing…" : "Take your first Pulse →"}
           </button>
         )}
       </div>
@@ -122,15 +133,15 @@ export function EmployeeWizard({ companyName }: { companyName: string }) {
 function Chips({ label, options, value, onChange }: { label: string; options: [string, string][]; value: string[]; onChange: (v: string[]) => void }) {
   const toggle = (v: string) => onChange(value.includes(v) ? value.filter((x) => x !== v) : [...value, v]);
   return (
-    <div>
-      <p className="mb-2 text-sm font-medium">{label}</p>
-      <div className="flex flex-wrap gap-2">
+    <div className="field">
+      <label>{label}</label>
+      <div className="chip-row">
         {options.map(([v, l]) => (
           <button
             type="button"
             key={v}
             onClick={() => toggle(v)}
-            className={`rounded-full border px-3 py-1.5 text-sm transition ${value.includes(v) ? "border-primary bg-primary text-white" : "border-line bg-paper text-ink hover:border-primary"}`}
+            className={`chip${value.includes(v) ? " on" : ""}`}
           >
             {l}
           </button>
@@ -142,10 +153,10 @@ function Chips({ label, options, value, onChange }: { label: string; options: [s
 
 function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
   return (
-    <label className="block">
-      <span className="mb-1 block text-sm font-medium">{label}</span>
+    <div className="field">
+      <label>{label}</label>
       {children}
-      {hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
-    </label>
+      {hint && <span className="mt-1.5 block font-mono text-[11px] uppercase tracking-[0.08em] text-muted">{hint}</span>}
+    </div>
   );
 }

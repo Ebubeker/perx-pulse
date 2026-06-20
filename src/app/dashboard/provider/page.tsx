@@ -3,6 +3,7 @@ import { requireProvider } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { setOfferActive, deleteOffer } from "@/lib/offer-actions";
 import { toCoins, effectiveLek } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 import { OfferForm } from "./OfferForm";
 import { RedeemButton } from "./RedeemButton";
 
@@ -24,97 +25,109 @@ export default async function ProviderDashboard() {
   const toRedeem = orders.filter((o) => o.status === "PAID").length;
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-10">
-      <p className="text-sm text-muted">Provider · {p.category}</p>
-      <h1 className="text-2xl font-bold">{p.businessName}</h1>
-      <p className="mt-1 text-muted">
-        List the offers employees can pick. They reach you as <strong>pre-funded, employer-approved</strong> customers.
+    <main className="mx-auto max-w-2xl px-4 py-5">
+      {/* heading */}
+      <div className="kicker text-coral">{p.category}</div>
+      <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">{p.businessName}</h1>
+      <p className="mt-2 text-sm text-muted">
+        List the offers employees can pick. They reach you as <strong className="text-ink">pre-funded, employer-approved</strong> customers.
       </p>
 
-      <Link href="/dashboard/provider/drops" className="mt-4 inline-block rounded-lg bg-accent px-4 py-2.5 font-semibold text-white">
+      <Link href="/dashboard/provider/drops" className="btn btn-primary mt-4">
         ⚡ Manage flash drops
       </Link>
 
-      <div className="mt-6 grid grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold text-primary">{earned.toLocaleString("en-US")}</p>
-          <p className="text-xs text-muted">L earned (net)</p>
+      {/* KPI stats — revenue/settlement is real cash Lek */}
+      <div className="mt-5 grid grid-cols-3 gap-3">
+        <div className="stat">
+          <div className="k">Orders</div>
+          <div className="v">{orders.length}</div>
+          <div className="d">All pre-funded</div>
         </div>
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold">{orders.length}</p>
-          <p className="text-xs text-muted">orders</p>
+        <div className="stat">
+          <div className="k">Earned (net)</div>
+          <div className="v">{earned.toLocaleString("en-US")} <span className="text-lg">L</span></div>
+          <div className="d">Settles to you</div>
         </div>
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold text-accent">{toRedeem}</p>
-          <p className="text-xs text-muted">to redeem</p>
+        <div className="stat">
+          <div className="k">To redeem</div>
+          <div className="v text-coral">{toRedeem}</div>
+          <div className="d">{toRedeem > 0 ? "Ready when they arrive →" : "All caught up"}</div>
         </div>
       </div>
 
-      <h2 className="mb-2 mt-8 font-semibold">Incoming orders</h2>
+      {/* Incoming orders */}
+      <div className="sec"><h3>Incoming orders</h3></div>
       {orders.length === 0 ? (
-        <p className="rounded-xl border border-line bg-paper px-4 py-6 text-center text-sm text-muted">
+        <div className="card text-center text-sm text-muted">
           No orders yet. When an employee&apos;s pack is approved, paid orders land here.
-        </p>
+        </div>
       ) : (
-        <ul className="divide-y divide-line rounded-xl border border-line bg-paper">
+        <div className="space-y-2.5">
           {orders.map((o) => (
-            <li key={o.id} className="flex items-center justify-between gap-3 px-4 py-3">
-              <div className="min-w-0">
-                <p className="truncate font-medium">{o.title}</p>
-                <p className="text-sm text-muted">
-                  {o.employee.displayName} · <span className="font-mono">{o.code}</span>
-                </p>
+            <div key={o.id} className="row mb-0">
+              <span className="ico coral">💆</span>
+              <div className="grow">
+                <div className="t truncate">{o.title}</div>
+                <div className="s">
+                  {o.employee.displayName} · <span className="font-mono tracking-wider">{o.code}</span>
+                </div>
               </div>
               <div className="flex shrink-0 items-center gap-3">
-                <span className="text-sm font-bold text-primary">+{o.netLek.toLocaleString("en-US")} L</span>
+                <span className="amt">+{o.netLek.toLocaleString("en-US")} L</span>
                 {o.status === "PAID" ? (
                   <RedeemButton orderId={o.id} />
                 ) : (
-                  <span className="rounded-lg bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">redeemed</span>
+                  <span className="pill pill-redeemed"><span className="dot" />Redeemed</span>
                 )}
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
-      <div className="mt-8 rounded-xl border border-line bg-paper p-5">
-        <h2 className="mb-3 font-semibold">Add an offer</h2>
+      {/* Add an offer */}
+      <div className="sec"><h3>Add an offer</h3></div>
+      <div className="card">
         <OfferForm providerCategory={p.category} />
       </div>
 
-      <h2 className="mb-2 mt-8 font-semibold">Your offers ({offers.length})</h2>
+      {/* Your offers */}
+      <div className="sec"><h3>Your offers ({offers.length})</h3></div>
       {offers.length === 0 ? (
-        <p className="rounded-xl border border-line bg-paper px-4 py-6 text-center text-sm text-muted">No offers yet — add your first above.</p>
+        <div className="card text-center text-sm text-muted">No offers yet — add your first above.</div>
       ) : (
-        <ul className="divide-y divide-line rounded-xl border border-line bg-paper">
+        <div className="space-y-2.5">
           {offers.map((o) => (
-            <li key={o.id} className="flex items-center justify-between gap-3 px-4 py-3">
-              <div className="min-w-0">
-                <p className="truncate font-medium">
-                  {o.title} {!o.active && <span className="text-xs text-muted">(hidden)</span>}
-                </p>
-                <p className="text-sm text-muted">
-                  {toCoins(effectiveLek(o.priceLek, o.discountPct)).toLocaleString("en-US")} 🪙{o.discountPct > 0 ? ` (−${o.discountPct}%)` : ""} · {o.category}
-                  {o.area ? ` · ${o.area}` : ""}
-                  {o.taxFree ? " · tax-free" : ""}
-                </p>
+            <div key={o.id} className={`row mb-0 ${!o.active ? "opacity-60" : ""}`}>
+              <span className="ico coral">💆</span>
+              <div className="grow">
+                <div className="t truncate">
+                  {o.title} {!o.active && <span className="badge badge-new">HIDDEN</span>}
+                </div>
+                <div className="s flex flex-wrap items-center gap-x-1.5">
+                  <span className="font-semibold text-ink-soft"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /></span>
+                  {o.discountPct > 0 && <span>· −{o.discountPct}%</span>}
+                  <span>· {o.category}</span>
+                  {o.area ? <span>· {o.area}</span> : null}
+                  {o.taxFree ? <span className="badge badge-tax">TAX-FREE</span> : null}
+                </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <form action={setOfferActive.bind(null, o.id, !o.active)}>
-                  <button type="submit" className="rounded-lg border border-line px-3 py-1.5 text-sm font-semibold">
+                  <button type="submit" className="btn btn-ghost px-4 py-2 text-sm">
                     {o.active ? "Hide" : "Show"}
                   </button>
                 </form>
                 <form action={deleteOffer.bind(null, o.id)}>
-                  <button type="submit" className="rounded-lg px-3 py-1.5 text-sm font-semibold text-accent">
+                  <button type="submit" className="px-2 py-2 text-sm font-semibold text-coral">
                     Delete
                   </button>
                 </form>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </main>
   );

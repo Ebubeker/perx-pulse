@@ -1,8 +1,11 @@
 import { requireMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
+import { Mascot } from "@/components/Mascot";
 import { CreateTeamPack, JoinLeaveButton } from "./TeamForms";
 
 export const dynamic = "force-dynamic";
+
+const PACK_TOP = ["lime", "coral", "ink"] as const;
 
 export default async function TeamPage() {
   const m = await requireMembership();
@@ -17,42 +20,62 @@ export default async function TeamPage() {
   });
 
   return (
-    <main className="mx-auto max-w-md px-6 py-10">
-      <p className="text-sm font-semibold tracking-wide text-primary">TEAM PACKS</p>
-      <h1 className="text-2xl font-bold">Do perks together</h1>
-      <p className="mt-1 text-sm text-muted">Open a group activity and rally your colleagues.</p>
+    <main className="mx-auto max-w-md px-5 py-5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="greet">
+          <div className="day">👥 Team Packs</div>
+          <h1>Do perks together</h1>
+        </div>
+        <Mascot mood="cool" size={60} className="float" />
+      </div>
+      <p className="mt-1 px-0.5 text-sm text-muted">Pool budgets with coworkers for something bigger.</p>
 
-      <div className="mt-5">
+      <div className="mt-4">
         <CreateTeamPack />
       </div>
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-5 space-y-4">
         {packs.length === 0 && (
-          <p className="rounded-xl border border-line bg-paper px-4 py-6 text-center text-sm text-muted">No team packs yet. Start the first one!</p>
+          <p className="rounded-[18px] border border-line bg-paper px-4 py-6 text-center text-sm text-muted">No team packs yet. Start the first one!</p>
         )}
-        {packs.map((pk) => {
+        {packs.map((pk, i) => {
           const joined = pk.members.some((mem) => mem.employeeProfileId === m.id);
           const count = pk.members.length;
           const full = count >= pk.targetSize;
           const pct = Math.min(100, Math.round((count / pk.targetSize) * 100));
+          const top = PACK_TOP[i % PACK_TOP.length];
           return (
-            <div key={pk.id} className="rounded-2xl border border-line bg-paper p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h2 className="text-lg font-bold">{pk.title}</h2>
-                  <p className="text-xs text-muted">by {pk.creator.displayName}</p>
+            <div key={pk.id} className="pack">
+              <div className={`pack-top ${top}`}>
+                <div className="kk">Team pack · by {pk.creator.displayName}</div>
+                <h2>{pk.title}</h2>
+              </div>
+              <div className="pack-body">
+                {pk.description && (
+                  <div className="why"><span className="spark">✦</span><span>{pk.description}</span></div>
+                )}
+                {pk.members.length > 0 && (
+                  <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
+                    {pk.members.slice(0, 6).map((mem) => (
+                      <span key={mem.employeeProfileId} className="avatar !h-8 !w-8 text-xs">
+                        {mem.employee.displayName.trim().charAt(0).toUpperCase()}
+                      </span>
+                    ))}
+                    {count > 6 && <span className="text-xs text-muted">+{count - 6} more</span>}
+                  </div>
+                )}
+                <div className="metric !mb-0">
+                  <div className="top">
+                    <span className="k">{count} / {pk.targetSize} joined</span>
+                    {full && <span className="text-coral">Locked in 🎉</span>}
+                  </div>
+                  <div className={`bar ${full ? "coral" : ""}`}><i style={{ width: `${pct}%` }} /></div>
                 </div>
-                <JoinLeaveButton teamPackId={pk.id} joined={joined} full={full} />
+                <div className="pack-foot">
+                  <span className="truncate text-xs text-muted">{pk.members.map((mem) => mem.employee.displayName).join(", ") || "No one yet — be first"}</span>
+                  <JoinLeaveButton teamPackId={pk.id} joined={joined} full={full} />
+                </div>
               </div>
-              {pk.description && <p className="mt-2 text-sm text-ink-soft">{pk.description}</p>}
-              <div className="mt-3 flex items-baseline justify-between text-xs">
-                <span className="font-semibold">{count} / {pk.targetSize} joined</span>
-                {full && <span className="font-bold text-primary">Locked in 🎉</span>}
-              </div>
-              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-cream">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-              </div>
-              <p className="mt-2 truncate text-xs text-muted">{pk.members.map((mem) => mem.employee.displayName).join(", ")}</p>
             </div>
           );
         })}

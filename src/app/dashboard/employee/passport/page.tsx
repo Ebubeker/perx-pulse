@@ -1,9 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
+import { Mascot } from "@/components/Mascot";
 import { passportFor, ALL_CATEGORIES } from "@/lib/passport";
 
 export const dynamic = "force-dynamic";
+
+const DISC = [
+  { bg: "var(--coral)", color: "#fff" },
+  { bg: "var(--lime)", color: "var(--ink)" },
+  { bg: "var(--ink)", color: "#fff" },
+] as const;
 
 export default async function PassportPage() {
   const m = await getMembership();
@@ -14,42 +21,48 @@ export default async function PassportPage() {
   const pct = Math.round((have / ALL_CATEGORIES.length) * 100);
 
   return (
-    <main className="mx-auto max-w-md px-6 py-10">
-      <p className="mt-1 text-sm font-semibold tracking-wide text-violet">PERX PASSPORT</p>
-      <h1 className="text-2xl font-bold">Your benefit journey</h1>
-      <p className="mt-1 text-sm text-muted">Collect a stamp for every kind of perk you try.</p>
-
-      <div className="mt-5 rounded-2xl border border-line bg-paper p-5">
-        <div className="flex items-baseline justify-between">
-          <span className="text-sm font-semibold">{have} / {ALL_CATEGORIES.length} explored</span>
-          <span className="text-sm font-bold text-violet">{pct}%</span>
+    <main className="mx-auto max-w-md px-5 py-5">
+      {/* heading + mascot */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="greet">
+          <div className="day">Your year so far</div>
+          <h1>Passport</h1>
         </div>
-        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-cream">
-          <div className="h-full rounded-full bg-violet" style={{ width: `${pct}%` }} />
+        <Mascot mood="cool" size={58} />
+      </div>
+
+      {/* recap hero */}
+      <div className="recap relative mt-3 overflow-hidden rounded-[var(--r-xl)] bg-coral p-[22px] text-white">
+        <h1 className="max-w-[70%] font-display text-[26px] font-bold tracking-[-0.02em]">{have === ALL_CATEGORIES.length ? "Full passport!" : "Your benefit journey"}</h1>
+        <p className="mt-2 text-sm text-white/90">Collect a stamp for every kind of perk you try.</p>
+        <div className="mt-4 flex items-baseline justify-between text-sm font-semibold">
+          <span>{have} / {ALL_CATEGORIES.length} explored</span>
+          <span>{pct}%</span>
+        </div>
+        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/25">
+          <div className="h-full rounded-full bg-white" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3">
-        {ALL_CATEGORIES.map((c) => {
+      <div className="sec"><h3>Stamps</h3><span className="link">{have} / {ALL_CATEGORIES.length} collected</span></div>
+      <div className="stamp-grid">
+        {ALL_CATEGORIES.map((c, i) => {
           const got = collected.has(c.key);
+          const disc = DISC[i % DISC.length]!;
           return (
-            <Link
-              key={c.key}
-              href={`/dashboard/employee?cat=${c.key}#browse`}
-              className={`flex flex-col items-center rounded-2xl border p-5 text-center transition hover:shadow-soft ${got ? "border-violet/40 bg-violet-soft" : "border-dashed border-line bg-paper"}`}
-            >
-              <span className={`text-3xl ${got ? "" : "opacity-25 grayscale"}`}>{c.emoji}</span>
-              <span className={`mt-2 text-sm font-semibold ${got ? "text-violet" : "text-muted"}`}>{c.label}</span>
-              <span className="mt-0.5 text-xs text-muted">{got ? "Stamped ✓" : "Explore →"}</span>
+            <Link key={c.key} href={`/dashboard/employee?cat=${c.key}#browse`} className={`stamp ${got ? "got" : "lock"}`}>
+              <div className="disc" style={got ? { background: disc.bg, color: disc.color } : undefined}>{got ? c.emoji : "🔒"}</div>
+              <div className="nm">{c.label}</div>
             </Link>
           );
         })}
       </div>
 
       {have === ALL_CATEGORIES.length && (
-        <p className="mt-5 rounded-xl border border-violet/30 bg-violet-soft px-4 py-3 text-center text-sm font-semibold text-violet">
-          🎉 Full passport! You&apos;re a Perx explorer.
-        </p>
+        <div className="card mt-4 flex items-center gap-3 border-[#E3EBBE] bg-lime-soft">
+          <Mascot mood="celebrate" size={44} />
+          <div className="text-sm font-semibold">🎉 Full passport! You&apos;re a Perx explorer.</div>
+        </div>
       )}
     </main>
   );

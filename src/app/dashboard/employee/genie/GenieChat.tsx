@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { genieAsk, type GenieResult } from "@/lib/genie-actions";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
+import { Mascot } from "@/components/Mascot";
 
 type Msg = { role: "user" | "genie"; text: string; offers?: GenieResult["offers"] };
 
@@ -33,48 +34,81 @@ export function GenieChat() {
   }
 
   return (
-    <div className="mt-6">
+    <div className="mt-5">
       <div className="space-y-3">
-        {messages.map((msg, i) => (
-          <div key={i} className={msg.role === "user" ? "flex justify-end" : "flex justify-start"}>
-            <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${msg.role === "user" ? "bg-primary text-white" : "border border-line bg-paper"}`}>
-              <p>{msg.text}</p>
+        {messages.map((msg, i) =>
+          msg.role === "user" ? (
+            <div key={i} className="flex justify-end">
+              <div className="max-w-[80%] rounded-[18px] rounded-br-md bg-ink px-4 py-3 text-sm text-[var(--txt-on-dark)]">
+                {msg.text}
+              </div>
+            </div>
+          ) : (
+            <div key={i} className="space-y-2">
+              {msg.text && (
+                <div className="flex justify-start">
+                  <div className="max-w-[85%] rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm">
+                    {msg.text}
+                  </div>
+                </div>
+              )}
               {msg.offers && msg.offers.length > 0 && (
-                <ul className="mt-2 space-y-1.5">
-                  {msg.offers.map((o) => (
-                    <li key={o.id} className="rounded-lg bg-cream px-3 py-2 text-xs">
-                      <span className="font-semibold">{o.title}</span> · {o.providerName}
-                      <span className="float-right font-bold text-ink-soft"><Coins amount={toCoins(o.effLek)} /></span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="pack fade-up">
+                  <div className="pack-top coral">
+                    <div className="kk">Genie Pick · {msg.offers.length} providers</div>
+                    <h2>Your pack</h2>
+                  </div>
+                  <div className="pack-body">
+                    <ul className="space-y-1.5">
+                      {msg.offers.map((o) => (
+                        <li key={o.id} className="flex items-center justify-between gap-3 text-sm">
+                          <span className="min-w-0 truncate">
+                            <span className="font-medium">{o.title}</span>{" "}
+                            <span className="text-muted">· {o.providerName}</span>
+                          </span>
+                          <span className="shrink-0 font-semibold text-ink-soft"><Coins amount={toCoins(o.effLek)} /></span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               )}
             </div>
+          )
+        )}
+        {pending && (
+          <div className="flex items-center justify-start gap-2">
+            <Mascot mood="thinking" size={34} />
+            <div className="rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm text-muted">Genie is thinking…</div>
           </div>
-        ))}
-        {pending && <div className="flex justify-start"><div className="rounded-2xl border border-line bg-paper px-4 py-2.5 text-sm text-muted">Genie is thinking…</div></div>}
+        )}
       </div>
 
       {messages.length <= 1 && (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="chip-row mt-4">
           {SUGGESTIONS.map((s) => (
-            <button key={s} onClick={() => send(s)} className="rounded-full border border-line bg-paper px-3 py-1.5 text-xs font-medium hover:border-primary">
+            <button key={s} onClick={() => send(s)} className="chip text-[13px]">
               {s}
             </button>
           ))}
         </div>
       )}
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex items-center gap-2 rounded-full border-[1.5px] border-line bg-paper py-1.5 pl-4 pr-1.5 shadow-soft">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") send(input); }}
           placeholder="Ask Perx Genie…"
-          className="min-w-0 flex-1 rounded-xl border border-line bg-paper px-4 py-3 text-sm"
+          className="min-w-0 flex-1 border-none bg-transparent text-[15px] focus:outline-none"
         />
-        <button onClick={() => send(input)} disabled={pending || !input.trim()} className="rounded-xl bg-primary px-5 py-3 font-semibold text-white disabled:opacity-50">
-          Ask
+        <button
+          onClick={() => send(input)}
+          disabled={pending || !input.trim()}
+          aria-label="Ask Perx Genie"
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-coral text-white disabled:opacity-50"
+        >
+          ↑
         </button>
       </div>
     </div>

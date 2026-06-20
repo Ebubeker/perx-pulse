@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireCompanyAdmin } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
@@ -36,10 +37,17 @@ export default async function SettlementPage({ params }: { params: Promise<{ id:
   const net = payouts.reduce((s, p) => s + p.net, 0);
 
   return (
-    <main className="mx-auto max-w-md px-6 py-10">
-      <p className="mt-1 text-sm font-semibold tracking-wide text-primary">SETTLED</p>
-      <h1 className="text-2xl font-bold">{pkg.label}</h1>
-      <p className="mt-1 text-sm text-muted">Paid out for {pkg.employee.displayName}</p>
+    <main className="mx-auto max-w-md px-4 py-5">
+      <Link href="/dashboard/company/approvals" className="sec link mb-0 mt-0 inline-block text-sm text-muted">← Back to inbox</Link>
+      <div className="mt-2 flex items-center gap-3">
+        <span className="avatar size-12 text-lg">{pkg.employee.displayName.charAt(0).toUpperCase()}</span>
+        <div className="min-w-0">
+          <div className="kicker text-lime-deep">Settled</div>
+          <h1 className="truncate font-display text-2xl font-bold tracking-tight">{pkg.label}</h1>
+          <p className="text-sm text-muted">Paid out for {pkg.employee.displayName}</p>
+        </div>
+        <span className="badge badge-tax ml-auto shrink-0">Tax-free</span>
+      </div>
 
       <SettlementReveal employer={gross} payouts={payouts} fee={fee} net={net} />
 

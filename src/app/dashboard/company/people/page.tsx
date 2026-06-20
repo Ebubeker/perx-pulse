@@ -21,43 +21,45 @@ export default async function PeoplePage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-10">
-      <h1 className="mt-2 text-2xl font-bold">People</h1>
-      <p className="text-muted">Invite teammates to {admin.company.brandName || admin.company.name}.</p>
+    <main className="mx-auto max-w-2xl px-4 py-5">
+      <div className="kicker text-coral">{members.length} active · {invites.length} invited</div>
+      <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">Team &amp; budgets</h1>
+      <p className="mt-1 text-muted">Invite teammates to {admin.company.brandName || admin.company.name}.</p>
 
-      <div className="mt-6 rounded-xl border border-line bg-paper p-5">
-        <h2 className="mb-3 font-semibold">Invite an employee</h2>
+      <div className="card mt-4">
+        <h3 className="mb-3 font-display text-[18px] font-bold">Invite an employee</h3>
         <InviteForm departments={departments.map((d) => ({ id: d.id, name: d.name }))} />
       </div>
 
-      <h2 className="mb-2 mt-8 font-semibold">Team ({members.length})</h2>
-      <ul className="divide-y divide-line rounded-xl border border-line bg-paper">
+      <div className="sec"><h3>Team ({members.length})</h3></div>
+      <div>
         {members.map((m) => (
-          <li key={m.id}>
-            <Link href={`/dashboard/company/people/${m.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-cream">
-              <span>
-                <span className="font-medium">{m.displayName}</span>{" "}
-                <span className="text-sm text-muted">
-                  · {m.role}
-                  {m.department ? ` · ${m.department.name}` : ""}
-                </span>
-              </span>
-              <span className="text-muted">→</span>
-            </Link>
-          </li>
+          <Link key={m.id} href={`/dashboard/company/people/${m.id}`} className="row">
+            <span className="avatar">{(m.displayName || "?").charAt(0).toUpperCase()}</span>
+            <div className="grow">
+              <div className="t">{m.displayName}</div>
+              <div className="s">{m.department ? m.department.name : "No department"}</div>
+            </div>
+            <span className="pill pill-approved">{m.role}</span>
+          </Link>
         ))}
-      </ul>
+      </div>
 
       {invites.length > 0 && (
         <>
-          <h2 className="mb-2 mt-8 font-semibold">Pending invites ({invites.length})</h2>
-          <ul className="divide-y divide-line rounded-xl border border-line bg-paper">
+          <div className="sec"><h3>Pending invites ({invites.length})</h3></div>
+          <div>
             {invites.map((i) => (
-              <li key={i.id} className="px-4 py-3 text-sm">
-                <span className="font-medium">{i.email}</span> <span className="text-muted">· {i.role} · pending</span>
-              </li>
+              <div key={i.id} className="row">
+                <span className="avatar" style={{ background: "#E5E0D2", color: "var(--txt-mut)" }}>{(i.email || "?").charAt(0).toUpperCase()}</span>
+                <div className="grow">
+                  <div className="t">{i.email}</div>
+                  <div className="s">{i.role}</div>
+                </div>
+                <span className="pill pill-pending"><span className="dot" />Invited</span>
+              </div>
             ))}
-          </ul>
+          </div>
         </>
       )}
     </main>

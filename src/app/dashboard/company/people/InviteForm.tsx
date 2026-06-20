@@ -4,8 +4,6 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { inviteEmployee } from "@/lib/invite-actions";
 
-const inputCls = "w-full rounded-lg border border-line bg-paper px-3 py-2 text-[15px] outline-none focus:border-primary";
-
 export function InviteForm({ departments }: { departments: { id: string; name: string }[] }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -30,28 +28,37 @@ export function InviteForm({ departments }: { departments: { id: string; name: s
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3">
-      <input className={inputCls} type="email" placeholder="teammate@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      <div className="flex gap-3">
-        <select className={inputCls} value={departmentId} onChange={(e) => setDept(e.target.value)}>
-          <option value="">No department</option>
-          {departments.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
-        <select className={inputCls} value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="EMPLOYEE">Employee</option>
-          <option value="HR">HR</option>
-          <option value="FINANCE">Finance</option>
-        </select>
+    <form onSubmit={submit}>
+      <div className="field">
+        <label htmlFor="invite-email">Email</label>
+        <input id="invite-email" type="email" placeholder="teammate@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
       </div>
-      <button type="submit" disabled={pending} className="rounded-lg bg-primary px-5 py-2.5 font-semibold text-white disabled:opacity-50">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="field">
+          <label htmlFor="invite-dept">Department</label>
+          <select id="invite-dept" value={departmentId} onChange={(e) => setDept(e.target.value)}>
+            <option value="">No department</option>
+            {departments.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
+          <label htmlFor="invite-role">Role</label>
+          <select id="invite-role" value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="EMPLOYEE">Employee</option>
+            <option value="HR">HR</option>
+            <option value="FINANCE">Finance</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" disabled={pending} className="btn btn-primary disabled:opacity-50">
         {pending ? "Sending…" : "Send invite"}
       </button>
-      {msg?.ok && <p className="text-sm font-medium text-primary">Invite sent.</p>}
-      {msg?.error && <p className="text-sm font-medium text-accent">{msg.error}</p>}
+      {msg?.ok && <p className="mt-2 text-sm font-medium text-coral">Invite sent.</p>}
+      {msg?.error && <p className="mt-2 text-sm font-medium text-coral">{msg.error}</p>}
     </form>
   );
 }

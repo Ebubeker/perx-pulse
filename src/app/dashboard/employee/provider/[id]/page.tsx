@@ -23,8 +23,8 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
   });
   if (!provider) {
     return (
-      <main className="mx-auto max-w-md px-6 py-16 text-center text-muted">
-        Provider not found. <Link href="/dashboard/employee" className="text-primary underline">Back to perks</Link>
+      <main className="mx-auto max-w-md px-5 py-16 text-center text-muted">
+        Provider not found. <Link href="/dashboard/employee" className="font-semibold text-coral underline">Back to perks</Link>
       </main>
     );
   }
@@ -35,24 +35,33 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
   const priceFrom = provider.offers.length ? Math.min(...provider.offers.map((o) => effectiveLek(o.priceLek, o.discountPct))) : null;
 
   return (
-    <main className="mx-auto max-w-md px-6 py-8">
-      <p className="text-sm font-semibold tracking-wide text-accent">{CAT_LABEL[provider.category] ?? provider.category}</p>
-      <h1 className="mt-1 text-2xl font-bold">{provider.businessName}</h1>
-      {provider.description && <p className="mt-1.5 text-[15px] leading-relaxed text-ink-soft">{provider.description}</p>}
-
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold">{provider.offers.length}</p>
-          <p className="text-xs text-muted">offers available</p>
+    <main className="mx-auto max-w-md px-5 py-5">
+      {/* provider header card */}
+      <div className="card">
+        <div className="flex items-center gap-2">
+          <span className="chip on">{CAT_LABEL[provider.category] ?? provider.category}</span>
+          <span className="pill pill-ready"><span className="dot" />Active</span>
         </div>
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold text-primary">{priceFrom !== null ? <Coins amount={toCoins(priceFrom)} /> : "—"}</p>
-          <p className="text-xs text-muted">from</p>
+        <h1 className="mt-3 font-display text-[28px] font-bold leading-tight">{provider.businessName}</h1>
+        {provider.description && <p className="mt-1.5 text-[15px] leading-relaxed text-ink-soft">{provider.description}</p>}
+      </div>
+
+      {/* stats */}
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="stat">
+          <div className="k">Offers</div>
+          <div className="v">{provider.offers.length}</div>
+          <div className="d">available now</div>
+        </div>
+        <div className="stat">
+          <div className="k">From</div>
+          <div className="v text-coral">{priceFrom !== null ? <Coins amount={toCoins(priceFrom)} /> : "—"}</div>
+          <div className="d">lowest price</div>
         </div>
       </div>
 
       {(provider.addressLine || provider.city || provider.areasServed.length > 0 || provider.contactPhone || hours.length > 0) && (
-        <div className="mt-4 rounded-2xl border border-line bg-paper p-5">
+        <div className="card mt-3">
           <h2 className="font-display text-base font-bold">Good to know</h2>
           <dl className="mt-3 space-y-1.5 text-sm">
             {(provider.addressLine || provider.city) && (
@@ -67,8 +76,8 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
           </dl>
           {hours.length > 0 && (
             <div className="mt-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">Hours</p>
-              <ul className="mt-1 space-y-0.5 text-sm">
+              <p className="kicker">Hours</p>
+              <ul className="mt-1.5 space-y-0.5 text-sm">
                 {hours.map(([day, val]) => (
                   <li key={day} className="flex justify-between"><span className="capitalize text-muted">{day}</span><span>{val}</span></li>
                 ))}
@@ -78,19 +87,22 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
         </div>
       )}
 
-      <h2 className="mb-2 mt-7 font-display text-lg font-bold">Offers from {provider.businessName}</h2>
+      <div className="sec"><h3>Offers from {provider.businessName}</h3></div>
       {provider.offers.length === 0 ? (
-        <p className="rounded-xl border border-line bg-paper px-4 py-6 text-center text-sm text-muted">No live offers right now.</p>
+        <div className="card text-center text-sm text-muted">No live offers right now.</div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {provider.offers.map((o) => (
             <li key={o.id}>
-              <Link href={`/dashboard/employee/offer/${o.id}`} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-paper px-4 py-3">
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-medium">{o.title}</span>
-                  <span className="block truncate text-xs text-muted">{CAT_LABEL[o.category] ?? o.category}{o.area ? ` · ${o.area}` : ""}{o.taxFree ? " · tax-free" : ""}{o.discountPct > 0 ? ` · −${o.discountPct}%` : ""}</span>
-                </span>
-                <span className="shrink-0 text-sm font-semibold text-ink-soft"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /></span>
+              <Link href={`/dashboard/employee/offer/${o.id}`} className="row mb-0">
+                <span className="ico coral">✦</span>
+                <div className="grow">
+                  <div className="t truncate">{o.title}</div>
+                  <div className="s truncate">
+                    {CAT_LABEL[o.category] ?? o.category}{o.area ? ` · ${o.area}` : ""}{o.taxFree ? " · tax-free" : ""}{o.discountPct > 0 ? ` · −${o.discountPct}%` : ""}
+                  </div>
+                </div>
+                <span className="amt"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /></span>
               </Link>
             </li>
           ))}

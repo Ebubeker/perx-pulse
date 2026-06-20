@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createDrop } from "@/lib/drop-actions";
 
 const CATEGORIES = ["wellness", "fitness", "food", "health", "travel", "learning", "culture", "telecom"];
+const inputCls = "w-full rounded-[18px] border-[1.5px] border-line bg-paper px-4 py-3 text-[15px] outline-none focus:border-coral";
 
 export function DropForm({ defaultCategory }: { defaultCategory: string }) {
   const [pending, startTransition] = useTransition();
@@ -31,29 +32,29 @@ export function DropForm({ defaultCategory }: { defaultCategory: string }) {
 
   return (
     <form id="dropform" action={submit} className="space-y-3">
-      <input name="title" placeholder="Flash: free smoothie with any class" required className="w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm" />
-      <input name="description" placeholder="Short description (optional)" className="w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm" />
+      <input name="title" placeholder="Flash: free smoothie with any class" required className={inputCls} />
+      <input name="description" placeholder="Short description (optional)" className={inputCls} />
       <div className="flex gap-2">
-        <select name="category" defaultValue={defaultCategory} className="min-w-0 flex-1 rounded-lg border border-line bg-cream px-3 py-2.5 text-sm">
+        <select name="category" defaultValue={defaultCategory} className={`min-w-0 flex-1 ${inputCls}`}>
           {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
-        <input name="area" placeholder="Area" className="w-28 rounded-lg border border-line bg-cream px-3 py-2.5 text-sm" />
+        <input name="area" placeholder="Area" className={`w-28 ${inputCls}`} />
       </div>
       <div className="flex gap-2">
-        <label className="flex-1 text-xs text-muted">Cost (coins)
-          <input name="costCoins" type="number" min={1} defaultValue={50} required className="mt-1 w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm" />
+        <label className="field mb-0 flex-1"><span className="kicker mb-1.5 block">Cost (coins)</span>
+          <input name="costCoins" type="number" min={1} defaultValue={50} required />
         </label>
-        <label className="flex-1 text-xs text-muted">Slots
-          <input name="totalSlots" type="number" min={1} defaultValue={10} required className="mt-1 w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm" />
+        <label className="field mb-0 flex-1"><span className="kicker mb-1.5 block">Slots</span>
+          <input name="totalSlots" type="number" min={1} defaultValue={10} required />
         </label>
-        <label className="flex-1 text-xs text-muted">Ends in (h)
-          <input name="hours" type="number" min={1} defaultValue={48} required className="mt-1 w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm" />
+        <label className="field mb-0 flex-1"><span className="kicker mb-1.5 block">Ends in (h)</span>
+          <input name="hours" type="number" min={1} defaultValue={48} required />
         </label>
       </div>
-      <button type="submit" disabled={pending} className="w-full rounded-xl bg-accent py-3 font-semibold text-white disabled:opacity-60">
+      <button type="submit" disabled={pending} className="btn btn-primary btn-lg disabled:opacity-60">
         {pending ? "Posting…" : "Post drop"}
       </button>
-      {error && <p className="text-sm text-accent">{error}</p>}
+      {error && <p className="text-sm font-medium text-coral">{error}</p>}
     </form>
   );
 }

@@ -10,7 +10,7 @@ export function RedeemButton({ orderId }: { orderId: string }) {
       type="button"
       onClick={() => startTransition(async () => { await markRedeemed(orderId); })}
       disabled={pending}
-      className="rounded-lg border border-primary px-3 py-1.5 text-sm font-semibold text-primary disabled:opacity-50"
+      className="btn btn-primary px-4 py-2 text-sm disabled:opacity-50"
     >
       {pending ? "…" : "Redeem"}
     </button>

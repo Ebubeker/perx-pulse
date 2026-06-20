@@ -20,11 +20,11 @@ export function ClaimButton({ dropId, disabled }: { dropId: string; disabled?: b
           if (res.error) setMsg({ text: res.error });
           else { setMsg({ ok: true, text: `Claimed! Code ${res.code}` }); router.refresh(); }
         })}
-        className="w-full rounded-xl bg-gold-ink py-2.5 font-semibold text-white disabled:opacity-50"
+        className="btn btn-primary btn-lg disabled:opacity-50"
       >
         {pending ? "Claiming…" : "Claim with coins"}
       </button>
-      {msg && <p className={`mt-1.5 text-sm ${msg.ok ? "text-primary" : "text-accent"}`}>{msg.text}</p>}
+      {msg && <p className={`mt-1.5 text-sm font-semibold ${msg.ok ? "text-coral" : "text-coral-deep"}`}>{msg.text}</p>}
     </div>
   );
 }

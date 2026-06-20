@@ -28,53 +28,62 @@ export default async function InsightsPage() {
   const budgetPct = ins.budgetTotal ? Math.round((ins.budgetUsed / ins.budgetTotal) * 100) : 0;
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-10">
-      <p className="mt-1 text-sm font-semibold tracking-wide text-violet">INSIGHTS</p>
-      <h1 className="text-2xl font-bold">Wellbeing radar</h1>
+    <main className="mx-auto max-w-2xl px-4 py-5">
+      <div className="kicker text-coral">Anonymous · aggregated · no spying</div>
+      <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">Wellbeing radar</h1>
 
-      {/* Perx Score */}
-      <div className="mt-5 flex items-center gap-5 rounded-2xl border border-line bg-paper p-6">
-        <div className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-full border-4 border-primary">
-          <span className="text-3xl font-bold text-primary">{ins.perxScore}</span>
-          <span className="text-[10px] uppercase tracking-wide text-muted">/ 100</span>
-        </div>
-        <div>
-          <p className="text-lg font-bold">Perx Score · {scoreVerdict(ins.perxScore)}</p>
-          <p className="mt-1 text-sm text-muted">
-            A live index of how your team engages with benefits — participation, redemption, budget use, and recognition.
-          </p>
+      {/* Perx Score — dark scorecard with gauge ring */}
+      <div className="card-dark mt-5">
+        <div className="blob" />
+        <div className="relative z-[2] flex items-center gap-5">
+          <div
+            className="ring"
+            style={{ "--p": Math.min(100, ins.perxScore), "--size": "120px", "--fill": "var(--lime)" } as React.CSSProperties}
+          >
+            <div className="ring-c"><b>{ins.perxScore}</b><span>/ 100</span></div>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="kicker text-lime-deep">Perx Score</div>
+            <div className="mt-1 font-display text-xl font-bold text-[var(--txt-on-dark)]">{scoreVerdict(ins.perxScore)}</div>
+            <p className="mt-1 text-sm text-[var(--txt-on-dark-mut)]">
+              A live index of how your team engages with benefits — participation, redemption, budget use, and recognition.
+            </p>
+          </div>
         </div>
       </div>
 
+      {/* KPI stat tiles */}
       <div className="mt-3 grid grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold">{ins.participationPct}%</p>
-          <p className="text-xs text-muted">took a Pulse</p>
+        <div className="stat">
+          <div className="v">{ins.participationPct}%</div>
+          <div className="d">took a Pulse</div>
         </div>
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold">{ins.engagementPct}%</p>
-          <p className="text-xs text-muted">redeemed a perk</p>
+        <div className="stat">
+          <div className="v">{ins.engagementPct}%</div>
+          <div className="d">redeemed a perk</div>
         </div>
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold text-gold-ink">{ins.coinsMovedThisMonth}</p>
-          <p className="text-xs text-muted">coins moved</p>
+        <div className="stat">
+          <div className="v text-lime-deep">{ins.coinsMovedThisMonth}</div>
+          <div className="d">coins moved</div>
         </div>
       </div>
 
       {/* Mood radar */}
-      <h2 className="mb-2 mt-8 text-sm font-semibold text-muted">How the team&apos;s week felt</h2>
-      <div className="rounded-2xl border border-line bg-paper p-5">
+      <div className="sec"><h3>How the team&apos;s week felt</h3></div>
+      <div className="card">
         {ins.moods.every((x) => x.count === 0) ? (
           <p className="py-2 text-center text-sm text-muted">No pulses yet.</p>
         ) : (
-          <div className="space-y-2">
+          <div>
             {ins.moods.map((x) => (
-              <div key={x.mood} className="flex items-center gap-3">
-                <span className="w-20 text-sm">{x.mood}</span>
-                <div className="h-4 flex-1 overflow-hidden rounded-full bg-cream">
-                  <div className="h-full rounded-full" style={{ width: `${(x.count / maxMood) * 100}%`, background: MOOD_COLOR[x.mood] }} />
+              <div key={x.mood} className="metric mb-3 last:mb-0">
+                <div className="top">
+                  <span className="k">{x.mood}</span>
+                  <span>{x.count}</span>
                 </div>
-                <span className="w-6 text-right text-sm font-semibold">{x.count}</span>
+                <div className="bar">
+                  <i style={{ width: `${(x.count / maxMood) * 100}%`, background: MOOD_COLOR[x.mood] }} />
+                </div>
               </div>
             ))}
           </div>
@@ -82,7 +91,7 @@ export default async function InsightsPage() {
       </div>
 
       {/* Category demand heatmap */}
-      <h2 className="mb-2 mt-8 text-sm font-semibold text-muted">Where the demand is</h2>
+      <div className="sec"><h3>Where the demand is</h3></div>
       <div className="grid grid-cols-4 gap-2">
         {ins.categoryDemand.map((c) => {
           const intensity = c.count / ins.maxCategoryCount; // 0..1
@@ -90,7 +99,7 @@ export default async function InsightsPage() {
           return (
             <div
               key={c.category}
-              className="flex flex-col items-center rounded-xl border border-line p-3 text-center"
+              className="tile flex flex-col items-center p-3 text-center"
               style={{ background: intensity > 0 ? `rgba(20, 98, 74, ${0.12 + intensity * 0.6})` : undefined }}
             >
               <span className="text-xl">{meta?.emoji}</span>
@@ -102,14 +111,18 @@ export default async function InsightsPage() {
       </div>
 
       {/* Budget utilization */}
-      <h2 className="mb-2 mt-8 text-sm font-semibold text-muted">Budget utilization</h2>
-      <div className="rounded-2xl border border-line bg-paper p-5">
-        <div className="flex items-baseline justify-between text-sm">
-          <span className="text-muted">{toCoins(ins.budgetUsed).toLocaleString("en-US")} 🪙 used of {toCoins(ins.budgetTotal).toLocaleString("en-US")} 🪙</span>
-          <span className="font-bold">{budgetPct}%</span>
-        </div>
-        <div className="mt-2 h-3 overflow-hidden rounded-full bg-cream">
-          <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, budgetPct)}%` }} />
+      <div className="sec"><h3>Budget utilization</h3></div>
+      <div className="card">
+        <div className="metric mb-0">
+          <div className="top">
+            <span className="k">
+              {toCoins(ins.budgetUsed).toLocaleString("en-US")} used of {toCoins(ins.budgetTotal).toLocaleString("en-US")} coins
+            </span>
+            <span>{budgetPct}%</span>
+          </div>
+          <div className="bar coral">
+            <i style={{ width: `${Math.min(100, budgetPct)}%` }} />
+          </div>
         </div>
       </div>
     </main>

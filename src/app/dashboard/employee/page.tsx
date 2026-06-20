@@ -59,7 +59,7 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-[13px] text-[var(--txt-on-dark-mut)]">Your PerxCoins · {m.company.brandName || m.company.name}</div>
-            <div className="mt-1 font-display text-[15px] font-semibold text-[var(--txt-on-dark)]">{allowance} 🪙/mo from your employer</div>
+            <div className="mt-1 inline-flex items-center gap-1 font-display text-[15px] font-semibold text-[var(--txt-on-dark)]">{allowance}<CoinIcon className="size-[0.9em]" />/mo from your employer</div>
             <div className="mt-3 flex flex-wrap gap-2">
               <Link href="/dashboard/employee/wallet" className="coin"><CoinIcon className="size-4" />My perks</Link>
               <Link href="/dashboard/recognition" className="rounded-full border border-white/20 px-3.5 py-1.5 text-sm font-semibold text-[var(--txt-on-dark)]">Earn coins</Link>

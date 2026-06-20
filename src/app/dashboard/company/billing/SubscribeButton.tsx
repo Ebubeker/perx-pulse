@@ -16,11 +16,11 @@ export function SubscribeButton() {
           if (res?.error) setError(res.error);
         })}
         disabled={pending}
-        className="w-full rounded-xl bg-primary py-4 text-[15px] font-semibold text-white disabled:opacity-60 sm:w-auto sm:px-8"
+        className="btn btn-primary btn-lg disabled:opacity-60"
       >
         {pending ? "Opening checkout…" : "Subscribe to Perx"}
       </button>
-      {error && <p className="mt-2 text-sm text-accent">{error}</p>}
+      {error && <p className="mt-2 text-sm text-coral">{error}</p>}
     </div>
   );
 }

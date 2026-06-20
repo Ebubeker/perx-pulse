@@ -14,7 +14,7 @@ const CATEGORIES: [string, string][] = [
   ["culture", "Culture"],
   ["telecom", "Telecom"],
 ];
-const inputCls = "w-full rounded-lg border border-line bg-paper px-3 py-2 text-[15px] outline-none focus:border-primary";
+const inputCls = "w-full rounded-[18px] border-[1.5px] border-line bg-paper px-4 py-3 text-[15px] outline-none focus:border-coral";
 
 export function OfferForm({ providerCategory }: { providerCategory: string }) {
   const router = useRouter();
@@ -66,14 +66,14 @@ export function OfferForm({ providerCategory }: { providerCategory: string }) {
         <input className={inputCls} placeholder="Area (e.g. Blloku)" value={area} onChange={(e) => setArea(e.target.value)} />
         <input className={inputCls} type="number" min={0} max={90} placeholder="Discount %" value={discountPct} onChange={(e) => setDiscountPct(e.target.value)} />
       </div>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={taxFree} onChange={(e) => setTaxFree(e.target.checked)} /> Tax-free benefit
+      <label className="flex items-center gap-2 text-sm font-medium">
+        <input type="checkbox" checked={taxFree} onChange={(e) => setTaxFree(e.target.checked)} className="accent-coral" /> Tax-free benefit
       </label>
-      <button type="submit" disabled={pending} className="rounded-lg bg-primary px-5 py-2.5 font-semibold text-white disabled:opacity-50">
+      <button type="submit" disabled={pending} className="btn btn-primary disabled:opacity-50">
         {pending ? "Adding…" : "Add offer"}
       </button>
-      {msg?.ok && <p className="text-sm font-medium text-primary">Offer added.</p>}
-      {msg?.error && <p className="text-sm font-medium text-accent">{msg.error}</p>}
+      {msg?.ok && <p className="text-sm font-medium text-lime-deep">Offer added.</p>}
+      {msg?.error && <p className="text-sm font-medium text-coral">{msg.error}</p>}
     </form>
   );
 }

@@ -1,6 +1,8 @@
 import { requireMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { kudosRemainingFor, companyRecognitionFeed } from "@/lib/coins";
+import { Mascot } from "@/components/Mascot";
+import { Coins } from "@/components/Coins";
 import { RecognitionForms } from "./RecognitionForms";
 
 export const dynamic = "force-dynamic";
@@ -20,42 +22,50 @@ export default async function RecognitionPage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-md px-6 py-10">
-      <p className="text-sm font-semibold tracking-wide text-gold-ink">PERXCOIN · RECOGNITION</p>
-      <h1 className="text-2xl font-bold">Give someone their flowers</h1>
-
-      <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold text-gold-ink">{m.recognitionCoins.toLocaleString("en-US")}</p>
-          <p className="text-xs text-muted">your coins</p>
+    <main className="mx-auto max-w-md px-5 py-5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="greet">
+          <div className="day">PerxCoin · Recognition</div>
+          <h1>Give someone their flowers</h1>
         </div>
-        <div className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-2xl font-bold">{remaining.toLocaleString("en-US")}</p>
-          <p className="text-xs text-muted">to give this month</p>
+        <Mascot mood="love" size={62} className="float" />
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="stat">
+          <div className="k">Your coins</div>
+          <div className="v text-coral"><Coins amount={m.recognitionCoins} /></div>
+        </div>
+        <div className="stat">
+          <div className="k">To give this month</div>
+          <div className="v"><Coins amount={remaining} /></div>
         </div>
       </div>
 
       <RecognitionForms colleagues={colleagues} remaining={remaining} isAdmin={isAdmin} />
 
-      <h2 className="mb-2 mt-8 text-sm font-semibold text-muted">Recognition wall</h2>
+      <div className="sec"><h3>Recognition wall</h3></div>
       {feed.length === 0 ? (
-        <p className="rounded-xl border border-line bg-paper px-4 py-6 text-center text-sm text-muted">
+        <p className="rounded-[18px] border border-line bg-paper px-4 py-6 text-center text-sm text-muted">
           No recognition yet. Be the first to call out great work.
         </p>
       ) : (
-        <ul className="space-y-2">
+        <div>
           {feed.map((t) => (
-            <li key={t.id} className="rounded-xl border border-line bg-paper px-4 py-3">
-              <p className="text-sm">
-                <span className="font-semibold">{t.kind === "GRANT" ? "🏆 Company" : t.from?.displayName ?? "Someone"}</span>
-                <span className="text-muted"> → </span>
-                <span className="font-semibold">{t.to?.displayName ?? "Someone"}</span>
-                <span className="ml-2 rounded-full bg-cream px-2 py-0.5 text-xs font-bold text-gold-ink">+{t.amount}</span>
-              </p>
-              {t.memo && <p className="mt-1 text-sm text-ink-soft">“{t.memo}”</p>}
-            </li>
+            <div key={t.id} className="row mb-2.5 flex-col items-stretch !gap-1.5">
+              <div className="flex items-center gap-2">
+                <span className="ico coral shrink-0">{t.kind === "GRANT" ? "🏆" : "🙌"}</span>
+                <p className="grow text-sm">
+                  <span className="font-semibold">{t.kind === "GRANT" ? "Company" : t.from?.displayName ?? "Someone"}</span>
+                  <span className="text-muted"> → </span>
+                  <span className="font-semibold">{t.to?.displayName ?? "Someone"}</span>
+                </p>
+                <span className="coin sm shrink-0">+{t.amount}</span>
+              </div>
+              {t.memo && <p className="pl-[54px] text-sm text-ink-soft">“{t.memo}”</p>}
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </main>
   );

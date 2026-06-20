@@ -22,23 +22,30 @@ export function CreateTeamPack() {
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="w-full rounded-xl bg-primary py-3 font-semibold text-white">
+      <button onClick={() => setOpen(true)} className="btn btn-primary btn-lg">
         + Start a team pack
       </button>
     );
   }
   return (
-    <form action={submit} className="space-y-3 rounded-2xl border border-line bg-paper p-5">
-      <input name="title" placeholder="Friday 5-a-side football ⚽" required className="w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm" />
-      <input name="description" placeholder="What's the plan? (optional)" className="w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm" />
-      <label className="block text-xs text-muted">Target size
-        <input name="targetSize" type="number" min={2} max={50} defaultValue={6} required className="mt-1 w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm" />
-      </label>
-      <div className="flex gap-2">
-        <button type="submit" disabled={pending} className="flex-1 rounded-xl bg-primary py-2.5 font-semibold text-white disabled:opacity-60">{pending ? "Creating…" : "Create"}</button>
-        <button type="button" onClick={() => setOpen(false)} className="rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-muted">Cancel</button>
+    <form action={submit} className="card space-y-3">
+      <div className="field !mb-0">
+        <label>Title</label>
+        <input name="title" placeholder="Friday 5-a-side football ⚽" required />
       </div>
-      {error && <p className="text-sm text-accent">{error}</p>}
+      <div className="field !mb-0">
+        <label>Plan</label>
+        <input name="description" placeholder="What's the plan? (optional)" />
+      </div>
+      <div className="field !mb-0">
+        <label>Target size</label>
+        <input name="targetSize" type="number" min={2} max={50} defaultValue={6} required />
+      </div>
+      <div className="flex gap-2 pt-1">
+        <button type="submit" disabled={pending} className="btn btn-primary flex-1 disabled:opacity-60">{pending ? "Creating…" : "Create"}</button>
+        <button type="button" onClick={() => setOpen(false)} className="btn btn-ghost">Cancel</button>
+      </div>
+      {error && <p className="text-sm text-coral">{error}</p>}
     </form>
   );
 }
@@ -55,7 +62,7 @@ export function JoinLeaveButton({ teamPackId, joined, full }: { teamPackId: stri
         else await joinTeamPack(teamPackId);
         router.refresh();
       })}
-      className={`rounded-lg px-4 py-1.5 text-sm font-semibold disabled:opacity-50 ${joined ? "border border-line text-muted" : "bg-primary text-white"}`}
+      className={`shrink-0 disabled:opacity-50 ${joined ? "chip" : "btn btn-primary !px-5 !py-2.5 !text-sm"}`}
     >
       {pending ? "…" : joined ? "Leave" : full ? "Full" : "Join"}
     </button>
