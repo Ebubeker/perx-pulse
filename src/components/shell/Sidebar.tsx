@@ -1,0 +1,51 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Mascot } from "@/components/Mascot";
+import { AccountMenu } from "./AccountMenu";
+import { Icon } from "./icons";
+import { NAV_PRIMARY, NAV_SECONDARY, isActive, ROLE_HOME, type Role, type NavItem } from "./nav-config";
+import type { Locale } from "@/lib/i18n";
+
+export function Sidebar({ role, locale, labels, pendingCount }: { role: Role; locale: Locale; labels: Record<string, string>; pendingCount: number }) {
+  const pathname = usePathname() ?? ROLE_HOME[role];
+
+  const Row = ({ item }: { item: NavItem }) => {
+    const active = isActive(pathname, item);
+    const showBadge = item.badge === "approvals" && pendingCount > 0;
+    return (
+      <Link
+        href={item.href}
+        className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm ${active ? "bg-primary-soft font-medium text-primary" : "text-ink-soft hover:bg-cream"}`}
+      >
+        <Icon name={item.icon} size={20} />
+        <span className="flex-1 truncate">{labels[item.labelKey] ?? item.key}</span>
+        {showBadge && <span className="min-w-5 rounded-full bg-accent px-1.5 text-center text-xs font-bold text-white">{pendingCount}</span>}
+      </Link>
+    );
+  };
+
+  return (
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line bg-paper md:flex">
+      <Link href={ROLE_HOME[role]} className="flex items-center gap-2 px-5 py-5">
+        <Mascot size={30} />
+        <span className="font-display text-lg font-bold">Perx</span>
+      </Link>
+
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3">
+        {NAV_PRIMARY[role].map((item) => <Row key={item.key} item={item} />)}
+        {NAV_SECONDARY[role].length > 0 && (
+          <>
+            <div className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wide text-muted">{labels["nav.more"] ?? "More"}</div>
+            {NAV_SECONDARY[role].map((item) => <Row key={item.key} item={item} />)}
+          </>
+        )}
+      </nav>
+
+      <div className="border-t border-line px-4 py-3">
+        <AccountMenu locale={locale} signOutLabel={labels["action.signout"] ?? "Sign out"} />
+      </div>
+    </aside>
+  );
+}

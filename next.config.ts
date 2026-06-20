@@ -1,7 +1,23 @@
 import type { NextConfig } from "next";
 
+// Baseline security headers (applied to every route). A full nonce-based CSP is a
+// follow-up — see STANDARDS.md.
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+];
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Pin the Turbopack workspace root so a stray parent lockfile can't mis-infer it.
+  turbopack: { root: __dirname },
+  // Hide the dev-tools overlay button (it overlapped the mobile bottom nav).
+  devIndicators: false,
+  async headers() {
+    return [{ source: "/(.*)", headers: securityHeaders }];
+  },
 };
 
 export default nextConfig;

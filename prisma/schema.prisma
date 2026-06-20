@@ -1,0 +1,397 @@
+// Perx Pulse — data layer.
+// Identity, org membership & invitations live in Clerk (Organizations = companies).
+// This DB owns the rich domain profiles, keyed by Clerk org/user ids.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CompanyRole {
+  ADMIN
+  HR
+  FINANCE
+  EMPLOYEE
+}
+
+enum OfferCategory {
+  wellness
+  fitness
+  food
+  health
+  travel
+  learning
+  culture
+  telecom
+}
+
+enum SettlementMethod {
+  BANK
+  PERXCOIN
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+}
+
+/// A company tenant — mirrors a Clerk Organization.
+model Company {
+  id                  String   @id @default(cuid())
+  ownerClerkUserId    String   @unique // the admin who created the company (one per owner)
+  clerkOrgId          String?  @unique // set if/when upgraded to a Clerk Organization
+  name                String
+  brandName           String?
+  slug                String   @unique
+  logoUrl             String?
+  industry            String?
+  sizeBucket          String?
+  website             String?
+  nipt                String? // Albanian business id (NIPT/NUIS)
+  vatRegistered       Boolean  @default(false)
+  addressLine         String?
+  city                String?
+  country             String   @default("AL")
+  billingContactName  String?
+  billingContactEmail String?
+  defaultBudgetLek    Int      @default(12000)
+  currency            String   @default("ALL")
+  onboardingComplete  Boolean  @default(false)
+  createdAt           DateTime @default(now())
+
+  // Perx SaaS billing (Lemon Squeezy)
+  billingStatus       String? // "active" once paid, else null
+  billingPlan         String?
+  lemonOrderId        String?
+  lemonSubscriptionId String?
+  lemonCustomerId     String?
+  subscribedAt        DateTime?
+
+  departments Department[]
+  members     EmployeeProfile[]
+  invitations Invitation[]
+  packages    PerkPackage[]
+  orders      Order[]
+  coinTxns    CoinTxn[]
+  teamPacks   TeamPack[]
+}
+
+/// A team/department inside a company.
+model Department {
+  id        String  @id @default(cuid())
+  companyId String
+  name      String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  members   EmployeeProfile[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+}
+
+/// A person's seat inside a company (org member) + personalization for the AI Pulse.
+model EmployeeProfile {
+  id                  String      @id @default(cuid())
+  clerkUserId         String
+  companyId           String
+  departmentId        String?
+  role                CompanyRole @default(EMPLOYEE)
+  displayName         String
+  jobTitle            String?
+  workArea            String?
+  avatarUrl           String?
+  perksBudgetLek      Int         @default(12000)
+  recognitionCoins    Int         @default(0) // cached balance of coins received (ledger is source of truth)
+  kudosMonthlyAllowance Int       @default(100) // coins this person can GIVE per calendar month
+  preferredCategories String[]
+  dietary             String[]
+  wellnessGoals       String[]
+  interests           String[]
+  homeArea            String?
+  languages           String[]
+  onboardingComplete  Boolean     @default(false)
+  createdAt           DateTime    @default(now())
+
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  pulses          Pulse[]
+  recommendations Recommendation[]
+  packages        PerkPackage[]
+  orders          Order[]
+  coinsSent       CoinTxn[]        @relation("CoinFrom")
+  coinsReceived   CoinTxn[]        @relation("CoinTo")
+  dropClaims      DropClaim[]
+  teamPacksMade   TeamPack[]       @relation("TeamPackCreator")
+  teamPackSeats   TeamPackMember[]
+
+  @@unique([clerkUserId, companyId])
+  @@index([companyId])
+}
+
+/// A benefit provider — a single account (one Clerk user) that owns a business + offers.
+model Provider {
+  id                 String           @id @default(cuid())
+  clerkUserId        String           @unique
+  businessName       String
+  slug               String           @unique
+  logoUrl            String?
+  category           OfferCategory
+  description        String?
+  addressLine        String?
+  city               String?
+  areasServed        String[]
+  openingHours       Json?
+  contactName        String?
+  contactEmail       String?
+  contactPhone       String?
+  nipt               String?
+  vatRegistered      Boolean          @default(false)
+  settlementMethod   SettlementMethod @default(BANK)
+  bankIban           String?
+  takeRatePct        Int              @default(15) // Perx commission on each settled line
+  onboardingComplete Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+
+  offers Offer[]
+  orders Order[]
+  drops  Drop[]
+
+  @@index([category])
+}
+
+/// An offer/deal listed by a provider.
+model Offer {
+  id         String        @id @default(cuid())
+  providerId String
+  title      String
+  category   OfferCategory
+  priceLek   Int
+  area       String?
+  taxFree    Boolean       @default(false)
+  active     Boolean       @default(true)
+  createdAt  DateTime      @default(now())
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  orders   Order[]
+
+  @@index([providerId])
+}
+
+/// Tracks an employee invitation alongside the Clerk org invitation, so the admin can
+/// pre-assign a department/role/budget before the employee accepts.
+model Invitation {
+  id                String           @id @default(cuid())
+  companyId         String
+  email             String
+  departmentId      String?
+  role              CompanyRole      @default(EMPLOYEE)
+  clerkInvitationId String?          @unique
+  status            InvitationStatus @default(PENDING)
+  createdAt         DateTime         @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([email])
+}
+
+enum BudgetMode {
+  SPEND_ALL
+  SAVE_SOME
+  TREAT_MYSELF
+  TEAM
+}
+
+enum PackageStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// A weekly tap-only check-in by an employee.
+model Pulse {
+  id                String     @id @default(cuid())
+  employeeProfileId String
+  answers           Json
+  budgetMode        BudgetMode @default(SPEND_ALL)
+  createdAt         DateTime   @default(now())
+
+  employee        EmployeeProfile  @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
+  recommendations Recommendation[]
+
+  @@index([employeeProfileId])
+}
+
+/// An AI-generated multi-provider pack suggested from a pulse.
+model Recommendation {
+  id                String   @id @default(cuid())
+  pulseId           String
+  employeeProfileId String
+  label             String
+  rationale         String
+  itemOfferIds      String[]
+  totalLek          Int
+  createdAt         DateTime @default(now())
+
+  pulse    Pulse           @relation(fields: [pulseId], references: [id], onDelete: Cascade)
+  employee EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
+
+  @@index([employeeProfileId])
+}
+
+/// A chosen pack moving through draft -> pending -> approved.
+model PerkPackage {
+  id                   String        @id @default(cuid())
+  companyId            String
+  employeeProfileId    String
+  label                String
+  rationale            String
+  itemOfferIds         String[]
+  totalLek             Int
+  status               PackageStatus @default(DRAFT)
+  decidedByClerkUserId String?
+  createdAt            DateTime      @default(now())
+  decidedAt            DateTime?
+
+  company  Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
+  orders   Order[]
+
+  @@index([companyId])
+  @@index([employeeProfileId])
+}
+
+enum OrderStatus {
+  PAID
+  REDEEMED
+}
+
+/// A settled payment line: one offer in an approved package, paid to one provider.
+/// Created when HR approves a package — this is the employer→provider split with Perx's take-rate.
+model Order {
+  id                String      @id @default(cuid())
+  packageId         String
+  companyId         String
+  providerId        String
+  offerId           String
+  employeeProfileId String
+  title             String // snapshot of the offer title at settlement
+  grossLek          Int // what the employer pays for this line
+  takeRatePct       Int // Perx commission %, snapshotted at settlement
+  feeLek            Int // Perx revenue = gross * takeRate / 100
+  netLek            Int // provider receives = gross - fee
+  code              String      @unique // employee's redemption / voucher code
+  status            OrderStatus @default(PAID)
+  createdAt         DateTime    @default(now())
+  redeemedAt        DateTime?
+
+  package  PerkPackage     @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  company  Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  provider Provider        @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  offer    Offer           @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  employee EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+  @@index([companyId])
+  @@index([packageId])
+}
+
+enum CoinTxnKind {
+  GRANT // company / HR mints coins to an employee
+  KUDOS // employee recognizes a colleague
+  SPEND // employee burns coins to redeem (future)
+  ADJUST // manual correction
+}
+
+/// The PerxCoin ledger. Every coin movement is one append-only row (from → to).
+/// EmployeeProfile.recognitionCoins is a denormalized cache kept in sync inside the same txn.
+model CoinTxn {
+  id             String      @id @default(cuid())
+  companyId      String
+  kind           CoinTxnKind
+  fromEmployeeId String? // null = company mint
+  toEmployeeId   String? // null = burn / spend sink
+  amount         Int
+  memo           String?
+  createdAt      DateTime    @default(now())
+
+  company Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  from    EmployeeProfile? @relation("CoinFrom", fields: [fromEmployeeId], references: [id], onDelete: SetNull)
+  to      EmployeeProfile? @relation("CoinTo", fields: [toEmployeeId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([toEmployeeId])
+  @@index([fromEmployeeId])
+}
+
+/// A limited-time flash perk a provider promotes. Claimed instantly with PerxCoin (urgency + coin utility).
+model Drop {
+  id           String        @id @default(cuid())
+  providerId   String
+  title        String
+  description  String?
+  category     OfferCategory
+  area         String?
+  costCoins    Int
+  totalSlots   Int
+  claimedSlots Int           @default(0)
+  endsAt       DateTime
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+
+  provider Provider    @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  claims   DropClaim[]
+
+  @@index([providerId])
+}
+
+model DropClaim {
+  id                String   @id @default(cuid())
+  dropId            String
+  employeeProfileId String
+  code              String   @unique
+  createdAt         DateTime @default(now())
+
+  drop     Drop            @relation(fields: [dropId], references: [id], onDelete: Cascade)
+  employee EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([dropId, employeeProfileId]) // one claim per person
+  @@index([employeeProfileId])
+}
+
+/// A group activity an employee opens for colleagues to join (TEAM budget mode, social stickiness).
+model TeamPack {
+  id                  String    @id @default(cuid())
+  companyId           String
+  createdByEmployeeId String
+  title               String
+  description         String?
+  targetSize          Int       @default(4)
+  endsAt              DateTime?
+  createdAt           DateTime  @default(now())
+
+  company Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creator EmployeeProfile  @relation("TeamPackCreator", fields: [createdByEmployeeId], references: [id], onDelete: Cascade)
+  members TeamPackMember[]
+
+  @@index([companyId])
+}
+
+model TeamPackMember {
+  id                String   @id @default(cuid())
+  teamPackId        String
+  employeeProfileId String
+  createdAt         DateTime @default(now())
+
+  teamPack TeamPack        @relation(fields: [teamPackId], references: [id], onDelete: Cascade)
+  employee EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([teamPackId, employeeProfileId])
+  @@index([teamPackId])
+}
