@@ -2,14 +2,12 @@ import { requireMembership } from "@/lib/account";
 import { topEarners, topGivers, type Ranked } from "@/lib/leaderboard";
 import { Mascot } from "@/components/Mascot";
 import { Icon } from "@/components/Icon";
+import { Avatar } from "@/components/Avatar";
 
 export const dynamic = "force-dynamic";
 
+// Top-3 medal tints (gold / silver / bronze) for the leaderboard icons.
 const MEDAL_COLOR = ["text-[#E8B339]", "text-[#9AA0A6]", "text-[#CD7F32]"];
-
-function initial(name: string) {
-  return name.trim().charAt(0).toUpperCase() || "•";
-}
 
 function Board({ title, subtitle, rows, unit, meId }: { title: string; subtitle: string; rows: Ranked[]; unit: string; meId: string }) {
   return (
@@ -27,8 +25,10 @@ function Board({ title, subtitle, rows, unit, meId }: { title: string; subtitle:
             const me = r.id === meId;
             return (
               <div key={r.id} className={`lb-row ${me ? "me" : ""}`}>
-                <span className="lb-rank">{top3 ? <Icon name="medal" size={22} className={MEDAL_COLOR[i]} /> : i + 1}</span>
-                <span className="avatar">{initial(r.name)}</span>
+                <span className="lb-rank">
+                  {top3 ? <Icon name="medal" size={22} className={`medal ${MEDAL_COLOR[i]}`} /> : i + 1}
+                </span>
+                <Avatar name={r.name} seed={r.id} size={38} />
                 <div className="grow">
                   <div className="font-bold">{r.name}{me ? " · you" : ""}</div>
                 </div>

@@ -57,21 +57,30 @@ export function ProviderWizard() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-cream px-5 py-8">
       <div className="flex items-center justify-between gap-3">
-        <button type="button" disabled={step === 0 || pending} onClick={() => setStep(step - 1)} className="btn-icon disabled:opacity-40" aria-label="Back"><Icon name="chevronLeft" size={20} /></button>
-        <Mascot mood="cool" size={48} className="float" />
+        <button
+          type="button"
+          disabled={step === 0 || pending}
+          onClick={() => setStep(step - 1)}
+          className="btn-icon disabled:opacity-40"
+          aria-label="Back"
+        >
+          <Icon name="chevronLeft" size={20} />
+        </button>
+        <Mascot mood="cool" size={56} className="float" />
       </div>
 
-      <div className="mt-6 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.12em] text-coral">
+      <div className="mt-6 flex items-center justify-between font-mono text-[12px] uppercase tracking-[0.12em] text-coral">
         <span>Step {step + 1} of {STEPS.length} · {STEPS[step]}</span>
         <span>{pct}%</span>
       </div>
       <div className="bar coral mt-2.5">
         <i style={{ width: `${pct}%` }} />
       </div>
-      <h1 className="mt-5 font-display text-3xl font-bold tracking-tight">List your business</h1>
-      <p className="mt-1.5 text-muted">Employees will discover you in their weekly packs.</p>
 
-      <div className="mt-6">
+      <h1 className="mt-[18px] font-display text-[30px] font-extrabold tracking-tight">Tell us about your business</h1>
+      <p className="mt-2 text-muted">Employees will discover you in their weekly packs.</p>
+
+      <div className="mt-6 flex-1">
         {step === 0 && (
           <>
             <Field label="Business name *">
@@ -151,14 +160,14 @@ export function ProviderWizard() {
 
       {error && <p className="mt-2 text-sm font-medium text-coral">{error}</p>}
 
-      <div className="mt-auto pt-8">
+      <div className="sticky bottom-0 -mx-5 mt-6 bg-cream px-5 pb-2 pt-4">
         {step < last ? (
           <button type="button" disabled={!stepValid} onClick={() => setStep(step + 1)} className="btn btn-dark btn-lg disabled:opacity-40">
             Continue
           </button>
         ) : (
           <button type="button" disabled={!stepValid || pending} onClick={submit} className="btn btn-primary btn-lg disabled:opacity-50">
-            {pending ? "Listing…" : "Finish setup"}
+            {pending ? "Listing…" : "Add offer & continue"}
           </button>
         )}
       </div>

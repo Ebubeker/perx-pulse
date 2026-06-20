@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
+import { prisma } from "@/lib/prisma";
 import { Mascot } from "@/components/Mascot";
 import { Icon } from "@/components/Icon";
 import { passportFor, ALL_CATEGORIES } from "@/lib/passport";
@@ -17,34 +18,67 @@ export default async function PassportPage() {
   const m = await getMembership();
   if (!m) redirect("/onboarding");
 
-  const collected = await passportFor(m.id);
+  const [collected, perksEnjoyed, claimsCount] = await Promise.all([
+    passportFor(m.id),
+    prisma.order.count({ where: { employeeProfileId: m.id } }),
+    prisma.dropClaim.count({ where: { employeeProfileId: m.id } }),
+  ]);
   const have = ALL_CATEGORIES.filter((c) => collected.has(c.key)).length;
-  const pct = Math.round((have / ALL_CATEGORIES.length) * 100);
+  const full = have === ALL_CATEGORIES.length;
+
+  // top category label = the first category in canonical order the employee has collected
+  const topCat = ALL_CATEGORIES.find((c) => collected.has(c.key))?.label ?? "—";
+  const totalPerks = perksEnjoyed + claimsCount;
 
   return (
     <main className="mx-auto max-w-md px-5 py-5">
       {/* heading + mascot */}
-      <div className="flex items-start justify-between gap-2">
+      <div className="mb-3 flex items-start justify-between gap-2">
         <div className="greet">
           <div className="day">Your year so far</div>
           <h1>Passport</h1>
         </div>
-        <Mascot mood="cool" size={58} />
+        <Mascot mood={full ? "celebrate" : "cool"} size={58} />
       </div>
 
-      {/* recap hero */}
-      <div className="recap relative mt-3 overflow-hidden rounded-[var(--r-xl)] bg-coral p-[22px] text-white">
-        <h1 className="max-w-[70%] font-display text-[26px] font-bold tracking-[-0.02em]">{have === ALL_CATEGORIES.length ? "Full passport!" : "Your benefit journey"}</h1>
-        <p className="mt-2 text-sm text-white/90">Collect a stamp for every kind of perk you try.</p>
-        <div className="mt-4 flex items-baseline justify-between text-sm font-semibold">
-          <span>{have} / {ALL_CATEGORIES.length} explored</span>
-          <span>{pct}%</span>
-        </div>
-        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/25">
-          <div className="h-full rounded-full bg-white" style={{ width: `${pct}%` }} />
+      {/* recap hero (design: coral card, headline + 2×2 stat grid) */}
+      <div className="recap relative overflow-hidden rounded-[var(--r-xl)] bg-coral p-[22px] text-white">
+        <h1 className="max-w-[75%] font-display text-[26px] font-bold leading-tight tracking-[-0.02em]">
+          {full ? "Full passport!" : `A great year, ${m.displayName.split(" ")[0]}`}
+        </h1>
+        <div className="mt-4 grid grid-cols-2 gap-2.5">
+          <div className="rounded-[var(--r-md)] bg-white/[0.12] p-3.5">
+            <b className="block font-display text-[22px] font-bold leading-none">{totalPerks}</b>
+            <span className="text-xs opacity-90">Perks enjoyed</span>
+          </div>
+          <div className="rounded-[var(--r-md)] bg-white/[0.12] p-3.5">
+            <b className="block font-display text-[22px] font-bold leading-none">{topCat}</b>
+            <span className="text-xs opacity-90">Top category</span>
+          </div>
+          <div className="rounded-[var(--r-md)] bg-white/[0.12] p-3.5">
+            <b className="block font-display text-[22px] font-bold leading-none">{have}/{ALL_CATEGORIES.length}</b>
+            <span className="text-xs opacity-90">Stamps explored</span>
+          </div>
+          <div className="rounded-[var(--r-md)] bg-white/[0.12] p-3.5">
+            <b className="block font-display text-[22px] font-bold leading-none">{m.recognitionCoins.toLocaleString("en-US")}</b>
+            <span className="text-xs opacity-90">PerxCoin balance</span>
+          </div>
         </div>
       </div>
 
+      {/* lime info card (design: month-end recap callout) */}
+      <div className="card mt-3.5 flex items-center gap-3 border-[#E3EBBE] bg-lime-soft">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-lime text-ink"><Icon name="store" size={20} /></span>
+        <div className="text-sm">
+          {full ? (
+            <><b>You did it:</b> every kind of perk explored. You&apos;re a true Perx explorer.</>
+          ) : (
+            <>Try a new kind of perk to fill your passport — <b>{ALL_CATEGORIES.length - have} stamp{ALL_CATEGORIES.length - have === 1 ? "" : "s"} left</b> to collect.</>
+          )}
+        </div>
+      </div>
+
+      {/* stamps grid (keep ?cat=…#browse links + disc cycling + c.icon render) */}
       <div className="sec"><h3>Stamps</h3><span className="link">{have} / {ALL_CATEGORIES.length} collected</span></div>
       <div className="stamp-grid">
         {ALL_CATEGORIES.map((c, i) => {
@@ -58,13 +92,6 @@ export default async function PassportPage() {
           );
         })}
       </div>
-
-      {have === ALL_CATEGORIES.length && (
-        <div className="card mt-4 flex items-center gap-3 border-[#E3EBBE] bg-lime-soft">
-          <Mascot mood="celebrate" size={44} />
-          <div className="text-sm font-semibold">Full passport! You&apos;re a Perx explorer.</div>
-        </div>
-      )}
     </main>
   );
 }

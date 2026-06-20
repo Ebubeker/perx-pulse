@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { runPulse } from "@/lib/pulse-actions";
 import { Mascot } from "@/components/Mascot";
 import { Icon } from "@/components/Icon";
@@ -8,7 +8,7 @@ import { Icon } from "@/components/Icon";
 type Mode = "SPEND_ALL" | "SAVE_SOME" | "TREAT_MYSELF" | "TEAM";
 
 const QUESTIONS: { key: string; q: string; options: string[] }[] = [
-  { key: "week", q: "How was your week?", options: ["Stressful", "Tiring", "Productive", "Social", "Flat"] },
+  { key: "week", q: "How was your week?", options: ["Tired", "Stressed", "Productive", "Social", "Flat"] },
   { key: "need", q: "What do you need most?", options: ["Relax", "Energy", "Health", "Focus", "Fun"] },
   { key: "where", q: "Where?", options: ["Near work", "Near home", "A getaway", "Online"] },
 ];
@@ -18,33 +18,53 @@ const MODES: { v: Mode; label: string; sub: string; icon: string }[] = [
   { v: "TREAT_MYSELF", label: "Treat myself", sub: "Go premium, top up if needed", icon: "gift" },
   { v: "TEAM", label: "Team mode", sub: "Bundle with coworkers", icon: "team" },
 ];
+// Generating steps (design 10-generating.html)
+const GEN_STEPS = [
+  "Reading your vibe…",
+  "Matching local providers…",
+  "Checking your budget & tax-free rules…",
+  "Wrapping your packs…",
+];
 
 export function PulseForm() {
   const [picks, setPicks] = useState<Record<string, string>>({});
   const [mode, setMode] = useState<Mode>("SPEND_ALL");
   const [pending, startTransition] = useTransition();
+  const [step, setStep] = useState(0);
 
   const toggle = (k: string, v: string) => setPicks((p) => ({ ...p, [k]: p[k] === v ? "" : v }));
 
   function submit() {
+    setStep(0);
     startTransition(async () => {
       await runPulse(picks, mode);
     });
   }
 
+  // advance the generating-step copy while the server action runs
+  useEffect(() => {
+    if (!pending) return;
+    const t = setInterval(() => setStep((s) => Math.min(s + 1, GEN_STEPS.length - 1)), 850);
+    return () => clearInterval(t);
+  }, [pending]);
+
   const answered = Object.values(picks).filter(Boolean).length;
+  const progress = Math.round(((step + 1) / GEN_STEPS.length) * 100);
 
   // "Pulse is building your week" — the generating state (design 10-generating.html)
   if (pending) {
     return (
-      <main className="mx-auto flex min-h-[80vh] max-w-md flex-col items-center justify-center px-6 text-center">
-        <Mascot mood="charging" size={180} className="float" />
-        <h1 className="mt-6 font-display text-2xl font-bold leading-tight">Pulse is building<br />your week…</h1>
-        <p className="mt-2 text-sm text-muted">Matching local providers, checking your budget &amp; tax-free rules.</p>
-        <div className="mt-6 flex gap-2">
-          <i className="size-2.5 rounded-full bg-coral pulse-dot" />
-          <i className="size-2.5 rounded-full bg-lime-deep pulse-dot" style={{ animationDelay: ".15s" }} />
-          <i className="size-2.5 rounded-full bg-coral pulse-dot" style={{ animationDelay: ".3s" }} />
+      <main className="mx-auto flex min-h-[80vh] max-w-md flex-col items-center justify-center px-8 text-center">
+        <Mascot mood="charging" size={200} className="float" />
+        <h1 className="mt-6 font-display text-[27px] font-extrabold leading-tight tracking-[-.02em]">Pulse is building<br />your week…</h1>
+        <div className="mt-2 h-5 text-sm text-muted">{GEN_STEPS[step]}</div>
+        <div className="mt-[22px] flex gap-2">
+          <i className="size-[9px] rounded-full bg-coral pulse-dot" />
+          <i className="size-[9px] rounded-full bg-lime-deep pulse-dot" style={{ animationDelay: ".15s" }} />
+          <i className="size-[9px] rounded-full bg-coral pulse-dot" style={{ animationDelay: ".3s" }} />
+        </div>
+        <div className="mt-6 h-1.5 w-[200px] overflow-hidden rounded-full bg-line">
+          <i className="block h-full rounded-full bg-coral transition-[width] duration-500" style={{ width: `${progress}%` }} />
         </div>
       </main>
     );
@@ -85,7 +105,8 @@ export function PulseForm() {
         ))}
 
         <div>
-          <div className="kicker mb-2">04 · Smart budget mode</div>
+          <div className="kicker mb-1">04 · Smart budget mode</div>
+          <p className="mb-2.5 text-[13px] text-muted">Reshapes your packs instantly.</p>
           <div className="space-y-2.5">
             {MODES.map(({ v, label, sub, icon }) => {
               const on = mode === v;

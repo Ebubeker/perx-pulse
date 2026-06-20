@@ -36,25 +36,25 @@ export default async function WalletPage() {
 
   return (
     <main className="mx-auto max-w-md px-5 py-5">
-      {/* heading + mascot */}
+      {/* heading + mascot (design: "Your balance" / "PerxCoin Wallet") */}
       <div className="flex items-center justify-between gap-2">
         <div className="greet">
           <div className="day">Your balance</div>
           <h1>PerxCoin Wallet</h1>
         </div>
-        <Mascot mood="charged" size={66} className="float" />
+        <Mascot mood="charged" size={74} className="float" />
       </div>
 
-      {/* PerxCoin balance — dark card with ring (home pattern) */}
-      <div className="card-dark mt-3">
+      {/* dark balance card with ring (home pattern) */}
+      <div className="card-dark mt-3.5">
         <div className="blob" />
         <div className="relative z-[2] flex items-center gap-4">
           <div className="ring" style={{ "--p": ringP, "--size": "118px" } as React.CSSProperties}>
             <div className="ring-c"><b>{balance.toLocaleString("en-US")}</b><span>coins</span></div>
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[13px] text-[var(--txt-on-dark-mut)]">Available · earns you perks</div>
-            <div className="mt-1 inline-flex items-center gap-1 font-display text-[15px] font-semibold text-[var(--txt-on-dark)]">{allowance}<CoinIcon className="size-[0.9em]" />/mo from your employer</div>
+            <div className="kicker flex items-center gap-1.5 text-[var(--txt-on-dark-mut)]"><CoinIcon className="size-3.5" /> Available</div>
+            <div className="mt-1 inline-flex items-center gap-1 font-display text-[15px] font-semibold text-[var(--txt-on-dark)]">{allowance}<CoinIcon className="size-[0.9em]" />/mo from {m.company.brandName || m.company.name}</div>
             <div className="mt-3 flex flex-wrap gap-2">
               <Link href="/dashboard/employee#browse" className="coin"><CoinIcon className="size-4" />Redeem</Link>
               <Link href="/dashboard/recognition" className="rounded-full border border-white/20 px-3.5 py-1.5 text-sm font-semibold text-[var(--txt-on-dark)]">Send kudos</Link>
@@ -62,6 +62,19 @@ export default async function WalletPage() {
           </div>
         </div>
       </div>
+
+      {/* Daily Spin row (design: lime-soft accent row → free coins) */}
+      <Link
+        href="/dashboard/recognition"
+        className="row mt-3.5 mb-0 border-[#E3EBBE] bg-lime-soft"
+      >
+        <span className="ico" style={{ background: "var(--lime)", color: "var(--ink)" }}><Icon name="sparkles" size={20} /></span>
+        <div className="grow">
+          <div className="t">Daily Spin</div>
+          <div className="s">Earn free PerxCoin every day</div>
+        </div>
+        <span className="font-bold text-[var(--lime-deep)]">Spin →</span>
+      </Link>
 
       {empty && (
         <div className="mt-5 flex items-center gap-3 rounded-[26px] border border-dashed border-coral/40 bg-coral-soft p-5">
@@ -74,30 +87,35 @@ export default async function WalletPage() {
         </div>
       )}
 
+      {/* This week's vouchers — voucher rows with code chips + status pills */}
       {orders.length > 0 && (
         <section>
           <div className="sec"><h3>This week&apos;s vouchers</h3></div>
-          {orders.map((o) => (
-            <div key={o.id} className="row mb-2.5 flex-col items-stretch gap-2">
-              <div className="flex items-center gap-3">
-                <span className="ico coral"><Icon name="ticket" size={20} /></span>
-                <div className="grow">
-                  <div className="t truncate">{o.title}</div>
-                  <div className="s truncate">{o.provider.businessName}</div>
+          {orders.map((o) => {
+            const redeemed = o.status === "REDEEMED";
+            return (
+              <div key={o.id} className="row mb-2.5 flex-col items-stretch gap-2.5">
+                <div className="flex items-center gap-3">
+                  <span className="ico coral"><Icon name="ticket" size={20} /></span>
+                  <div className="grow">
+                    <div className="t truncate">{o.title}</div>
+                    <div className="s truncate">{o.provider.businessName}</div>
+                  </div>
+                  <span className={`pill shrink-0 ${redeemed ? "pill-redeemed" : "pill-ready"}`}>
+                    <span className="dot" />{redeemed ? "Redeemed" : "Ready"}
+                  </span>
                 </div>
-                <span className={`pill ${o.status === "REDEEMED" ? "pill-redeemed" : "pill-ready"}`}>
-                  <span className="dot" />{o.status === "REDEEMED" ? "Redeemed" : "Ready"}
-                </span>
+                <div className="flex items-center justify-between rounded-[var(--r-sm)] bg-cream px-3 py-2">
+                  <span className="font-mono text-sm font-bold tracking-[0.16em]">{o.code}</span>
+                  <span className="text-xs text-muted">{redeemed ? "used" : "show to redeem"}</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between rounded-[var(--r-sm)] bg-cream px-3 py-2">
-                <span className="font-mono text-sm font-bold tracking-wide">{o.code}</span>
-                <span className="text-xs text-muted">show to redeem</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </section>
       )}
 
+      {/* Flash drops claimed */}
       {claims.length > 0 && (
         <section>
           <div className="sec"><h3>Flash drops claimed</h3></div>
@@ -108,12 +126,13 @@ export default async function WalletPage() {
                 <div className="t truncate">{c.drop.title}</div>
                 <div className="s truncate">{c.drop.provider.businessName}</div>
               </div>
-              <span className="shrink-0 rounded-[var(--r-sm)] bg-cream px-2.5 py-1 font-mono text-sm font-bold">{c.code}</span>
+              <span className="shrink-0 rounded-[var(--r-sm)] bg-cream px-2.5 py-1 font-mono text-sm font-bold tracking-wide">{c.code}</span>
             </div>
           ))}
         </section>
       )}
 
+      {/* Pending packs awaiting HR approval */}
       {pending.length > 0 && (
         <section>
           <div className="sec"><h3>Awaiting HR approval</h3></div>

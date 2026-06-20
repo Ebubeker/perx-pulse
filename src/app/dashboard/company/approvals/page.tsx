@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { resolveOffers } from "@/lib/gemini";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
+import { Avatar } from "@/components/Avatar";
 import { ApprovalActions } from "./ApprovalActions";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function ApprovalsPage() {
   const m = await requireCompanyAdmin();
 
-  const [pending, decided] = await Promise.all([
+  const [pending, decided, newToday] = await Promise.all([
     prisma.perkPackage.findMany({
       where: { companyId: m.companyId, status: "PENDING" },
       include: { employee: { select: { displayName: true } } },
@@ -23,6 +24,13 @@ export default async function ApprovalsPage() {
       orderBy: { decidedAt: "desc" },
       take: 8,
     }),
+    prisma.perkPackage.count({
+      where: {
+        companyId: m.companyId,
+        status: "PENDING",
+        createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+      },
+    }),
   ]);
 
   const pendingWithItems = await Promise.all(
@@ -31,34 +39,44 @@ export default async function ApprovalsPage() {
   const pendingTotal = pending.reduce((s, p) => s + p.totalLek, 0);
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-5">
+    <main className="page" style={{ maxWidth: 920 }}>
       <div className="kicker text-coral">
         {pending.length === 0
           ? "All caught up"
-          : `${pending.length} pending · ${toCoins(pendingTotal).toLocaleString("en-US")} coins to settle`}
+          : `${pending.length} pending · ${newToday} new today`}
       </div>
-      <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">Approvals inbox</h1>
-      <p className="mt-1 text-sm text-muted">
+      <h1 className="mb-1.5 mt-1 font-display text-4xl font-extrabold tracking-tight">Approvals inbox</h1>
+      <p className="text-muted">
         {pending.length === 0
           ? "No packs waiting. You're all caught up."
           : "All within budget & tax-free unless flagged. One tap to fund."}
       </p>
+      {pending.length > 0 && (
+        <p className="mt-2 text-sm text-muted">
+          <Coins amount={toCoins(pendingTotal)} className="font-semibold text-ink-soft" /> waiting to settle across {pending.length} pack{pending.length === 1 ? "" : "s"}.
+        </p>
+      )}
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-5 space-y-3">
         {pendingWithItems.map(({ pkg, items }) => (
           <div key={pkg.id} className="card">
-            <div className="flex items-center gap-3">
-              <span className="avatar">{pkg.employee.displayName.charAt(0).toUpperCase()}</span>
-              <div className="min-w-0 flex-1">
-                <h2 className="truncate font-display text-lg font-bold">{pkg.label}</h2>
-                <p className="text-sm text-muted">for {pkg.employee.displayName}</p>
+            <div className="flex flex-wrap items-center gap-4">
+              <Avatar name={pkg.employee.displayName} seed={pkg.employeeProfileId} size={46} />
+              <div className="min-w-[170px] flex-1">
+                <div className="font-bold">{pkg.employee.displayName} · {pkg.label}</div>
+                <div className="truncate text-sm text-muted">
+                  {items.map((o) => o.providerName).join(" · ") || "Perx pack"}
+                </div>
               </div>
-              <span className="shrink-0 font-display text-lg font-bold text-lime-deep"><Coins amount={toCoins(pkg.totalLek)} /></span>
+              <div className="flex flex-wrap gap-1.5">
+                <span className="badge badge-tax">Tax-free</span>
+                <span className="pill pill-ready"><span className="dot" />In budget</span>
+              </div>
+              <div className="font-display text-xl font-extrabold text-lime-deep">
+                <Coins amount={toCoins(pkg.totalLek)} />
+              </div>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="badge badge-tax">Tax-free</span>
-              <span className="pill pill-pending"><span className="dot" />Pending</span>
-            </div>
+
             <ul className="mt-3 space-y-1.5 border-t border-line pt-3">
               {items.map((o) => (
                 <li key={o.id} className="flex items-center justify-between gap-3 text-sm">
@@ -70,6 +88,10 @@ export default async function ApprovalsPage() {
                 </li>
               ))}
             </ul>
+
+            <div className="mt-3 flex items-center justify-between gap-3 border-t border-line pt-3">
+              <Link href={`/dashboard/company/approvals/${pkg.id}`} className="link text-sm">View payment split →</Link>
+            </div>
             <ApprovalActions packageId={pkg.id} />
           </div>
         ))}
@@ -81,10 +103,10 @@ export default async function ApprovalsPage() {
           <div>
             {decided.map((p) => (
               <div key={p.id} className="row">
-                <span className={`ico ${p.status === "APPROVED" ? "coral" : ""}`}>{p.status === "APPROVED" ? "✓" : "✕"}</span>
+                <Avatar name={p.employee.displayName} seed={p.employeeProfileId} size={42} />
                 <div className="grow">
                   <div className="t truncate">{p.label}</div>
-                  <div className="s">{p.employee.displayName}</div>
+                  <div className="s">{p.employee.displayName} · <Coins amount={toCoins(p.totalLek)} /></div>
                 </div>
                 {p.status === "APPROVED" ? (
                   <Link href={`/dashboard/company/approvals/${p.id}`} className="pill pill-approved shrink-0">

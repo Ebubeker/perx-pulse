@@ -2,6 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireCompanyAdmin } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
+import { toCoins } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
+import { Avatar } from "@/components/Avatar";
 import { SettlementReveal } from "./SettlementReveal";
 
 export const dynamic = "force-dynamic";
@@ -37,19 +40,46 @@ export default async function SettlementPage({ params }: { params: Promise<{ id:
   const net = payouts.reduce((s, p) => s + p.net, 0);
 
   return (
-    <main className="mx-auto max-w-md px-4 py-5">
-      <Link href="/dashboard/company/approvals" className="sec link mb-0 mt-0 inline-block text-sm text-muted">← Back to inbox</Link>
-      <div className="mt-2 flex items-center gap-3">
-        <span className="avatar size-12 text-lg">{pkg.employee.displayName.charAt(0).toUpperCase()}</span>
+    <main className="page" style={{ maxWidth: 760 }}>
+      <Link href="/dashboard/company/approvals" className="navlink inline-block pl-0 text-sm text-muted">← Back to inbox</Link>
+
+      <div className="my-3 flex items-center gap-3.5">
+        <Avatar name={pkg.employee.displayName} seed={pkg.employeeProfileId} size={52} />
         <div className="min-w-0">
           <div className="kicker text-lime-deep">Settled</div>
-          <h1 className="truncate font-display text-2xl font-bold tracking-tight">{pkg.label}</h1>
-          <p className="text-sm text-muted">Paid out for {pkg.employee.displayName}</p>
+          <h1 className="truncate font-display text-3xl font-extrabold tracking-tight">{pkg.label}</h1>
+          <p className="text-muted">Paid out for {pkg.employee.displayName}</p>
         </div>
         <span className="badge badge-tax ml-auto shrink-0">Tax-free</span>
       </div>
 
-      <SettlementReveal employer={gross} payouts={payouts} fee={fee} net={net} />
+      <div className="grid g-2 items-start">
+        <div className="card">
+          <h3 className="display mb-2 font-display text-lg font-bold">Breakdown</h3>
+          {payouts.map((p) => (
+            <div key={p.name} className="flex items-center justify-between border-b border-line py-3">
+              <span className="min-w-0 truncate">{p.name}</span>
+              <b className="shrink-0 font-bold"><Coins amount={toCoins(p.gross)} /></b>
+            </div>
+          ))}
+          <div className="flex items-center justify-between pt-3 text-lg">
+            <b>Total</b>
+            <b className="text-lime-deep"><Coins amount={toCoins(gross)} /></b>
+          </div>
+        </div>
+
+        <SettlementReveal employer={gross} payouts={payouts} fee={fee} net={net} />
+      </div>
+
+      <div className="card mt-4 flex flex-wrap items-center gap-4">
+        <div>
+          <div className="kicker">Settlement</div>
+          <div className="font-display text-xl font-extrabold">
+            <Coins amount={toCoins(gross)} /> spent · {net.toLocaleString("en-US")} L to providers · {fee.toLocaleString("en-US")} L to Perx
+          </div>
+        </div>
+        <Link href="/dashboard/company/approvals" className="btn btn-soft ml-auto">Back to inbox</Link>
+      </div>
 
       <p className="mt-6 text-center text-xs text-muted">
         Funds move from your budget straight to the providers. {pkg.employee.displayName} never touches the money — fully tax-free.

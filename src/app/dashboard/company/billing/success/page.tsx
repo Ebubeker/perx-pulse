@@ -9,19 +9,23 @@ export default async function BillingSuccessPage() {
   const active = m.company.billingStatus === "active";
 
   return (
-    <main className="mx-auto max-w-md px-4 py-12 text-center">
-      <div className="flex justify-center">
-        <Mascot mood={active ? "celebrate" : "thinking"} size={120} className="float" />
+    <main className="page">
+      <div className="mx-auto max-w-xl text-center">
+        <div className="flex justify-center">
+          <Mascot mood={active ? "celebrate" : "thinking"} size={140} className="float" />
+        </div>
+        <h1 className="mt-6 font-display text-4xl font-extrabold tracking-tight md:text-5xl">
+          {active ? "You're on Perx!" : "Payment received"}
+        </h1>
+        <p className="mx-auto mt-3 max-w-md text-muted">
+          {active
+            ? "Your company plan is active. Time to build some great weeks."
+            : "We're confirming your payment — your plan activates within a few seconds of Lemon Squeezy notifying us."}
+        </p>
+        <Link href="/dashboard/company/billing" className="btn btn-primary btn-lg mt-8 mx-auto max-w-xs">
+          Back to billing
+        </Link>
       </div>
-      <h1 className="mt-5 font-display text-3xl font-bold tracking-tight">{active ? "You're on Perx!" : "Payment received"}</h1>
-      <p className="mt-2 text-sm text-muted">
-        {active
-          ? "Your company plan is active. Time to build some great weeks."
-          : "We're confirming your payment — your plan activates within a few seconds of Lemon Squeezy notifying us."}
-      </p>
-      <Link href="/dashboard/company/billing" className="btn btn-primary btn-lg mt-7">
-        Back to billing
-      </Link>
     </main>
   );
 }

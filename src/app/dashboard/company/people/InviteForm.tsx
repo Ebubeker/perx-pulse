@@ -33,28 +33,26 @@ export function InviteForm({ departments }: { departments: { id: string; name: s
         <label htmlFor="invite-email">Email</label>
         <input id="invite-email" type="email" placeholder="teammate@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="field">
-          <label htmlFor="invite-dept">Department</label>
-          <select id="invite-dept" value={departmentId} onChange={(e) => setDept(e.target.value)}>
-            <option value="">No department</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="field">
-          <label htmlFor="invite-role">Role</label>
-          <select id="invite-role" value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="EMPLOYEE">Employee</option>
-            <option value="HR">HR</option>
-            <option value="FINANCE">Finance</option>
-          </select>
-        </div>
+      <div className="field">
+        <label htmlFor="invite-dept">Department</label>
+        <select id="invite-dept" value={departmentId} onChange={(e) => setDept(e.target.value)}>
+          <option value="">No department</option>
+          {departments.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
+        </select>
       </div>
-      <button type="submit" disabled={pending} className="btn btn-primary disabled:opacity-50">
+      <div className="field">
+        <label htmlFor="invite-role">Role</label>
+        <select id="invite-role" value={role} onChange={(e) => setRole(e.target.value)}>
+          <option value="EMPLOYEE">Employee</option>
+          <option value="HR">HR</option>
+          <option value="FINANCE">Finance</option>
+        </select>
+      </div>
+      <button type="submit" disabled={pending} className="btn btn-primary btn-lg disabled:opacity-50">
         {pending ? "Sending…" : "Send invite"}
       </button>
       {msg?.ok && <p className="mt-2 text-sm font-medium text-coral">Invite sent.</p>}

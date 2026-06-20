@@ -62,27 +62,43 @@ export function EmployeeWizard({ companyName }: { companyName: string }) {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-cream px-5 py-8">
       <div className="flex items-center justify-between gap-3">
-        <button type="button" disabled={step === 0 || pending} onClick={() => setStep(step - 1)} className="btn-icon disabled:opacity-40" aria-label="Back"><Icon name="chevronLeft" size={20} /></button>
-        <Mascot mood="love" size={48} className="float" />
+        <button
+          type="button"
+          disabled={step === 0 || pending}
+          onClick={() => setStep(step - 1)}
+          className="btn-icon disabled:opacity-40"
+          aria-label="Back"
+        >
+          <Icon name="chevronLeft" size={20} />
+        </button>
       </div>
 
-      <div className="mt-6 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.12em] text-coral">
+      <div className="mt-6 flex items-center justify-between font-mono text-[12px] uppercase tracking-[0.12em] text-coral">
         <span>Step {step + 1} of {STEPS.length} · {STEPS[step]}</span>
         <span>{pct}%</span>
       </div>
       <div className="bar mt-2.5">
         <i style={{ width: `${pct}%` }} />
       </div>
-      <h1 className="mt-5 font-display text-3xl font-bold tracking-tight">Welcome to {companyName}</h1>
-      <p className="mt-1.5 text-muted">A few taps so Perx can build perks you&apos;ll actually use.</p>
 
-      {step === 0 && (
-        <div className="speech mt-5 self-start rounded-[18px] border border-line bg-paper px-4 py-3 text-sm font-semibold shadow-soft">
-          Hi, tell me your vibe — I&apos;ll do the rest.
+      {step === 0 ? (
+        <div className="mt-4 flex flex-col items-center text-center">
+          <p className="kicker">Welcome to {companyName}</p>
+          <h1 className="mt-2 font-display text-[34px] font-extrabold leading-[1.05] tracking-tight">
+            Welcome, <em className="not-italic text-coral">{displayName.trim() || "there"}</em>
+          </h1>
+          <div className="speech relative mt-5 max-w-[300px] rounded-[18px] border border-line bg-paper px-4 py-3 text-sm font-semibold shadow-soft after:absolute after:-bottom-2 after:left-1/2 after:size-3.5 after:-translate-x-1/2 after:rotate-45 after:border-b after:border-r after:border-line after:bg-paper after:content-['']">
+            Hi 👋 Tell me your vibe — I&apos;ll do the rest.
+          </div>
+          <Mascot mood="antenna" size={180} className="float -mt-2" />
         </div>
+      ) : (
+        <h1 className="mt-[18px] font-display text-[30px] font-extrabold tracking-tight">
+          {step === 1 ? "What you're into" : "Wellness & diet"}
+        </h1>
       )}
 
-      <div className="mt-6 space-y-5">
+      <div className="mt-6 flex-1 space-y-5">
         {step === 0 && (
           <>
             <Field label="Your name *">
@@ -116,7 +132,7 @@ export function EmployeeWizard({ companyName }: { companyName: string }) {
 
       {error && <p className="mt-2 text-sm font-medium text-coral">{error}</p>}
 
-      <div className="mt-auto pt-8">
+      <div className="sticky bottom-0 -mx-5 mt-6 bg-cream px-5 pb-2 pt-4">
         {step < last ? (
           <button type="button" disabled={!stepValid} onClick={() => setStep(step + 1)} className="btn btn-dark btn-lg disabled:opacity-40">
             Continue

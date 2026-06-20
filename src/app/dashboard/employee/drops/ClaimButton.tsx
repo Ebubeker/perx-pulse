@@ -10,7 +10,7 @@ export function ClaimButton({ dropId, disabled }: { dropId: string; disabled?: b
   const router = useRouter();
 
   return (
-    <div>
+    <div className="flex flex-wrap items-center gap-2">
       <button
         type="button"
         disabled={pending || disabled}
@@ -20,11 +20,11 @@ export function ClaimButton({ dropId, disabled }: { dropId: string; disabled?: b
           if (res.error) setMsg({ text: res.error });
           else { setMsg({ ok: true, text: `Claimed! Code ${res.code}` }); router.refresh(); }
         })}
-        className="btn btn-primary btn-lg disabled:opacity-50"
+        className="btn btn-primary px-[18px] py-[9px] text-sm disabled:opacity-50"
       >
-        {pending ? "Claiming…" : "Claim with coins"}
+        {pending ? "Claiming…" : "Claim"}
       </button>
-      {msg && <p className={`mt-1.5 text-sm font-semibold ${msg.ok ? "text-coral" : "text-coral-deep"}`}>{msg.text}</p>}
+      {msg && <p className={`text-sm font-semibold ${msg.ok ? "text-coral" : "text-coral-deep"}`}>{msg.text}</p>}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { kudosRemainingFor, companyRecognitionFeed } from "@/lib/coins";
 import { Mascot } from "@/components/Mascot";
 import { Coins } from "@/components/Coins";
 import { Icon } from "@/components/Icon";
+import { Avatar } from "@/components/Avatar";
 import { RecognitionForms } from "./RecognitionForms";
 
 export const dynamic = "force-dynamic";
@@ -52,20 +53,28 @@ export default async function RecognitionPage() {
         </p>
       ) : (
         <div>
-          {feed.map((t) => (
-            <div key={t.id} className="row mb-2.5 flex-col items-stretch !gap-1.5">
-              <div className="flex items-center gap-2">
-                <span className="ico coral shrink-0">{t.kind === "GRANT" ? <Icon name="trophy" size={20} /> : <Icon name="kudos" size={20} />}</span>
-                <p className="grow text-sm">
-                  <span className="font-semibold">{t.kind === "GRANT" ? "Company" : t.from?.displayName ?? "Someone"}</span>
-                  <span className="text-muted"> → </span>
-                  <span className="font-semibold">{t.to?.displayName ?? "Someone"}</span>
-                </p>
-                <span className="coin sm shrink-0">+{t.amount}</span>
+          {feed.map((t) => {
+            const fromName = t.kind === "GRANT" ? "Company" : t.from?.displayName ?? "Someone";
+            const toName = t.to?.displayName ?? "Someone";
+            return (
+              <div key={t.id} className="row mb-2.5 flex-col items-stretch !gap-1.5">
+                <div className="flex items-center gap-2">
+                  {t.kind === "GRANT" ? (
+                    <span className="ico coral shrink-0"><Icon name="trophy" size={20} /></span>
+                  ) : (
+                    <Avatar name={fromName} seed={t.fromEmployeeId ?? fromName} size={42} className="shrink-0" />
+                  )}
+                  <p className="grow text-sm">
+                    <span className="font-semibold">{fromName}</span>
+                    <span className="text-muted"> → </span>
+                    <span className="font-semibold">{toName}</span>
+                  </p>
+                  <span className="coin sm shrink-0">+{t.amount}</span>
+                </div>
+                {t.memo && <p className="pl-[54px] text-sm text-ink-soft">“{t.memo}”</p>}
               </div>
-              {t.memo && <p className="pl-[54px] text-sm text-ink-soft">“{t.memo}”</p>}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </main>

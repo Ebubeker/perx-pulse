@@ -4,13 +4,17 @@ import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { toCoins, effectiveLek } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
-import { Icon } from "@/components/Icon";
+import { Icon, type IconName } from "@/components/Icon";
 
 export const dynamic = "force-dynamic";
 
 const CAT_LABEL: Record<string, string> = {
   wellness: "Wellness", fitness: "Fitness", food: "Food", health: "Health",
   travel: "Travel", learning: "Learning", culture: "Culture", telecom: "Telecom",
+};
+const CAT_ICON: Record<string, IconName> = {
+  wellness: "wellness", fitness: "fitness", food: "food", health: "health",
+  travel: "travel", learning: "learning", culture: "culture", telecom: "telecom",
 };
 
 export default async function ProviderPage({ params }: { params: Promise<{ id: string }> }) {
@@ -34,33 +38,46 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     ? Object.entries(provider.openingHours as Record<string, unknown>).map(([k, v]) => [k, String(v)] as const)
     : [];
   const priceFrom = provider.offers.length ? Math.min(...provider.offers.map((o) => effectiveLek(o.priceLek, o.discountPct))) : null;
+  const taxFreeCount = provider.offers.filter((o) => o.taxFree).length;
+  const metaLine = [CAT_LABEL[provider.category] ?? provider.category, provider.city].filter(Boolean).join(" · ");
 
   return (
     <main className="mx-auto max-w-md px-5 py-5">
-      {/* provider header card */}
+      {/* ── Provider card (directory pcard style) ── */}
       <div className="card">
-        <div className="flex items-center gap-2">
-          <span className="chip on">{CAT_LABEL[provider.category] ?? provider.category}</span>
-          <span className="pill pill-ready"><span className="dot" />Active</span>
+        <div className="grid h-20 place-items-center rounded-[var(--r-md)] bg-coral-soft text-coral-deep">
+          <Icon name={CAT_ICON[provider.category] ?? "store"} size={34} />
         </div>
-        <h1 className="mt-3 font-display text-[28px] font-bold leading-tight">{provider.businessName}</h1>
-        {provider.description && <p className="mt-1.5 text-[15px] leading-relaxed text-ink-soft">{provider.description}</p>}
+        <div className="mt-3 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="font-display text-[20px] font-bold leading-tight">{provider.businessName}</div>
+            <div className="mt-0.5 text-[13px] text-muted">{metaLine}</div>
+          </div>
+          <span className="pill pill-ready mt-0.5 shrink-0"><span className="dot" />Active</span>
+        </div>
+        {provider.description && <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">{provider.description}</p>}
       </div>
 
-      {/* stats */}
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      {/* ── Stats ── */}
+      <div className="mt-3 grid grid-cols-3 gap-3">
         <div className="stat">
           <div className="k">Offers</div>
           <div className="v">{provider.offers.length}</div>
-          <div className="d">available now</div>
+          <div className="d">live now</div>
         </div>
         <div className="stat">
           <div className="k">From</div>
           <div className="v text-coral">{priceFrom !== null ? <Coins amount={toCoins(priceFrom)} /> : "—"}</div>
-          <div className="d">lowest price</div>
+          <div className="d">lowest</div>
+        </div>
+        <div className="stat">
+          <div className="k">Tax-free</div>
+          <div className="v">{taxFreeCount}</div>
+          <div className="d">of {provider.offers.length}</div>
         </div>
       </div>
 
+      {/* ── Good to know ── */}
       {(provider.addressLine || provider.city || provider.areasServed.length > 0 || provider.contactPhone || hours.length > 0) && (
         <div className="card mt-3">
           <h2 className="font-display text-base font-bold">Good to know</h2>
@@ -88,7 +105,8 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
         </div>
       )}
 
-      <div className="sec"><h3>Offers from {provider.businessName}</h3></div>
+      {/* ── Their offers as rows ── */}
+      <div className="sec"><h3>Offers</h3></div>
       {provider.offers.length === 0 ? (
         <div className="card text-center text-sm text-muted">No live offers right now.</div>
       ) : (
@@ -96,7 +114,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
           {provider.offers.map((o) => (
             <li key={o.id}>
               <Link href={`/dashboard/employee/offer/${o.id}`} className="row mb-0">
-                <span className="ico coral">✦</span>
+                <span className="ico coral"><Icon name={CAT_ICON[o.category] ?? "gift"} size={20} /></span>
                 <div className="grow">
                   <div className="t truncate">{o.title}</div>
                   <div className="s truncate">

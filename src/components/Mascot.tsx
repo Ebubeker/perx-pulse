@@ -11,6 +11,7 @@ const MOODS: Record<string, string> = {
   low: "perx-mood-lowbattery", lowbattery: "perx-mood-lowbattery", tired: "perx-mood-lowbattery",
   charging: "perx-mood-charging", holding: "perx-mascot-holding-pack", pack: "perx-mascot-holding-pack",
   love: "perx-sister-e-hearteyes", hearteyes: "perx-sister-e-hearteyes",
+  antenna: "perx-sister-a-antenna", bow: "perx-sister-d-bow", headphones: "perx-sister-c-headphones",
 };
 
 export function Mascot({ mood = "charged", size = 72, className = "" }: { mood?: string; size?: number; className?: string }) {

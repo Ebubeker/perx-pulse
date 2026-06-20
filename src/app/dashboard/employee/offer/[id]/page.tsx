@@ -4,7 +4,7 @@ import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { toCoins, effectiveLek } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
-import { Icon } from "@/components/Icon";
+import { Icon, type IconName } from "@/components/Icon";
 import { AddOfferButton } from "./AddOfferButton";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +12,10 @@ export const dynamic = "force-dynamic";
 const CAT_LABEL: Record<string, string> = {
   wellness: "Wellness", fitness: "Fitness", food: "Food", health: "Health",
   travel: "Travel", learning: "Learning", culture: "Culture", telecom: "Telecom",
+};
+const CAT_ICON: Record<string, IconName> = {
+  wellness: "wellness", fitness: "fitness", food: "food", health: "health",
+  travel: "travel", learning: "learning", culture: "culture", telecom: "telecom",
 };
 
 export default async function OfferPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,6 +33,7 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
   }
 
   const p = offer.provider;
+  const effLek = effectiveLek(offer.priceLek, offer.discountPct);
   const more = await prisma.offer.findMany({
     where: { providerId: offer.providerId, active: true, id: { not: offer.id } },
     orderBy: { priceLek: "asc" },
@@ -40,7 +45,7 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
 
   return (
     <main className="mx-auto max-w-md px-5 py-5">
-      {/* hero header */}
+      {/* ── Product hero ── */}
       <div className="pack">
         <div className="pack-top coral">
           <div className="kk">{CAT_LABEL[offer.category] ?? offer.category}{offer.area ? ` · ${offer.area}` : ""}</div>
@@ -48,22 +53,27 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
         </div>
         <div className="pack-body">
           <p className="text-sm text-muted">
-            <Link href={`/dashboard/employee/provider/${offer.providerId}`} className="font-semibold text-ink underline-offset-2 hover:underline">{p.businessName}</Link>
+            <Link href={`/dashboard/employee/provider/${offer.providerId}`} className="font-semibold text-ink underline-offset-2 hover:underline">
+              {p.businessName}
+            </Link>
+            {p.city ? ` · ${p.city}` : ""}
           </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2.5">
-            <span className="font-display text-3xl font-bold text-ink"><Coins amount={toCoins(effectiveLek(offer.priceLek, offer.discountPct))} /></span>
-            {offer.discountPct > 0 && (
-              <>
-                <Coins amount={toCoins(offer.priceLek)} strike className="text-base" />
-                <span className="badge badge-new">−{offer.discountPct}%</span>
-              </>
-            )}
-            {offer.taxFree && <span className="badge badge-tax">Tax-free</span>}
+
+          {/* price line */}
+          <div className="pack-foot">
+            <div className="flex flex-wrap items-center gap-2">
+              {offer.taxFree && <span className="badge badge-tax">Tax-free</span>}
+              {offer.discountPct > 0 && <span className="badge badge-new">−{offer.discountPct}%</span>}
+            </div>
+            <div className="flex items-baseline gap-2">
+              {offer.discountPct > 0 && <Coins amount={toCoins(offer.priceLek)} strike className="text-sm" />}
+              <span className="price text-coral"><Coins amount={toCoins(effLek)} /></span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* what you get */}
+      {/* ── What you get ── */}
       <div className="card mt-4">
         <div className="kicker">What you get</div>
         <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
@@ -71,19 +81,25 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
         </p>
       </div>
 
-      {/* add to pack */}
+      {/* ── Add to pack ── */}
       <div className="mt-4">
         <AddOfferButton offerId={offer.id} />
-        <p className="mt-2 text-center text-xs text-muted">Adds to a pack you can send to HR. Fully employer-funded.</p>
+        <p className="mt-2 text-center text-xs text-muted">Adds to a pack you can send to HR. Fully employer-funded · the money never touches your hands.</p>
       </div>
 
-      {/* Provider */}
+      {/* ── About the provider ── */}
       <div className="card mt-6">
-        <div className="flex items-baseline justify-between gap-2">
-          <h2 className="font-display text-base font-bold">About {p.businessName}</h2>
-          <Link href={`/dashboard/employee/provider/${offer.providerId}`} className="shrink-0 text-sm font-semibold text-coral">View profile →</Link>
+        <div className="flex items-center gap-3">
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-coral-soft text-coral-deep">
+            <Icon name={CAT_ICON[p.category] ?? "store"} size={24} />
+          </span>
+          <div className="min-w-0 grow">
+            <h2 className="truncate font-display text-base font-bold">{p.businessName}</h2>
+            <div className="text-[12.5px] text-muted">{CAT_LABEL[p.category] ?? p.category}{p.city ? ` · ${p.city}` : ""}</div>
+          </div>
+          <Link href={`/dashboard/employee/provider/${offer.providerId}`} className="shrink-0 text-sm font-semibold text-coral">Profile →</Link>
         </div>
-        {p.description && <p className="mt-1.5 text-sm text-ink-soft">{p.description}</p>}
+        {p.description && <p className="mt-3 text-sm text-ink-soft">{p.description}</p>}
         <dl className="mt-3 space-y-1.5 text-sm">
           {(p.addressLine || p.city) && (
             <div className="flex gap-2"><dt className="text-muted"><Icon name="pin" size={16} /></dt><dd>{[p.addressLine, p.city].filter(Boolean).join(", ")}</dd></div>
@@ -107,6 +123,7 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
         )}
       </div>
 
+      {/* ── More from provider ── */}
       {more.length > 0 && (
         <div className="mt-6">
           <div className="sec"><h3>More from {p.businessName}</h3></div>
@@ -114,7 +131,7 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
             {more.map((o) => (
               <li key={o.id}>
                 <Link href={`/dashboard/employee/offer/${o.id}`} className="row mb-0">
-                  <span className="ico coral">✦</span>
+                  <span className="ico coral"><Icon name={CAT_ICON[o.category] ?? "gift"} size={20} /></span>
                   <div className="grow"><div className="t truncate">{o.title}</div><div className="s">{CAT_LABEL[o.category] ?? o.category}</div></div>
                   <span className="amt"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /></span>
                 </Link>
