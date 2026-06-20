@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
 import { Mascot } from "@/components/Mascot";
+import { Icon } from "@/components/Icon";
 import { passportFor, ALL_CATEGORIES } from "@/lib/passport";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +52,7 @@ export default async function PassportPage() {
           const disc = DISC[i % DISC.length]!;
           return (
             <Link key={c.key} href={`/dashboard/employee?cat=${c.key}#browse`} className={`stamp ${got ? "got" : "lock"}`}>
-              <div className="disc" style={got ? { background: disc.bg, color: disc.color } : undefined}>{got ? c.emoji : "🔒"}</div>
+              <div className="disc" style={got ? { background: disc.bg, color: disc.color } : undefined}>{got ? <Icon name={c.icon} size={24} /> : <Icon name="lock" size={22} />}</div>
               <div className="nm">{c.label}</div>
             </Link>
           );
@@ -61,7 +62,7 @@ export default async function PassportPage() {
       {have === ALL_CATEGORIES.length && (
         <div className="card mt-4 flex items-center gap-3 border-[#E3EBBE] bg-lime-soft">
           <Mascot mood="celebrate" size={44} />
-          <div className="text-sm font-semibold">🎉 Full passport! You&apos;re a Perx explorer.</div>
+          <div className="text-sm font-semibold">Full passport! You&apos;re a Perx explorer.</div>
         </div>
       )}
     </main>

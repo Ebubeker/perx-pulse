@@ -3,6 +3,7 @@ import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { Mascot } from "@/components/Mascot";
 import { Coins } from "@/components/Coins";
+import { Icon } from "@/components/Icon";
 import { ClaimButton } from "./ClaimButton";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +34,7 @@ export default async function EmployeeDropsPage() {
     <main className="mx-auto max-w-md px-5 py-5">
       {/* topbar with live pill + mascot */}
       <div className="topbar">
-        <h2>⚡ Perx Drops</h2>
+        <h2 className="flex items-center gap-2"><Icon name="bolt" size={22} className="text-coral" />Perx Drops</h2>
         <Mascot mood="excited" size={44} />
         <span className="pill pill-live"><span className="dot pulse-dot" />Live</span>
       </div>

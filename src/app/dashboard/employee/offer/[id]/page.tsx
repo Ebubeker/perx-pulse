@@ -4,6 +4,7 @@ import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { toCoins, effectiveLek } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
+import { Icon } from "@/components/Icon";
 import { AddOfferButton } from "./AddOfferButton";
 
 export const dynamic = "force-dynamic";
@@ -85,13 +86,13 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
         {p.description && <p className="mt-1.5 text-sm text-ink-soft">{p.description}</p>}
         <dl className="mt-3 space-y-1.5 text-sm">
           {(p.addressLine || p.city) && (
-            <div className="flex gap-2"><dt className="text-muted">📍</dt><dd>{[p.addressLine, p.city].filter(Boolean).join(", ")}</dd></div>
+            <div className="flex gap-2"><dt className="text-muted"><Icon name="pin" size={16} /></dt><dd>{[p.addressLine, p.city].filter(Boolean).join(", ")}</dd></div>
           )}
           {p.areasServed.length > 0 && (
-            <div className="flex gap-2"><dt className="text-muted">🗺️</dt><dd>{p.areasServed.join(" · ")}</dd></div>
+            <div className="flex gap-2"><dt className="text-muted"><Icon name="map" size={16} /></dt><dd>{p.areasServed.join(" · ")}</dd></div>
           )}
           {p.contactPhone && (
-            <div className="flex gap-2"><dt className="text-muted">📞</dt><dd>{p.contactPhone}</dd></div>
+            <div className="flex gap-2"><dt className="text-muted"><Icon name="phone" size={16} /></dt><dd>{p.contactPhone}</dd></div>
           )}
         </dl>
         {hours.length > 0 && (

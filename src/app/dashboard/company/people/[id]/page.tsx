@@ -4,6 +4,7 @@ import { requireCompanyAdmin } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
+import { Icon } from "@/components/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -84,7 +85,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
         <div>
           {packages.map((p) => (
             <div key={p.id} className="row">
-              <span className="ico coral">🎁</span>
+              <span className="ico coral"><Icon name="gift" size={20} /></span>
               <div className="grow">
                 <div className="t truncate">{p.label}</div>
                 <span className={`pill ${STATUS_PILL[p.status]} mt-1`}>{STATUS_LABEL[p.status]}</span>

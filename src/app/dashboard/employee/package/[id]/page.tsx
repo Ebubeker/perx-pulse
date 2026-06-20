@@ -6,6 +6,7 @@ import { resolveOffers } from "@/lib/gemini";
 import { submitPackage } from "@/lib/pulse-actions";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
+import { Icon } from "@/components/Icon";
 import { Mascot } from "@/components/Mascot";
 import { SwapButton } from "./SwapButton";
 
@@ -114,7 +115,7 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
           <div className="card flex items-center gap-4 border-lime/40 bg-lime-soft">
             <Mascot mood="celebrate" size={58} className="float" />
             <div>
-              <div className="font-display text-base font-bold">Approved — your week is ready! 🎉</div>
+              <div className="font-display text-base font-bold">Approved — your week is ready!</div>
               <div className="text-sm text-ink-soft">Show these codes at each provider.</div>
             </div>
           </div>
@@ -122,7 +123,7 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
           <div className="space-y-2.5">
             {vouchers.map((v) => (
               <div key={v.code} className="row mb-0">
-                <span className="ico">🎟️</span>
+                <span className="ico"><Icon name="ticket" size={20} /></span>
                 <div className="grow"><div className="t truncate">{v.title}</div></div>
                 <span className="shrink-0 rounded-lg bg-cream px-2.5 py-1 font-mono text-sm font-bold tracking-wider text-ink">{v.code}</span>
               </div>

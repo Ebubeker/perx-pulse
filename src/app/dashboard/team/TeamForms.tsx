@@ -31,7 +31,7 @@ export function CreateTeamPack() {
     <form action={submit} className="card space-y-3">
       <div className="field !mb-0">
         <label>Title</label>
-        <input name="title" placeholder="Friday 5-a-side football ⚽" required />
+        <input name="title" placeholder="Friday 5-a-side football" required />
       </div>
       <div className="field !mb-0">
         <label>Plan</label>

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { kudosRemainingFor, companyRecognitionFeed } from "@/lib/coins";
 import { Mascot } from "@/components/Mascot";
 import { Coins } from "@/components/Coins";
+import { Icon } from "@/components/Icon";
 import { RecognitionForms } from "./RecognitionForms";
 
 export const dynamic = "force-dynamic";
@@ -54,7 +55,7 @@ export default async function RecognitionPage() {
           {feed.map((t) => (
             <div key={t.id} className="row mb-2.5 flex-col items-stretch !gap-1.5">
               <div className="flex items-center gap-2">
-                <span className="ico coral shrink-0">{t.kind === "GRANT" ? "🏆" : "🙌"}</span>
+                <span className="ico coral shrink-0">{t.kind === "GRANT" ? <Icon name="trophy" size={20} /> : <Icon name="kudos" size={20} />}</span>
                 <p className="grow text-sm">
                   <span className="font-semibold">{t.kind === "GRANT" ? "Company" : t.from?.displayName ?? "Someone"}</span>
                   <span className="text-muted"> → </span>

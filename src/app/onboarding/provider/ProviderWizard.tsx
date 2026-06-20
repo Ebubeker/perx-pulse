@@ -3,6 +3,7 @@
 import { useState, useTransition, useId, isValidElement, cloneElement, type ReactNode, type ReactElement } from "react";
 import { setupProvider } from "@/lib/onboarding-actions";
 import { Mascot } from "@/components/Mascot";
+import { Icon } from "@/components/Icon";
 
 const CATEGORIES: [string, string][] = [
   ["wellness", "Wellness"],
@@ -56,7 +57,7 @@ export function ProviderWizard() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-cream px-5 py-8">
       <div className="flex items-center justify-between gap-3">
-        <button type="button" disabled={step === 0 || pending} onClick={() => setStep(step - 1)} className="btn-icon disabled:opacity-40" aria-label="Back">←</button>
+        <button type="button" disabled={step === 0 || pending} onClick={() => setStep(step - 1)} className="btn-icon disabled:opacity-40" aria-label="Back"><Icon name="chevronLeft" size={20} /></button>
         <Mascot mood="cool" size={48} className="float" />
       </div>
 

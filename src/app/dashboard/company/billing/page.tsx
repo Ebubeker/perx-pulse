@@ -39,7 +39,7 @@ export default async function BillingPage() {
           </div>
           {active ? (
             <p className="mt-1 text-sm text-[var(--txt-on-dark-mut)]">
-              Subscribed{company.subscribedAt ? ` since ${company.subscribedAt.toISOString().slice(0, 10)}` : ""} · billed via Lemon Squeezy. Thanks for running on Perx 💚
+              Subscribed{company.subscribedAt ? ` since ${company.subscribedAt.toISOString().slice(0, 10)}` : ""} · billed via Lemon Squeezy. Thanks for running on Perx.
             </p>
           ) : (
             <p className="mt-1 text-sm text-[var(--txt-on-dark-mut)]">

@@ -3,6 +3,7 @@ import { getAccount } from "@/lib/account";
 import { chooseAccountType } from "@/lib/onboarding-actions";
 import { Mascot } from "@/components/Mascot";
 import { Logo } from "@/components/Logo";
+import { Icon } from "@/components/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,7 @@ export default async function OnboardingPage() {
       <div className="flex flex-col gap-3.5">
         <form action={chooseAccountType.bind(null, "company")}>
           <button type="submit" className="flex w-full items-center gap-4 rounded-[26px] border border-line bg-paper p-[18px] text-left shadow-soft transition active:scale-[.98]">
-            <span className="grid size-[54px] shrink-0 place-items-center rounded-2xl bg-lime text-2xl text-ink">⌂</span>
+            <span className="grid size-[54px] shrink-0 place-items-center rounded-2xl bg-lime text-ink"><Icon name="building" size={26} /></span>
             <span className="min-w-0">
               <span className="block font-display text-[21px] font-bold leading-tight">Employer / HR</span>
               <span className="block text-[13.5px] text-muted">Fund and manage benefits for your team</span>
@@ -35,7 +36,7 @@ export default async function OnboardingPage() {
         </form>
         <form action={chooseAccountType.bind(null, "provider")}>
           <button type="submit" className="flex w-full items-center gap-4 rounded-[26px] border border-line bg-paper p-[18px] text-left shadow-soft transition active:scale-[.98]">
-            <span className="grid size-[54px] shrink-0 place-items-center rounded-2xl bg-coral text-2xl text-white">🛍</span>
+            <span className="grid size-[54px] shrink-0 place-items-center rounded-2xl bg-coral text-white"><Icon name="shopping" size={26} /></span>
             <span className="min-w-0">
               <span className="block font-display text-[21px] font-bold leading-tight">Provider</span>
               <span className="block text-[13.5px] text-muted">I offer services &amp; experiences</span>

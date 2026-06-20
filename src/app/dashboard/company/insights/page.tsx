@@ -2,6 +2,7 @@ import { requireCompanyAdmin } from "@/lib/account";
 import { companyInsights } from "@/lib/insights";
 import { ALL_CATEGORIES } from "@/lib/passport";
 import { toCoins } from "@/lib/currency";
+import { Icon } from "@/components/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -100,9 +101,9 @@ export default async function InsightsPage() {
             <div
               key={c.category}
               className="tile flex flex-col items-center p-3 text-center"
-              style={{ background: intensity > 0 ? `rgba(20, 98, 74, ${0.12 + intensity * 0.6})` : undefined }}
+              style={{ background: intensity > 0 ? `rgba(236, 106, 77, ${0.12 + intensity * 0.6})` : undefined }}
             >
-              <span className="text-xl">{meta?.emoji}</span>
+              <span className={intensity > 0.5 ? "text-white" : "text-coral"}>{meta && <Icon name={meta.icon} size={22} />}</span>
               <span className={`mt-1 text-xs font-semibold ${intensity > 0.5 ? "text-white" : ""}`}>{meta?.label}</span>
               <span className={`text-xs ${intensity > 0.5 ? "text-white/90" : "text-muted"}`}>{c.count}</span>
             </div>

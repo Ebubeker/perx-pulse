@@ -16,7 +16,7 @@ const SUGGESTIONS = [
 
 export function GenieChat() {
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "genie", text: "Hi, I'm Perx Genie ✨ Tell me how your week is going or what you're in the mood for, and I'll find the perfect perk." },
+    { role: "genie", text: "Hi, I'm Perx Genie. Tell me how your week is going or what you're in the mood for, and I'll find the perfect perk." },
   ]);
   const [input, setInput] = useState("");
   const [pending, startTransition] = useTransition();

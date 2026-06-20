@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
 import { CoinIcon } from "@/components/CoinIcon";
+import { Icon } from "@/components/Icon";
 import { Mascot } from "@/components/Mascot";
 
 export const dynamic = "force-dynamic";
@@ -79,7 +80,7 @@ export default async function WalletPage() {
           {orders.map((o) => (
             <div key={o.id} className="row mb-2.5 flex-col items-stretch gap-2">
               <div className="flex items-center gap-3">
-                <span className="ico coral">🎟</span>
+                <span className="ico coral"><Icon name="ticket" size={20} /></span>
                 <div className="grow">
                   <div className="t truncate">{o.title}</div>
                   <div className="s truncate">{o.provider.businessName}</div>
@@ -102,7 +103,7 @@ export default async function WalletPage() {
           <div className="sec"><h3>Flash drops claimed</h3></div>
           {claims.map((c) => (
             <div key={c.id} className="row">
-              <span className="ico">⚡</span>
+              <span className="ico"><Icon name="bolt" size={20} /></span>
               <div className="grow">
                 <div className="t truncate">{c.drop.title}</div>
                 <div className="s truncate">{c.drop.provider.businessName}</div>
@@ -118,7 +119,7 @@ export default async function WalletPage() {
           <div className="sec"><h3>Awaiting HR approval</h3></div>
           {pending.map((p) => (
             <Link key={p.id} href={`/dashboard/employee/package/${p.id}`} className="row">
-              <span className="ico">⏳</span>
+              <span className="ico"><Icon name="clock" size={20} /></span>
               <div className="grow">
                 <div className="t truncate">{p.label}</div>
                 <div className="s">Pending approval</div>

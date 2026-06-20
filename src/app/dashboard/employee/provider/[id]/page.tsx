@@ -4,6 +4,7 @@ import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { toCoins, effectiveLek } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
+import { Icon } from "@/components/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -65,13 +66,13 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
           <h2 className="font-display text-base font-bold">Good to know</h2>
           <dl className="mt-3 space-y-1.5 text-sm">
             {(provider.addressLine || provider.city) && (
-              <div className="flex gap-2"><dt className="text-muted">📍</dt><dd>{[provider.addressLine, provider.city].filter(Boolean).join(", ")}</dd></div>
+              <div className="flex gap-2"><dt className="text-muted"><Icon name="pin" size={16} /></dt><dd>{[provider.addressLine, provider.city].filter(Boolean).join(", ")}</dd></div>
             )}
             {provider.areasServed.length > 0 && (
-              <div className="flex gap-2"><dt className="text-muted">🗺️</dt><dd>{provider.areasServed.join(" · ")}</dd></div>
+              <div className="flex gap-2"><dt className="text-muted"><Icon name="map" size={16} /></dt><dd>{provider.areasServed.join(" · ")}</dd></div>
             )}
             {provider.contactPhone && (
-              <div className="flex gap-2"><dt className="text-muted">📞</dt><dd>{provider.contactPhone}</dd></div>
+              <div className="flex gap-2"><dt className="text-muted"><Icon name="phone" size={16} /></dt><dd>{provider.contactPhone}</dd></div>
             )}
           </dl>
           {hours.length > 0 && (

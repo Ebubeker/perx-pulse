@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { runPulse } from "@/lib/pulse-actions";
 import { Mascot } from "@/components/Mascot";
+import { Icon } from "@/components/Icon";
 
 type Mode = "SPEND_ALL" | "SAVE_SOME" | "TREAT_MYSELF" | "TEAM";
 
@@ -12,10 +13,10 @@ const QUESTIONS: { key: string; q: string; options: string[] }[] = [
   { key: "where", q: "Where?", options: ["Near work", "Near home", "A getaway", "Online"] },
 ];
 const MODES: { v: Mode; label: string; sub: string; icon: string }[] = [
-  { v: "SPEND_ALL", label: "Spend for me", sub: "Pulse uses your full weekly budget", icon: "🤖" },
-  { v: "SAVE_SOME", label: "Save some", sub: "Keep ~40% as PerxCoin", icon: "🐖" },
-  { v: "TREAT_MYSELF", label: "Treat myself", sub: "Go premium, top up if needed", icon: "🎁" },
-  { v: "TEAM", label: "Team mode", sub: "Bundle with coworkers", icon: "👥" },
+  { v: "SPEND_ALL", label: "Spend for me", sub: "Pulse uses your full weekly budget", icon: "bot" },
+  { v: "SAVE_SOME", label: "Save some", sub: "Keep ~40% as PerxCoin", icon: "piggy" },
+  { v: "TREAT_MYSELF", label: "Treat myself", sub: "Go premium, top up if needed", icon: "gift" },
+  { v: "TEAM", label: "Team mode", sub: "Bundle with coworkers", icon: "team" },
 ];
 
 export function PulseForm() {
@@ -95,7 +96,7 @@ export function PulseForm() {
                   onClick={() => setMode(v)}
                   className={`flex w-full items-center gap-3.5 rounded-[18px] border p-4 text-left transition ${on ? "border-coral bg-paper shadow-soft" : "border-line bg-cream"}`}
                 >
-                  <span className={`grid size-[42px] shrink-0 place-items-center rounded-xl text-xl ${on ? "bg-coral text-white" : "bg-coral-soft"}`}>{icon}</span>
+                  <span className={`grid size-[42px] shrink-0 place-items-center rounded-xl ${on ? "bg-coral text-white" : "bg-coral-soft text-coral"}`}><Icon name={icon} size={20} /></span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-[15px] font-bold">{label}</span>
                     <span className="block text-[12.5px] text-muted">{sub}</span>

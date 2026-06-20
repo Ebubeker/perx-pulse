@@ -6,6 +6,7 @@ import { resolveOffers } from "@/lib/gemini";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
 import { Mascot } from "@/components/Mascot";
+import { Icon } from "@/components/Icon";
 import { ChooseButton } from "./ChooseButton";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +42,7 @@ export default async function DiscoverPage() {
       {/* header + mascot */}
       <div className="flex items-start justify-between gap-2">
         <div className="greet">
-          <div className="day">✨ Discover Weekly</div>
+          <div className="day flex items-center gap-1.5"><Icon name="sparkles" size={13} />Discover Weekly</div>
           <h1>Built for your week</h1>
         </div>
         <Mascot mood="excited" size={58} className="float" />
@@ -86,7 +87,7 @@ export default async function DiscoverPage() {
 
       {/* Ask Perx Genie */}
       <Link href="/dashboard/employee/genie" className="row mt-4 mb-0">
-        <span className="ico coral">✨</span>
+        <span className="ico coral"><Icon name="sparkles" size={20} /></span>
         <div className="grow"><div className="t">Ask Perx Genie</div><div className="s">&ldquo;I have 3,000 L and I&apos;m exhausted&rdquo;</div></div>
         <span className="text-coral">→</span>
       </Link>

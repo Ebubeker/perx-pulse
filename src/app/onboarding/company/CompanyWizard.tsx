@@ -3,6 +3,7 @@
 import { useState, useTransition, useId, isValidElement, cloneElement, type ReactNode, type ReactElement } from "react";
 import { setupCompany } from "@/lib/onboarding-actions";
 import { Mascot } from "@/components/Mascot";
+import { Icon } from "@/components/Icon";
 
 const INDUSTRIES = ["Technology", "Finance", "Retail", "Manufacturing", "Healthcare", "Hospitality", "Education", "Other"];
 const SIZES = ["1–10", "11–50", "51–200", "201–500", "500+"];
@@ -51,7 +52,7 @@ export function CompanyWizard() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-cream px-5 py-8">
       <div className="flex items-center justify-between gap-3">
-        <button type="button" disabled={step === 0 || pending} onClick={() => setStep(step - 1)} className="btn-icon disabled:opacity-40" aria-label="Back">←</button>
+        <button type="button" disabled={step === 0 || pending} onClick={() => setStep(step - 1)} className="btn-icon disabled:opacity-40" aria-label="Back"><Icon name="chevronLeft" size={20} /></button>
         <Mascot mood="charged" size={48} className="float" />
       </div>
 

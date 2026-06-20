@@ -2,6 +2,7 @@ import { requireProvider } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { setDropActive } from "@/lib/drop-actions";
 import { Coins } from "@/components/Coins";
+import { Icon } from "@/components/Icon";
 import { DropForm } from "./DropForm";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +47,7 @@ export default async function ProviderDropsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-coral text-white">⚡</span>
+                      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-coral text-white"><Icon name="bolt" size={18} /></span>
                       <span className="truncate font-display text-lg font-bold">{d.title}</span>
                     </div>
                   </div>

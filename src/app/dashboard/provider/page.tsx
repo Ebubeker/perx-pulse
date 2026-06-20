@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { setOfferActive, deleteOffer } from "@/lib/offer-actions";
 import { toCoins, effectiveLek } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
+import { Icon } from "@/components/Icon";
 import { OfferForm } from "./OfferForm";
 import { RedeemButton } from "./RedeemButton";
 
@@ -33,8 +34,8 @@ export default async function ProviderDashboard() {
         List the offers employees can pick. They reach you as <strong className="text-ink">pre-funded, employer-approved</strong> customers.
       </p>
 
-      <Link href="/dashboard/provider/drops" className="btn btn-primary mt-4">
-        ⚡ Manage flash drops
+      <Link href="/dashboard/provider/drops" className="btn btn-primary mt-4 inline-flex items-center justify-center gap-2">
+        <Icon name="bolt" size={18} />Manage flash drops
       </Link>
 
       {/* KPI stats — revenue/settlement is real cash Lek */}
@@ -66,7 +67,7 @@ export default async function ProviderDashboard() {
         <div className="space-y-2.5">
           {orders.map((o) => (
             <div key={o.id} className="row mb-0">
-              <span className="ico coral">💆</span>
+              <span className="ico coral"><Icon name="ticket" size={20} /></span>
               <div className="grow">
                 <div className="t truncate">{o.title}</div>
                 <div className="s">
@@ -100,7 +101,7 @@ export default async function ProviderDashboard() {
         <div className="space-y-2.5">
           {offers.map((o) => (
             <div key={o.id} className={`row mb-0 ${!o.active ? "opacity-60" : ""}`}>
-              <span className="ico coral">💆</span>
+              <span className="ico coral"><Icon name="ticket" size={20} /></span>
               <div className="grow">
                 <div className="t truncate">
                   {o.title} {!o.active && <span className="badge badge-new">HIDDEN</span>}

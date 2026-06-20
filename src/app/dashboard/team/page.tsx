@@ -1,6 +1,7 @@
 import { requireMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { Mascot } from "@/components/Mascot";
+import { Icon } from "@/components/Icon";
 import { CreateTeamPack, JoinLeaveButton } from "./TeamForms";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export default async function TeamPage() {
     <main className="mx-auto max-w-md px-5 py-5">
       <div className="flex items-center justify-between gap-2">
         <div className="greet">
-          <div className="day">👥 Team Packs</div>
+          <div className="day flex items-center gap-1.5"><Icon name="team" size={13} />Team Packs</div>
           <h1>Do perks together</h1>
         </div>
         <Mascot mood="cool" size={60} className="float" />
@@ -67,7 +68,7 @@ export default async function TeamPage() {
                 <div className="metric !mb-0">
                   <div className="top">
                     <span className="k">{count} / {pk.targetSize} joined</span>
-                    {full && <span className="text-coral">Locked in 🎉</span>}
+                    {full && <span className="text-coral">Locked in</span>}
                   </div>
                   <div className={`bar ${full ? "coral" : ""}`}><i style={{ width: `${pct}%` }} /></div>
                 </div>

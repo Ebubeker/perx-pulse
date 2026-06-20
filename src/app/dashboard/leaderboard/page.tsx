@@ -1,10 +1,11 @@
 import { requireMembership } from "@/lib/account";
 import { topEarners, topGivers, type Ranked } from "@/lib/leaderboard";
 import { Mascot } from "@/components/Mascot";
+import { Icon } from "@/components/Icon";
 
 export const dynamic = "force-dynamic";
 
-const MEDALS = ["🥇", "🥈", "🥉"];
+const MEDAL_COLOR = ["text-[#E8B339]", "text-[#9AA0A6]", "text-[#CD7F32]"];
 
 function initial(name: string) {
   return name.trim().charAt(0).toUpperCase() || "•";
@@ -22,11 +23,11 @@ function Board({ title, subtitle, rows, unit, meId }: { title: string; subtitle:
       ) : (
         <div>
           {rows.map((r, i) => {
-            const medal = MEDALS[i];
+            const top3 = i < 3;
             const me = r.id === meId;
             return (
               <div key={r.id} className={`lb-row ${me ? "me" : ""}`}>
-                <span className={`lb-rank ${medal ? "medal" : ""}`}>{medal ?? i + 1}</span>
+                <span className="lb-rank">{top3 ? <Icon name="medal" size={22} className={MEDAL_COLOR[i]} /> : i + 1}</span>
                 <span className="avatar">{initial(r.name)}</span>
                 <div className="grow">
                   <div className="font-bold">{r.name}{me ? " · you" : ""}</div>
@@ -49,7 +50,7 @@ export default async function LeaderboardPage() {
     <main className="mx-auto max-w-md px-5 py-5">
       <div className="flex items-center justify-between gap-2">
         <div className="greet">
-          <div className="day">🏆 Leaderboard</div>
+          <div className="day flex items-center gap-1.5"><Icon name="trophy" size={13} />Leaderboard</div>
           <h1>{m.company.brandName || m.company.name}</h1>
         </div>
         <Mascot mood="celebrate" size={62} className="float" />

@@ -21,7 +21,7 @@ export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleague
     startTransition(async () => {
       const res = await giveKudos(to, amount, memo);
       if (res.error) setMsg({ text: res.error });
-      else { setMsg({ ok: true, text: "Kudos sent 🎉" }); setMemo(""); router.refresh(); }
+      else { setMsg({ ok: true, text: "Kudos sent" }); setMemo(""); router.refresh(); }
     });
   }
 
@@ -73,7 +73,7 @@ export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleague
             <input
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
-              placeholder="Saved the demo at 2am 🙌"
+              placeholder="Saved the demo at 2am"
               className="!border-white/15 !bg-white/10 !text-[var(--txt-on-dark)] placeholder:!text-white/40"
             />
           </div>
@@ -137,7 +137,7 @@ function GrantForm({ colleagues }: { colleagues: Colleague[] }) {
       <input
         value={memo}
         onChange={(e) => setMemo(e.target.value)}
-        placeholder="3-year work anniversary 🎉"
+        placeholder="3-year work anniversary"
         className="mt-2 w-full rounded-[18px] border-[1.5px] border-line bg-paper px-3 py-2.5 text-sm"
       />
       <button type="button" onClick={grant} disabled={pending || !to} className="btn btn-primary btn-lg mt-3 disabled:opacity-50">

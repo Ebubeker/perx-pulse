@@ -3,6 +3,7 @@ import { requireCompanyAdmin } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
+import { Icon } from "@/components/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -62,11 +63,11 @@ export default async function CompanyDashboard() {
       {/* Quick links */}
       <div className="sec"><h3>Quick links</h3></div>
       <div className="grid grid-cols-2 gap-3">
-        <Link href="/dashboard/company/insights" className="tile text-center text-sm font-semibold">📊 Insights</Link>
-        <Link href="/dashboard/recognition" className="tile text-center text-sm font-semibold">🏅 Recognition</Link>
-        <Link href="/dashboard/leaderboard" className="tile text-center text-sm font-semibold">🏆 Leaderboard</Link>
-        <Link href="/dashboard/team" className="tile text-center text-sm font-semibold">👥 Team packs</Link>
-        <Link href="/dashboard/company/people" className="tile col-span-2 text-center text-sm font-semibold">⚙️ Manage people</Link>
+        <Link href="/dashboard/company/insights" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="chart" size={20} /><span>Insights</span></Link>
+        <Link href="/dashboard/recognition" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="medal" size={20} /><span>Recognition</span></Link>
+        <Link href="/dashboard/leaderboard" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="trophy" size={20} /><span>Leaderboard</span></Link>
+        <Link href="/dashboard/team" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="team" size={20} /><span>Team packs</span></Link>
+        <Link href="/dashboard/company/people" className="tile col-span-2 flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="settings" size={20} /><span>Manage people</span></Link>
       </div>
     </main>
   );

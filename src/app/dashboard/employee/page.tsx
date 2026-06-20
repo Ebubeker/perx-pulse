@@ -7,6 +7,7 @@ import { getT } from "@/lib/i18n";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
 import { CoinIcon } from "@/components/CoinIcon";
+import { Icon } from "@/components/Icon";
 import { Mascot } from "@/components/Mascot";
 import { ChooseButton } from "./discover/ChooseButton";
 import { BrowseOffers } from "./BrowseOffers";
@@ -44,7 +45,7 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
       {/* greeting + mascot */}
       <div className="flex items-center justify-between gap-2">
         <div className="greet">
-          <div className="day">{t("common.morning")} 👋</div>
+          <div className="day">{t("common.morning")}</div>
           <h1>{m.displayName}</h1>
         </div>
         <Mascot mood="charged" size={66} className="float" />
@@ -124,24 +125,24 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
 
       {/* Drops */}
       <Link href="/dashboard/employee/drops" className="mt-5 flex items-center gap-3 rounded-[26px] border border-[#F4D3C8] bg-coral-soft p-4">
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-coral text-white">⚡</span>
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-coral text-white"><Icon name="bolt" size={20} /></span>
         <div className="flex-1"><div className="font-bold">Perx Drops are live</div><div className="text-[13px] text-muted">Flash deals you claim with coins</div></div>
         <span className="text-coral">→</span>
       </Link>
 
       {/* Quick links + latest pack */}
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <Link href="/dashboard/employee/passport" className="tile text-center text-sm font-semibold">🛂 Passport</Link>
-        <Link href="/dashboard/leaderboard" className="tile text-center text-sm font-semibold">🏆 Leaderboard</Link>
-        <Link href="/dashboard/team" className="tile text-center text-sm font-semibold">👥 Team packs</Link>
-        <Link href="/dashboard/employee/genie" className="tile text-center text-sm font-semibold">✨ Perx Genie</Link>
+        <Link href="/dashboard/employee/passport" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="passport" size={20} /><span>Passport</span></Link>
+        <Link href="/dashboard/leaderboard" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="trophy" size={20} /><span>Leaderboard</span></Link>
+        <Link href="/dashboard/team" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="team" size={20} /><span>Team packs</span></Link>
+        <Link href="/dashboard/employee/genie" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="genie" size={20} /><span>Perx Genie</span></Link>
       </div>
 
       {latest && (
         <div className="mt-5">
           <div className="kicker mb-2">{t("home.latest")}</div>
           <Link href={`/dashboard/employee/package/${latest.id}`} className="row mb-0">
-            <span className="ico coral">🎁</span>
+            <span className="ico coral"><Icon name="gift" size={20} /></span>
             <div className="grow"><div className="t">{latest.label}</div><div className="s">{t(`status.${latest.status}`)}</div></div>
             <span className="amt"><Coins amount={toCoins(latest.totalLek)} /></span>
           </Link>
