@@ -71,17 +71,15 @@ export function BrowseOffers({ offers, initialCategory = "all" }: { offers: Cata
               <Icon name={CAT_ICON[o.category] ?? "gift"} size={104} className="pointer-events-none absolute -right-3 -top-3 text-white/15" />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-            <div className="absolute left-3.5 top-3.5 z-[2] flex flex-wrap gap-1.5">
-              {o.taxFree && <span className="badge badge-tax">Tax-free</span>}
-              {o.discountPct > 0 && <span className="badge badge-new">−{o.discountPct}%</span>}
-            </div>
+            {o.discountPct > 0 && (
+              <span className="badge badge-new absolute left-3.5 top-3.5 z-[2]">−{o.discountPct}%</span>
+            )}
+            <span className="absolute right-3.5 top-3.5 z-[2] inline-flex items-center rounded-full bg-coral px-3 py-1.5 font-display text-sm font-bold text-white shadow-[var(--sh-press)]">
+              <Coins amount={toCoins(o.effLek)} />
+            </span>
             <div className="relative z-[2] p-4 text-white">
               <div className="font-display text-xl font-bold leading-tight line-clamp-2">{o.title}</div>
               <div className="mt-0.5 truncate text-sm text-white/85">{o.providerName}{o.area ? ` · ${o.area}` : ""}</div>
-              <div className="mt-1.5 flex items-baseline gap-2">
-                {o.discountPct > 0 && <span className="text-sm text-white/60 line-through"><Coins amount={toCoins(o.priceLek)} /></span>}
-                <span className="font-display text-2xl font-bold"><Coins amount={toCoins(o.effLek)} /></span>
-              </div>
             </div>
           </Link>
         ))}
