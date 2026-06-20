@@ -16,15 +16,23 @@ export function RecognitionForms({ colleagues, balance, isAdmin }: { colleagues:
   const [amount, setAmount] = useState(10);
   const [memo, setMemo] = useState("");
   const [msg, setMsg] = useState<{ ok?: boolean; text: string } | null>(null);
+  const [success, setSuccess] = useState<{ amount: number; toName: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
   function sendKudos() {
     setMsg(null);
+    const sentAmount = amount;
+    const sentTo = colleagues.find((c) => c.id === to)?.displayName ?? "your teammate";
     startTransition(async () => {
       const res = await giveKudos(to, amount, memo);
       if (res.error) setMsg({ text: res.error });
-      else { setMsg({ ok: true, text: `Sent ${amount} coins ✓` }); setMemo(""); setTo(""); router.refresh(); }
+      else {
+        setSuccess({ amount: sentAmount, toName: sentTo });
+        setMemo("");
+        setTo("");
+        router.refresh();
+      }
     });
   }
 
@@ -110,6 +118,20 @@ export function RecognitionForms({ colleagues, balance, isAdmin }: { colleagues:
       </div>
 
       {isAdmin && <GrantForm colleagues={colleagues} />}
+
+      {/* Success celebration overlay — character celebrating + "Sent successfully" */}
+      {success && (
+        <div className="spinreward" onClick={() => setSuccess(null)}>
+          <div className="panel" onClick={(e) => e.stopPropagation()}>
+            <Mascot mood="celebrate" size={118} className="float mx-auto" />
+            <div className="kicker mt-1 text-coral">Kudos delivered</div>
+            <h2 className="mt-1 font-display text-2xl font-extrabold leading-tight">Sent successfully!</h2>
+            <div className="big">+{success.amount}<CoinIcon className="size-9" /></div>
+            <div className="text-[13px] text-muted">to <b className="text-ink">{success.toName}</b> · straight from your wallet</div>
+            <button type="button" onClick={() => setSuccess(null)} className="btn btn-lime btn-lg mt-[18px]">Done</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
