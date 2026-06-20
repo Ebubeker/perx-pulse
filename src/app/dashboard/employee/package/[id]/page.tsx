@@ -147,7 +147,9 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
   const savedCoins = toCoins(items.reduce((s, o) => s + (o.priceLek - o.effLek), 0));
 
   return (
-    <main className="mx-auto max-w-md px-5 py-5 md:max-w-2xl">
+    <main className="mx-auto max-w-md px-5 py-5 md:max-w-5xl md:px-8 md:py-7">
+     <div className="md:grid md:grid-cols-12 md:items-start md:gap-8">
+      <div className="md:col-span-7">
       {/* photo hero — the offers' real images behind the pack title */}
       <div className="relative overflow-hidden rounded-[var(--r-lg)] shadow-soft">
         <div className="absolute inset-0 flex">
@@ -236,8 +238,11 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
         ))}
       </div>
 
+      </div>{/* /left column */}
+
+      <div className="mt-6 md:col-span-5 md:mt-0">
       {/* budget ring impact */}
-      <div className="impact mt-5">
+      <div className="impact">
         <div className="ring" style={{ "--p": ringPct, "--size": "96px" } as React.CSSProperties}>
           <div className="ring-c"><b>{toCoins(afterLek).toLocaleString("en-US")}</b><span>after this</span></div>
         </div>
@@ -259,6 +264,8 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
       <form action={submitPackage.bind(null, pkg.id)} className="mt-2">
         <button type="submit" className="btn btn-primary btn-lg">Choose this week →</button>
       </form>
+      </div>{/* /right column */}
+     </div>{/* /grid */}
     </main>
   );
 }

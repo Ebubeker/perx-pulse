@@ -45,7 +45,9 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
     : [];
 
   return (
-    <main className="mx-auto max-w-md px-5 py-5">
+    <main className="mx-auto max-w-md px-5 py-5 md:max-w-5xl md:px-8 md:py-7">
+     <div className="md:grid md:grid-cols-12 md:items-start md:gap-8">
+      <div className="md:col-span-7">
       {/* ── Product hero ── */}
       <div className="pack">
         {offer.imageUrl ? (
@@ -99,8 +101,11 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
         <p className="mt-2 text-center text-xs text-muted">Adds to a pack you can send to HR. Fully employer-funded · the money never touches your hands.</p>
       </div>
 
+      </div>{/* /left column */}
+
+      <div className="mt-6 space-y-6 md:col-span-5 md:mt-0">
       {/* ── About the provider ── */}
-      <div className="card mt-6">
+      <div className="card">
         <div className="flex items-center gap-3">
           <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-coral-soft text-coral-deep">
             <Icon name={CAT_ICON[p.category] ?? "store"} size={24} />
@@ -137,7 +142,7 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
 
       {/* ── More from provider ── */}
       {more.length > 0 && (
-        <div className="mt-6">
+        <div>
           <div className="sec"><h3>More from {p.businessName}</h3></div>
           <ul className="space-y-2.5">
             {more.map((o) => (
@@ -152,6 +157,8 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
           </ul>
         </div>
       )}
+      </div>{/* /right column */}
+     </div>{/* /grid */}
     </main>
   );
 }
