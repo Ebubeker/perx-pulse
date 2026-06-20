@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
+import { Bricolage_Grotesque, Inter, Space_Mono, Fraunces } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
@@ -10,10 +10,24 @@ const display = Bricolage_Grotesque({
   display: "swap",
 });
 
-const sans = Plus_Jakarta_Sans({
+const sans = Inter({
   subsets: ["latin"],
-  variable: "--font-jakarta",
-  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-inter",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const mono = Space_Mono({
+  subsets: ["latin"],
+  variable: "--font-spacemono",
+  weight: ["400", "700"],
+  display: "swap",
+});
+
+const serif = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -25,7 +39,7 @@ export const metadata: Metadata = {
 
 // Next 16: viewport/themeColor must be a separate export, not keys on `metadata`.
 export const viewport: Viewport = {
-  themeColor: "#14624a",
+  themeColor: "#ec6a4d",
   width: "device-width",
   initialScale: 1,
 };
@@ -33,7 +47,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${display.variable} ${sans.variable}`}>
+      <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable} ${serif.variable}`}>
         <body className="min-h-dvh">{children}</body>
       </html>
     </ClerkProvider>
