@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import type { OfferCategory } from "@prisma/client";
+import { Prisma, type OfferCategory } from "@prisma/client";
 import { prisma } from "./prisma";
 import { requireProvider, requireMembership } from "./account";
 import { voucherCode } from "./payments";
+
+class ClaimError extends Error {}
 
 const CATEGORIES = ["wellness", "fitness", "food", "health", "travel", "learning", "culture", "telecom"] as const;
 
@@ -48,31 +50,44 @@ export async function setDropActive(dropId: string, active: boolean): Promise<vo
   revalidatePath("/dashboard/provider/drops");
 }
 
-/** Employee claims a drop with PerxCoin — atomic: slot + claim + ledger SPEND + balance. */
+/**
+ * Employee claims a drop with PerxCoin. Fully atomic: the slot count and the coin balance
+ * are guarded by conditional SQL writes inside one transaction, so concurrent claims can
+ * neither oversell the slots nor drive a wallet negative.
+ */
 export async function claimDrop(dropId: string): Promise<{ error?: string; code?: string }> {
   const m = await requireMembership();
+
+  // Fast pre-checks for friendly messages; the writes below are the real guards.
   const drop = await prisma.drop.findUnique({ where: { id: dropId } });
-  if (!drop || !drop.active) return { error: "This drop is no longer available." };
-  if (drop.endsAt <= new Date()) return { error: "This drop has ended." };
+  if (!drop || !drop.active || drop.endsAt <= new Date()) return { error: "This drop is no longer available." };
   if (drop.claimedSlots >= drop.totalSlots) return { error: "All slots are gone." };
   if (m.recognitionCoins < drop.costCoins) return { error: `You need ${drop.costCoins} coins — you have ${m.recognitionCoins}.` };
 
-  const already = await prisma.dropClaim.findUnique({
-    where: { dropId_employeeProfileId: { dropId, employeeProfileId: m.id } },
-  });
-  if (already) return { error: "You already claimed this drop." };
-
   const code = voucherCode();
   try {
-    await prisma.$transaction([
-      prisma.drop.update({ where: { id: dropId }, data: { claimedSlots: { increment: 1 } } }),
-      prisma.dropClaim.create({ data: { dropId, employeeProfileId: m.id, code } }),
-      prisma.coinTxn.create({
+    await prisma.$transaction(async (tx) => {
+      // Atomic slot claim (column-to-column guard requires raw SQL).
+      const slot = await tx.$executeRaw`UPDATE "perx"."Drop" SET "claimedSlots" = "claimedSlots" + 1
+        WHERE "id" = ${dropId} AND "active" = true AND "endsAt" > now() AND "claimedSlots" < "totalSlots"`;
+      if (slot === 0) throw new ClaimError("SOLD_OUT");
+
+      // One claim per person — the unique [dropId, employeeProfileId] index enforces it.
+      await tx.dropClaim.create({ data: { dropId, employeeProfileId: m.id, code } });
+
+      // Atomic coin debit — only succeeds if the wallet can cover it.
+      const debit = await tx.$executeRaw`UPDATE "perx"."EmployeeProfile" SET "recognitionCoins" = "recognitionCoins" - ${drop.costCoins}
+        WHERE "id" = ${m.id} AND "recognitionCoins" >= ${drop.costCoins}`;
+      if (debit === 0) throw new ClaimError("NO_FUNDS");
+
+      await tx.coinTxn.create({
         data: { companyId: m.companyId, kind: "SPEND", fromEmployeeId: m.id, toEmployeeId: null, amount: drop.costCoins, memo: `Claimed: ${drop.title}` },
-      }),
-      prisma.employeeProfile.update({ where: { id: m.id }, data: { recognitionCoins: { decrement: drop.costCoins } } }),
-    ]);
-  } catch {
+      });
+    });
+  } catch (e) {
+    if (e instanceof ClaimError) return { error: e.message === "SOLD_OUT" ? "All slots are gone." : "You don't have enough coins." };
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") return { error: "You already claimed this drop." };
+    console.error("[claimDrop]", e);
     return { error: "Could not claim — try again." };
   }
   revalidatePath("/dashboard/employee/drops");

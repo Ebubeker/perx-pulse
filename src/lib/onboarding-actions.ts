@@ -53,22 +53,24 @@ export async function chooseAccountType(type: AccountType): Promise<void> {
   redirect(`/onboarding/${type}`);
 }
 
+const optEmail = z.string().trim().max(254).email("Enter a valid email").optional().or(z.literal(""));
+
 const CompanyInput = z.object({
-  name: z.string().trim().min(2, "Company name is required"),
-  brandName: z.string().trim().optional(),
-  industry: z.string().trim().optional(),
-  sizeBucket: z.string().trim().optional(),
-  website: z.string().trim().optional(),
-  nipt: z.string().trim().optional(),
+  name: z.string().trim().min(2, "Company name is required").max(120),
+  brandName: z.string().trim().max(120).optional(),
+  industry: z.string().trim().max(80).optional(),
+  sizeBucket: z.string().trim().max(40).optional(),
+  website: z.string().trim().max(2048).optional(),
+  nipt: z.string().trim().max(20).optional(),
   vatRegistered: z.boolean().optional(),
-  addressLine: z.string().trim().optional(),
-  city: z.string().trim().optional(),
+  addressLine: z.string().trim().max(200).optional(),
+  city: z.string().trim().max(80).optional(),
   defaultBudgetLek: z.coerce.number().int().min(0).max(10_000_000).optional(),
-  billingContactName: z.string().trim().optional(),
-  billingContactEmail: z.string().trim().optional(),
-  departments: z.array(z.string().trim()).optional(),
-  adminName: z.string().trim().min(1, "Your name is required"),
-  adminTitle: z.string().trim().optional(),
+  billingContactName: z.string().trim().max(120).optional(),
+  billingContactEmail: optEmail,
+  departments: z.array(z.string().trim().min(1).max(60)).max(50).optional(),
+  adminName: z.string().trim().min(1, "Your name is required").max(80),
+  adminTitle: z.string().trim().max(80).optional(),
   adminRole: z.enum(["ADMIN", "HR", "FINANCE"]).optional(),
 });
 
@@ -84,7 +86,9 @@ export async function setupCompany(input: unknown): Promise<ActionResult> {
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Please check your details." };
   const data = parsed.data;
 
-  const budget = data.defaultBudgetLek ?? 12000;
+  // An empty budget field coerces to 0 (Number("")===0), which is not nullish — so a blank
+  // input would set a 0-Lek company. Treat any non-positive value as "use the default".
+  const budget = data.defaultBudgetLek && data.defaultBudgetLek > 0 ? data.defaultBudgetLek : 12000;
   const slug = await uniqueSlug(data.brandName || data.name, "company");
   const departments = (data.departments ?? []).map((s) => s.trim()).filter(Boolean);
 
@@ -110,7 +114,9 @@ export async function setupCompany(input: unknown): Promise<ActionResult> {
         members: {
           create: {
             clerkUserId: userId,
-            role: data.adminRole ?? "ADMIN",
+            // The owner must keep admin access. HR also has it; anything else (e.g. FINANCE)
+            // would lock the sole member out of company-admin surfaces, so clamp to ADMIN.
+            role: data.adminRole === "HR" ? "HR" : "ADMIN",
             displayName: data.adminName,
             jobTitle: data.adminTitle || null,
             perksBudgetLek: budget,
@@ -134,21 +140,26 @@ export async function setupCompany(input: unknown): Promise<ActionResult> {
   redirect("/dashboard");
 }
 
-const ProviderInput = z.object({
-  businessName: z.string().trim().min(2, "Business name is required"),
-  category: z.enum(["wellness", "fitness", "food", "health", "travel", "learning", "culture", "telecom"]),
-  description: z.string().trim().optional(),
-  addressLine: z.string().trim().optional(),
-  city: z.string().trim().optional(),
-  areasServed: z.array(z.string().trim()).optional(),
-  contactName: z.string().trim().optional(),
-  contactEmail: z.string().trim().optional(),
-  contactPhone: z.string().trim().optional(),
-  nipt: z.string().trim().optional(),
-  vatRegistered: z.boolean().optional(),
-  settlementMethod: z.enum(["BANK", "PERXCOIN"]).optional(),
-  bankIban: z.string().trim().optional(),
-});
+const ProviderInput = z
+  .object({
+    businessName: z.string().trim().min(2, "Business name is required").max(120),
+    category: z.enum(["wellness", "fitness", "food", "health", "travel", "learning", "culture", "telecom"]),
+    description: z.string().trim().max(2000).optional(),
+    addressLine: z.string().trim().max(200).optional(),
+    city: z.string().trim().max(80).optional(),
+    areasServed: z.array(z.string().trim().min(1).max(60)).max(30).optional(),
+    contactName: z.string().trim().max(120).optional(),
+    contactEmail: optEmail,
+    contactPhone: z.string().trim().max(30).optional(),
+    nipt: z.string().trim().max(20).optional(),
+    vatRegistered: z.boolean().optional(),
+    settlementMethod: z.enum(["BANK", "PERXCOIN"]).optional(),
+    bankIban: z.string().trim().max(34).optional(),
+  })
+  .refine((d) => d.settlementMethod !== "BANK" || !!d.bankIban?.trim(), {
+    message: "An IBAN is required for bank settlement",
+    path: ["bankIban"],
+  });
 
 export async function setupProvider(input: unknown): Promise<ActionResult> {
   const { userId } = await auth();
@@ -198,16 +209,18 @@ export async function setupProvider(input: unknown): Promise<ActionResult> {
   redirect("/dashboard");
 }
 
+const chips = z.array(z.string().trim().min(1).max(40)).max(20).optional();
+
 const EmployeeInput = z.object({
-  displayName: z.string().trim().min(1, "Your name is required"),
-  jobTitle: z.string().trim().optional(),
-  workArea: z.string().trim().optional(),
-  homeArea: z.string().trim().optional(),
-  preferredCategories: z.array(z.string().trim()).optional(),
-  interests: z.array(z.string().trim()).optional(),
-  wellnessGoals: z.array(z.string().trim()).optional(),
-  dietary: z.array(z.string().trim()).optional(),
-  languages: z.array(z.string().trim()).optional(),
+  displayName: z.string().trim().min(1, "Your name is required").max(80),
+  jobTitle: z.string().trim().max(80).optional(),
+  workArea: z.string().trim().max(80).optional(),
+  homeArea: z.string().trim().max(80).optional(),
+  preferredCategories: chips,
+  interests: chips,
+  wellnessGoals: chips,
+  dietary: chips,
+  languages: chips,
 });
 
 export async function completeEmployeeOnboarding(input: unknown): Promise<ActionResult> {
@@ -227,11 +240,14 @@ export async function completeEmployeeOnboarding(input: unknown): Promise<Action
   const invitation = await prisma.invitation.findFirst({ where: { id: invitationId, companyId, status: "PENDING" } });
   if (!invitation) redirect("/onboarding"); // revoked, already used, or unknown
 
-  // The invite was sent to a specific email — the signed-in user must own it.
-  const primary = user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId);
-  const email = primary?.emailAddress ?? user.emailAddresses[0]?.emailAddress ?? null;
-  if (!email || email.toLowerCase() !== invitation.email.toLowerCase()) {
-    return { error: "This invitation was sent to a different email address." };
+  // The invite was sent to a specific email — the signed-in user must own a VERIFIED copy of it
+  // (an unverified address must not be enough to claim a seat).
+  const target = invitation.email.toLowerCase();
+  const ownsVerified = user.emailAddresses.some(
+    (e) => e.verification?.status === "verified" && e.emailAddress.toLowerCase() === target,
+  );
+  if (!ownsVerified) {
+    return { error: "Sign in with the verified email this invitation was sent to." };
   }
 
   const company = await prisma.company.findUnique({ where: { id: companyId } });

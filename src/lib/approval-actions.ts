@@ -7,6 +7,8 @@ import { requireCompanyAdmin } from "./account";
 import { splitFor, voucherCode } from "./payments";
 import { effectiveLek, toCoins } from "./currency";
 
+class ApproveError extends Error {}
+
 /**
  * HR approves a pending package. The employee's PerxCoins are spent, and the cash
  * equivalent is split across the providers behind each offer (Perx records its take-rate).
@@ -54,14 +56,29 @@ export async function approvePackage(packageId: string): Promise<{ error?: strin
     return { error: `${pkg.employee.displayName} needs ${costCoins} coins but has ${pkg.employee.recognitionCoins}.` };
   }
 
-  await prisma.$transaction([
-    prisma.perkPackage.update({
-      where: { id: pkg.id },
-      data: { status: "APPROVED", decidedByClerkUserId: m.clerkUserId, decidedAt: new Date() },
-    }),
-    prisma.order.createMany({ data: orderData }),
-    prisma.employeeProfile.update({ where: { id: pkg.employeeProfileId }, data: { recognitionCoins: { decrement: costCoins } } }),
-  ]);
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Only one approval wins the PENDING→APPROVED flip (defeats double-approve / double-spend).
+      const flip = await tx.perkPackage.updateMany({
+        where: { id: pkg.id, status: "PENDING" },
+        data: { status: "APPROVED", decidedByClerkUserId: m.clerkUserId, decidedAt: new Date() },
+      });
+      if (flip.count === 0) return; // a concurrent approval already settled it — nothing to do
+
+      // Atomic coin debit — fails (rolls the flip back) if the wallet can't cover it.
+      const debit = await tx.$executeRaw`UPDATE "perx"."EmployeeProfile" SET "recognitionCoins" = "recognitionCoins" - ${costCoins}
+        WHERE "id" = ${pkg.employeeProfileId} AND "recognitionCoins" >= ${costCoins}`;
+      if (debit === 0) throw new ApproveError("NO_FUNDS");
+
+      await tx.order.createMany({ data: orderData });
+    });
+  } catch (e) {
+    if (e instanceof ApproveError) {
+      return { error: `${pkg.employee.displayName} needs ${costCoins} coins but has ${pkg.employee.recognitionCoins}.` };
+    }
+    console.error("[approvePackage]", e);
+    return { error: "Could not approve — try again." };
+  }
 
   revalidatePath("/dashboard/company/approvals");
   redirect(`/dashboard/company/approvals/${pkg.id}`);

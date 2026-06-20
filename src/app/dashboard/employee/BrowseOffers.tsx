@@ -19,7 +19,7 @@ const CAT_LABEL: Record<string, string> = {
   telecom: "Telecom",
 };
 
-export function BrowseOffers({ offers, initialCategory = "all" }: { offers: CatalogOffer[]; initialCategory?: string }) {
+export function BrowseOffers({ offers, initialCategory = "all", walletCoins = 0 }: { offers: CatalogOffer[]; initialCategory?: string; walletCoins?: number }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState(initialCategory);
   const [selected, setSelected] = useState<string[]>([]);
@@ -69,26 +69,31 @@ export function BrowseOffers({ offers, initialCategory = "all" }: { offers: Cata
         ))}
       </div>
 
-      {selected.length > 0 && (
-        <div className="sticky top-16 z-20 mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary-soft px-4 py-2.5">
-          <span className="text-sm font-semibold text-primary">
-            {selected.length} selected · <Coins amount={toCoins(selTotal)} />
-          </span>
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setSelected([])} className="text-xs font-semibold text-muted">
-              Clear
-            </button>
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => startTransition(async () => { await requestOffers(selected); })}
-              className="rounded-lg bg-primary px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-60"
-            >
-              {pending ? "…" : "Request"}
-            </button>
+      {selected.length > 0 && (() => {
+        const selCoins = toCoins(selTotal);
+        const over = selCoins > walletCoins;
+        return (
+          <div className={`sticky top-16 z-20 mt-3 rounded-xl border px-4 py-2.5 ${over ? "border-accent/40 bg-accent-soft" : "border-primary/30 bg-primary-soft"}`}>
+            <div className="flex items-center justify-between gap-3">
+              <span className={`text-sm font-semibold ${over ? "text-accent" : "text-primary"}`}>
+                {selected.length} selected · <Coins amount={selCoins} />
+              </span>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setSelected([])} className="text-xs font-semibold text-muted">Clear</button>
+                <button
+                  type="button"
+                  disabled={pending || over}
+                  onClick={() => startTransition(async () => { await requestOffers(selected); })}
+                  className="rounded-lg bg-primary px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  {pending ? "…" : "Request"}
+                </button>
+              </div>
+            </div>
+            <p className="mt-0.5 text-xs text-muted">{over ? `Over your ${walletCoins} 🪙 balance — deselect some.` : `You have ${walletCoins} 🪙`}</p>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <p className="mt-3 text-xs text-muted">{filtered.length} of {offers.length} perks</p>
       <ul className="mt-2 space-y-2">

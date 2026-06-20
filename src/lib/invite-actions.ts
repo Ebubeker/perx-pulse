@@ -11,8 +11,8 @@ export type InviteResult = { error: string } | { ok: true };
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 const InviteInput = z.object({
-  email: z.string().trim().refine((v) => EMAIL_RE.test(v), "Enter a valid email"),
-  departmentId: z.string().trim().optional(),
+  email: z.string().trim().toLowerCase().max(254).refine((v) => EMAIL_RE.test(v), "Enter a valid email"),
+  departmentId: z.string().trim().max(40).optional(),
   role: z.enum(["EMPLOYEE", "HR", "FINANCE"]).optional(),
 });
 
@@ -35,6 +35,13 @@ export async function inviteEmployee(input: unknown): Promise<InviteResult> {
   }
 
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "");
+
+  // Don't accumulate duplicate PENDING invites for the same email — supersede any prior one
+  // so the new role/department wins and the people list stays clean.
+  await prisma.invitation.updateMany({
+    where: { companyId: admin.companyId, email, status: "PENDING" },
+    data: { status: "REVOKED" },
+  });
 
   // We need the DB row id to embed in the invite metadata, so create it first — but if
   // the external Clerk call then fails, delete the row so it can't linger as a phantom invite.

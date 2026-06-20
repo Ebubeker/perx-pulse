@@ -2,8 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { requireMembership } from "./account";
+
+class JoinError extends Error {}
 
 const TeamPackInput = z.object({
   title: z.string().trim().min(2).max(80),
@@ -34,12 +37,27 @@ export async function createTeamPack(input: unknown): Promise<{ error?: string }
 
 export async function joinTeamPack(teamPackId: string): Promise<{ error?: string }> {
   const m = await requireMembership();
-  const pack = await prisma.teamPack.findFirst({ where: { id: teamPackId, companyId: m.companyId } });
-  if (!pack) return { error: "Team pack not found." };
   try {
-    await prisma.teamPackMember.create({ data: { teamPackId, employeeProfileId: m.id } });
-  } catch {
-    // already a member (unique) — treat as success
+    await prisma.$transaction(async (tx) => {
+      const pack = await tx.teamPack.findFirst({
+        where: { id: teamPackId, companyId: m.companyId },
+        select: { targetSize: true, _count: { select: { members: true } } },
+      });
+      if (!pack) throw new JoinError("NOT_FOUND");
+      const already = await tx.teamPackMember.findUnique({
+        where: { teamPackId_employeeProfileId: { teamPackId, employeeProfileId: m.id } },
+      });
+      if (already) return; // idempotent — already a member
+      if (pack._count.members >= pack.targetSize) throw new JoinError("FULL");
+      await tx.teamPackMember.create({ data: { teamPackId, employeeProfileId: m.id } });
+    });
+  } catch (e) {
+    if (e instanceof JoinError) return { error: e.message === "FULL" ? "This team pack is already full." : "Team pack not found." };
+    // unique violation = a concurrent join landed first — treat as success
+    if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) {
+      console.error("[joinTeamPack]", e);
+      return { error: "Could not join — try again." };
+    }
   }
   revalidatePath("/dashboard/team");
   return {};

@@ -10,12 +10,12 @@ export type OfferResult = { error: string } | { ok: true };
 const CATEGORIES = ["wellness", "fitness", "food", "health", "travel", "learning", "culture", "telecom"] as const;
 
 const OfferInput = z.object({
-  title: z.string().trim().min(2, "Title is required"),
+  title: z.string().trim().min(2, "Title is required").max(80),
   description: z.string().trim().max(600).optional(),
   category: z.enum(CATEGORIES).optional(),
   priceLek: z.coerce.number().int().min(0).max(10_000_000),
   discountPct: z.coerce.number().int().min(0).max(90).optional(),
-  area: z.string().trim().optional(),
+  area: z.string().trim().max(60).optional(),
   taxFree: z.boolean().optional(),
 });
 

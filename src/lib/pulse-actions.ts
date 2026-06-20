@@ -2,18 +2,32 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { BudgetMode } from "@prisma/client";
+import { z } from "zod";
+import { BudgetMode } from "@prisma/client";
 import { prisma } from "./prisma";
 import { requireMembership } from "./account";
 import { recommendPackages } from "./gemini";
 import { effectiveLek, toLek } from "./currency";
 
-export async function runPulse(answers: Record<string, string>, budgetMode: BudgetMode): Promise<void> {
+// Tap-only Pulse: a small bounded map of chip answers + a known budget mode. These feed an AI
+// prompt and the DB, so they must be validated server-side (never trust the client).
+const PulseAnswers = z.record(z.string().trim().max(40), z.string().trim().max(60)).refine(
+  (a) => Object.keys(a).length <= 12,
+  "Too many answers.",
+);
+
+export async function runPulse(answers: unknown, budgetMode: unknown): Promise<void> {
   const m = await requireMembership();
 
+  const parsedAnswers = PulseAnswers.safeParse(answers);
+  const parsedMode = z.nativeEnum(BudgetMode).safeParse(budgetMode);
+  if (!parsedAnswers.success || !parsedMode.success) redirect("/dashboard/employee/pulse");
+  const safeAnswers = parsedAnswers.data;
+  const mode = parsedMode.data;
+
   const recs = await recommendPackages({
-    answers,
-    budgetMode,
+    answers: safeAnswers,
+    budgetMode: mode,
     budgetLek: m.perksBudgetLek,
     personalization: {
       preferredCategories: m.preferredCategories,
@@ -24,7 +38,7 @@ export async function runPulse(answers: Record<string, string>, budgetMode: Budg
     },
   });
 
-  const pulse = await prisma.pulse.create({ data: { employeeProfileId: m.id, answers, budgetMode } });
+  const pulse = await prisma.pulse.create({ data: { employeeProfileId: m.id, answers: safeAnswers, budgetMode: mode } });
   if (recs.length) {
     await prisma.recommendation.createMany({
       data: recs.map((r) => ({
@@ -64,7 +78,7 @@ export async function choosePackage(recId: string): Promise<void> {
 /** Employee hand-picks offers from the full catalog → a draft pack they can submit to HR. */
 export async function requestOffers(offerIds: string[]): Promise<void> {
   const m = await requireMembership();
-  const ids = [...new Set(offerIds)].slice(0, 8);
+  const ids = [...new Set((Array.isArray(offerIds) ? offerIds : []).filter((x): x is string => typeof x === "string"))].slice(0, 8);
   if (!ids.length) redirect("/dashboard/employee");
 
   const offers = await prisma.offer.findMany({ where: { id: { in: ids }, active: true } });

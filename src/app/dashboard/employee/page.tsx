@@ -97,7 +97,7 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
       <div id="browse" className="mt-8 scroll-mt-16">
         <h2 className="font-display text-lg font-bold">Browse all perks</h2>
         <p className="mb-3 text-sm text-muted">Every offer from every provider — pay with your coins, send to HR.</p>
-        <BrowseOffers offers={catalog} initialCategory={initialCategory} />
+        <BrowseOffers offers={catalog} initialCategory={initialCategory} walletCoins={m.recognitionCoins} />
       </div>
 
       {/* Quick links + latest pack */}
