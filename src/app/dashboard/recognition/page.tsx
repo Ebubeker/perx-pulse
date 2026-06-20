@@ -41,7 +41,8 @@ export default async function CoinsPage() {
   const eur = toEur(lek);
   const allowance = toCoins(m.perksBudgetLek);
   const employerName = m.company.brandName || m.company.name;
-  const award = feed.find((t) => t.kind === "GRANT" && t.toEmployeeId === m.id);
+  // A real company award — not the daily-spin grants (those are coin earnings, not recognition).
+  const award = feed.find((t) => t.kind === "GRANT" && t.toEmployeeId === m.id && !/spin/i.test(t.memo ?? ""));
 
   return (
     <main className="mx-auto max-w-md px-5 py-5 md:max-w-5xl md:px-8 md:py-7">
