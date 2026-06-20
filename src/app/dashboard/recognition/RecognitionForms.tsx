@@ -63,10 +63,10 @@ export function RecognitionForms({ colleagues, balance, isAdmin }: { colleagues:
             const on = c.id === to;
             return (
               <button key={c.id} type="button" onClick={() => setTo(c.id)} className="k">
-                <span className={`relative mx-auto mb-1.5 block w-fit rounded-full ${on ? "ring-2 ring-coral ring-offset-2 ring-offset-cream" : ""}`}>
-                  <Avatar name={c.displayName} seed={c.id} size={56} />
+                <span className={`mx-auto mb-1.5 block w-fit rounded-full ring-2 ring-offset-2 ring-offset-white transition ${on ? "scale-105 ring-coral" : "ring-transparent"}`}>
+                  <Avatar name={c.displayName} seed={c.id} size={54} />
                 </span>
-                <span className={`block truncate text-xs font-semibold ${on ? "text-coral" : "text-ink"}`}>
+                <span className={`block truncate text-xs font-semibold ${on ? "text-coral" : "text-muted"}`}>
                   {c.displayName.split(" ")[0]}
                 </span>
               </button>
