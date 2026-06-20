@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
+import { useState, useTransition, useId, isValidElement, cloneElement, type ReactNode, type ReactElement } from "react";
 import { setupProvider } from "@/lib/onboarding-actions";
 import { Mascot } from "@/components/Mascot";
 
@@ -166,10 +166,11 @@ export function ProviderWizard() {
 }
 
 function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
+  const id = useId();
   return (
     <div className="field">
-      <label>{label}</label>
-      {children}
+      <label htmlFor={id}>{label}</label>
+      {isValidElement(children) ? cloneElement(children as ReactElement<{ id?: string }>, { id }) : children}
       {hint && <span className="mt-1.5 block font-mono text-[11px] uppercase tracking-[0.08em] text-muted">{hint}</span>}
     </div>
   );
