@@ -71,6 +71,7 @@ export function BrowseOffers({ offers, initialCategory = "all" }: { offers: Cata
               <Icon name={CAT_ICON[o.category] ?? "gift"} size={104} className="pointer-events-none absolute -right-3 -top-3 text-white/15" />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+            <div className="coupon-tex pointer-events-none absolute inset-0 z-[1]" />
             {o.discountPct > 0 && (
               <span className="badge badge-new absolute left-3.5 top-3.5 z-[2]">−{o.discountPct}%</span>
             )}
