@@ -56,17 +56,17 @@ export function BrowseOffers({ offers, initialCategory = "all" }: { offers: Cata
 
       <p className="mt-3 text-xs text-muted">{filtered.length} of {offers.length} perks</p>
 
-      {/* perk cards — portrait 1:2, one per row on mobile, more per row on wider screens */}
-      <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* perk cards — landscape 2:1 banners, one per row on mobile, two per row on wider screens */}
+      <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {filtered.map((o) => (
           <Link
             key={o.id}
             href={`/dashboard/employee/offer/${o.id}`}
-            className="relative flex aspect-[1/2] flex-col justify-end overflow-hidden rounded-2xl shadow-soft transition active:scale-[.99]"
+            className="relative flex aspect-[2/1] flex-col justify-end overflow-hidden rounded-2xl shadow-soft transition active:scale-[.99]"
             style={{ background: CAT_COLOR[o.category] ?? "var(--coral)" }}
           >
             {o.imageUrl ? (
-              <Image src={o.imageUrl} alt="" fill sizes="(min-width:1024px) 340px, (min-width:640px) 50vw, 100vw" unoptimized className="object-cover" />
+              <Image src={o.imageUrl} alt="" fill sizes="(min-width:640px) 480px, 100vw" unoptimized className="object-cover" />
             ) : (
               <Icon name={CAT_ICON[o.category] ?? "gift"} size={104} className="pointer-events-none absolute -right-3 -top-3 text-white/15" />
             )}
