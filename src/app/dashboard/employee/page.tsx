@@ -10,12 +10,14 @@ import { BrowseOffers } from "./BrowseOffers";
 
 export const dynamic = "force-dynamic";
 
-export default async function EmployeeHome() {
+export default async function EmployeeHome({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const m = await getMembership();
   if (!m) redirect("/onboarding");
   if (m.role !== "EMPLOYEE") redirect("/dashboard/company");
 
   const { t } = await getT();
+  const sp = await searchParams;
+  const initialCategory = typeof sp.cat === "string" ? sp.cat : "all";
   const [latestPulse, approvedAgg, catalog, latest] = await Promise.all([
     prisma.pulse.findFirst({
       where: { employeeProfileId: m.id },
@@ -74,9 +76,9 @@ export default async function EmployeeHome() {
                 <ul className="mt-3 space-y-1.5">
                   {items.map((o) => (
                     <li key={o.id} className="flex items-center justify-between gap-3 text-sm">
-                      <span className="min-w-0 truncate">
-                        <span className="font-medium">{o.title}</span> <span className="text-muted">· {o.providerName}</span>
-                      </span>
+                      <Link href={`/dashboard/employee/offer/${o.id}`} className="min-w-0 truncate">
+                        <span className="font-medium underline-offset-2 hover:underline">{o.title}</span> <span className="text-muted">· {o.providerName}</span>
+                      </Link>
                       <span className="shrink-0 font-semibold text-ink-soft">{o.priceLek.toLocaleString("en-US")} L</span>
                     </li>
                   ))}
@@ -93,14 +95,17 @@ export default async function EmployeeHome() {
       )}
 
       {/* 3 · Browse all offers */}
-      <div className="mt-8">
+      <div id="browse" className="mt-8 scroll-mt-16">
         <h2 className="font-display text-lg font-bold">Browse all perks</h2>
         <p className="mb-3 text-sm text-muted">Every offer from every provider — pick your own and send to HR.</p>
-        <BrowseOffers offers={catalog} />
+        <BrowseOffers offers={catalog} initialCategory={initialCategory} />
       </div>
 
       {/* Quick links + latest pack */}
-      <div className="mt-8 grid grid-cols-2 gap-3">
+      <Link href="/dashboard/employee/wallet" className="mt-8 flex items-center justify-between rounded-xl border border-gold-ink/30 bg-cream px-5 py-3.5 font-semibold text-gold-ink">
+        <span>🎟️ My perks &amp; vouchers</span><span>→</span>
+      </Link>
+      <div className="mt-3 grid grid-cols-2 gap-3">
         <Link href="/dashboard/employee/drops" className="rounded-xl border border-line bg-paper px-4 py-3 text-center text-sm font-semibold">⚡ Drops</Link>
         <Link href="/dashboard/employee/passport" className="rounded-xl border border-line bg-paper px-4 py-3 text-center text-sm font-semibold">🛂 Passport</Link>
         <Link href="/dashboard/leaderboard" className="rounded-xl border border-line bg-paper px-4 py-3 text-center text-sm font-semibold">🏆 Leaderboard</Link>

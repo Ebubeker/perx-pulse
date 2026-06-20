@@ -17,9 +17,9 @@ const CAT_LABEL: Record<string, string> = {
   telecom: "Telecom",
 };
 
-export function BrowseOffers({ offers }: { offers: CatalogOffer[] }) {
+export function BrowseOffers({ offers, initialCategory = "all" }: { offers: CatalogOffer[]; initialCategory?: string }) {
   const [q, setQ] = useState("");
-  const [cat, setCat] = useState("all");
+  const [cat, setCat] = useState(initialCategory);
   const [selected, setSelected] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
 

@@ -46,6 +46,8 @@ const en: Dict = {
   "page.pulse": "Weekly Pulse",
   "page.pack": "Your pack",
   "page.offer": "Offer",
+  "page.provider": "Provider",
+  "nav.wallet": "My perks",
   "action.signout": "Sign out",
 };
 
@@ -89,6 +91,8 @@ const sq: Dict = {
   "page.pulse": "Pulse javor",
   "page.pack": "Paketa jote",
   "page.offer": "Oferta",
+  "page.provider": "Ofruesi",
+  "nav.wallet": "Përfitimet e mia",
   "action.signout": "Dil",
 };
 

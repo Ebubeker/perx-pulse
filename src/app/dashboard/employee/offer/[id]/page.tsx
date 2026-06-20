@@ -39,7 +39,10 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
     <main className="mx-auto max-w-md px-6 py-8">
       <p className="text-sm font-semibold tracking-wide text-accent">{CAT_LABEL[offer.category] ?? offer.category}</p>
       <h1 className="mt-1 text-2xl font-bold">{offer.title}</h1>
-      <p className="mt-1 text-sm text-muted">{p.businessName}{offer.area ? ` · ${offer.area}` : ""}</p>
+      <p className="mt-1 text-sm text-muted">
+        <Link href={`/dashboard/employee/provider/${offer.providerId}`} className="font-medium text-primary underline-offset-2 hover:underline">{p.businessName}</Link>
+        {offer.area ? ` · ${offer.area}` : ""}
+      </p>
 
       <div className="mt-4 flex items-center gap-3">
         <span className="text-3xl font-bold">{offer.priceLek.toLocaleString("en-US")} L</span>
@@ -60,7 +63,10 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
 
       {/* Provider */}
       <div className="mt-7 rounded-2xl border border-line bg-paper p-5">
-        <h2 className="font-display text-base font-bold">About {p.businessName}</h2>
+        <div className="flex items-baseline justify-between gap-2">
+          <h2 className="font-display text-base font-bold">About {p.businessName}</h2>
+          <Link href={`/dashboard/employee/provider/${offer.providerId}`} className="shrink-0 text-sm font-semibold text-primary">View profile →</Link>
+        </div>
         {p.description && <p className="mt-1.5 text-sm text-ink-soft">{p.description}</p>}
         <dl className="mt-3 space-y-1.5 text-sm">
           {(p.addressLine || p.city) && (

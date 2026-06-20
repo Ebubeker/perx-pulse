@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
 import { passportFor, ALL_CATEGORIES } from "@/lib/passport";
@@ -32,14 +33,15 @@ export default async function PassportPage() {
         {ALL_CATEGORIES.map((c) => {
           const got = collected.has(c.key);
           return (
-            <div
+            <Link
               key={c.key}
-              className={`flex flex-col items-center rounded-2xl border p-5 text-center ${got ? "border-violet/40 bg-violet-soft" : "border-dashed border-line bg-paper"}`}
+              href={`/dashboard/employee?cat=${c.key}#browse`}
+              className={`flex flex-col items-center rounded-2xl border p-5 text-center transition hover:shadow-soft ${got ? "border-violet/40 bg-violet-soft" : "border-dashed border-line bg-paper"}`}
             >
               <span className={`text-3xl ${got ? "" : "opacity-25 grayscale"}`}>{c.emoji}</span>
               <span className={`mt-2 text-sm font-semibold ${got ? "text-violet" : "text-muted"}`}>{c.label}</span>
-              <span className="mt-0.5 text-xs text-muted">{got ? "Stamped ✓" : "Locked"}</span>
-            </div>
+              <span className="mt-0.5 text-xs text-muted">{got ? "Stamped ✓" : "Explore →"}</span>
+            </Link>
           );
         })}
       </div>

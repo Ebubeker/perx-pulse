@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireCompanyAdmin } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { InviteForm } from "./InviteForm";
@@ -32,14 +33,17 @@ export default async function PeoplePage() {
       <h2 className="mb-2 mt-8 font-semibold">Team ({members.length})</h2>
       <ul className="divide-y divide-line rounded-xl border border-line bg-paper">
         {members.map((m) => (
-          <li key={m.id} className="flex items-center justify-between px-4 py-3">
-            <span>
-              <span className="font-medium">{m.displayName}</span>{" "}
-              <span className="text-sm text-muted">
-                · {m.role}
-                {m.department ? ` · ${m.department.name}` : ""}
+          <li key={m.id}>
+            <Link href={`/dashboard/company/people/${m.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-cream">
+              <span>
+                <span className="font-medium">{m.displayName}</span>{" "}
+                <span className="text-sm text-muted">
+                  · {m.role}
+                  {m.department ? ` · ${m.department.name}` : ""}
+                </span>
               </span>
-            </span>
+              <span className="text-muted">→</span>
+            </Link>
           </li>
         ))}
       </ul>
