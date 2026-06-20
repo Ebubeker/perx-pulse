@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mascot } from "@/components/Mascot";
+import { Logo } from "@/components/Logo";
 import { AccountMenu } from "./AccountMenu";
 import { Icon } from "./icons";
 import { NAV_PRIMARY, NAV_SECONDARY, isActive, ROLE_HOME, type Role, type NavItem } from "./nav-config";
@@ -28,9 +28,8 @@ export function Sidebar({ role, locale, labels, pendingCount }: { role: Role; lo
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line bg-paper md:flex">
-      <Link href={ROLE_HOME[role]} className="flex items-center gap-2 px-5 py-5">
-        <Mascot size={30} />
-        <span className="font-display text-lg font-bold">Perx</span>
+      <Link href={ROLE_HOME[role]} aria-label="Perx" className="px-5 py-5">
+        <Logo />
       </Link>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3">

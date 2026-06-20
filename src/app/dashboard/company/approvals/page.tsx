@@ -40,12 +40,12 @@ export default async function ApprovalsPage() {
 
   return (
     <main className="page" style={{ maxWidth: 920 }}>
-      <div className="kicker text-coral">
+      <div className="sub kicker text-coral">
         {pending.length === 0
-          ? "All caught up"
-          : `${pending.length} pending · ${newToday} new today`}
+          ? "ALL CAUGHT UP"
+          : `${pending.length} PENDING · ${newToday} NEW TODAY`}
       </div>
-      <h1 className="mb-1.5 mt-1 font-display text-4xl font-extrabold tracking-tight">Approvals inbox</h1>
+      <h1 className="h1" style={{ marginBottom: 6 }}>Approvals inbox</h1>
       <p className="text-muted">
         {pending.length === 0
           ? "No packs waiting. You're all caught up."
@@ -57,42 +57,22 @@ export default async function ApprovalsPage() {
         </p>
       )}
 
-      <div className="mt-5 space-y-3">
+      <div style={{ marginTop: 16 }}>
         {pendingWithItems.map(({ pkg, items }) => (
-          <div key={pkg.id} className="card">
-            <div className="flex flex-wrap items-center gap-4">
-              <Avatar name={pkg.employee.displayName} seed={pkg.employeeProfileId} size={46} />
-              <div className="min-w-[170px] flex-1">
-                <div className="font-bold">{pkg.employee.displayName} · {pkg.label}</div>
-                <div className="truncate text-sm text-muted">
-                  {items.map((o) => o.providerName).join(" · ") || "Perx pack"}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                <span className="badge badge-tax">Tax-free</span>
-                <span className="pill pill-ready"><span className="dot" />In budget</span>
-              </div>
-              <div className="font-display text-xl font-extrabold text-lime-deep">
-                <Coins amount={toCoins(pkg.totalLek)} />
-              </div>
+          <div key={pkg.id} className="appr">
+            <Avatar name={pkg.employee.displayName} seed={pkg.employeeProfileId} size={46} />
+            <Link href={`/dashboard/company/approvals/${pkg.id}`} className="who" style={{ color: "inherit" }}>
+              <div className="t">{pkg.employee.displayName} · {pkg.label}</div>
+              <div className="s">{items.map((o) => o.providerName).join(" · ") || "Perx pack"}</div>
+            </Link>
+            <div className="flags">
+              <span className="badge badge-tax">TAX-FREE</span>
+              <span className="pill pill-ready"><span className="dot" />In budget</span>
             </div>
-
-            <ul className="mt-3 space-y-1.5 border-t border-line pt-3">
-              {items.map((o) => (
-                <li key={o.id} className="flex items-center justify-between gap-3 text-sm">
-                  <span className="min-w-0 truncate">
-                    <span className="font-medium">{o.title}</span>{" "}
-                    <span className="text-muted">· {o.providerName}</span>
-                  </span>
-                  <span className="shrink-0 text-ink-soft"><Coins amount={toCoins(o.effLek)} /></span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-3 flex items-center justify-between gap-3 border-t border-line pt-3">
-              <Link href={`/dashboard/company/approvals/${pkg.id}`} className="link text-sm">View payment split →</Link>
+            <div className="tot text-lime-deep"><Coins amount={toCoins(pkg.totalLek)} /></div>
+            <div className="actions">
+              <ApprovalActions packageId={pkg.id} />
             </div>
-            <ApprovalActions packageId={pkg.id} />
           </div>
         ))}
       </div>

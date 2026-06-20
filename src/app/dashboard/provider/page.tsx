@@ -30,7 +30,7 @@ export default async function ProviderDashboard() {
     <main className="page">
       {/* heading */}
       <div className="kicker text-coral">{p.category}</div>
-      <h1 className="mt-1 font-display text-4xl font-bold tracking-tight">{p.businessName}</h1>
+      <h1 className="h1 mt-1">{p.businessName}</h1>
       <p className="mt-2 max-w-xl text-sm text-muted">
         List the offers employees can pick. They reach you as <strong className="text-ink">pre-funded, employer-approved</strong> customers.
       </p>

@@ -41,7 +41,6 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
   const balance = m.recognitionCoins;
   const allowance = toCoins(m.perksBudgetLek);
   const ringP = Math.min(100, Math.round((balance / Math.max(allowance, 1)) * 100));
-
   const employerName = m.company.brandName || m.company.name;
 
   return (
@@ -53,77 +52,44 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
           <h1>{m.displayName}</h1>
         </div>
         <Mascot mood="charged" size={72} className="float ml-auto" />
-        <Link href="/dashboard/employee/wallet" className="btn-icon" aria-label="Notifications"><Icon name="bolt" size={18} /></Link>
+        <Link href="/dashboard/employee/wallet" className="btn-icon" aria-label="Wallet"><Icon name="card" size={18} /></Link>
       </div>
 
-      {/* budget + coins — dark card with ring */}
+      {/* budget + coins — dark card with ring (design .hcard) */}
       <div className="card-dark mt-4">
         <div className="blob" />
-        <div className="relative z-[2] flex items-center gap-[18px]">
+        <div className="hcard relative z-[2]">
           <div className="ring" style={{ "--p": ringP, "--size": "118px" } as React.CSSProperties}>
             <div className="ring-c"><b>{balance.toLocaleString("en-US")}</b><span>coins left</span></div>
           </div>
-          <div className="flex-1">
-            <div className="text-[13px] text-[var(--txt-on-dark-mut)]">Monthly budget · {employerName}</div>
-            <div className="mt-0.5 inline-flex items-center gap-1 font-display text-[26px] font-bold text-[var(--txt-on-dark)]">{allowance}<CoinIcon className="size-[0.7em]" /></div>
+          <div className="info">
+            <div className="lab">Monthly budget · {employerName}</div>
+            <div className="big inline-flex items-center gap-1">{allowance}<CoinIcon className="size-[0.7em]" /></div>
             <Link href="/dashboard/recognition" className="coin mt-3"><CoinIcon className="size-4" />{balance.toLocaleString("en-US")} PerxCoin</Link>
           </div>
         </div>
       </div>
 
-      {/* weekly pulse mini */}
-      <div className="sec"><h3>Weekly Pulse</h3><Link href="/dashboard/employee/pulse" className="link">{recs.length ? "Retake →" : "Start →"}</Link></div>
-      <p className="-mt-1.5 mb-3 text-sm text-muted">How&apos;s your week shaping up? Tap a few.</p>
-      <div className="chip-row">
-        {["Tired", "Stressed", "Social", "Focused", "Adventurous", "Save smart", "Treat me"].map((c) => (
-          <Link key={c} href="/dashboard/employee/pulse" className="chip">{c}</Link>
-        ))}
-      </div>
-
-      {/* ready — see your AI packs (design .ready: lime card) */}
-      <Link
-        href={recs.length > 0 ? "/dashboard/employee/discover" : "/dashboard/employee/pulse"}
-        className="mt-5 flex items-center gap-3.5 rounded-[var(--r-lg)] bg-lime px-5 py-[18px] shadow-soft"
-      >
-        <div>
-          <div className="font-mono text-[11px] tracking-[.14em] text-[#5c6b14]">READY</div>
-          <div className="mt-0.5 font-display text-xl font-bold">
-            {recs.length > 0 ? `See your ${recs.length} AI ${recs.length === 1 ? "pack" : "packs"}` : "Build your AI packs"}
-          </div>
-        </div>
-        <span className="ml-auto grid size-11 shrink-0 place-items-center rounded-full bg-ink text-white">→</span>
-      </Link>
-
-      {/* drops (design .drop: coral-soft card) */}
-      <Link
-        href="/dashboard/employee/drops"
-        className="mt-3.5 flex items-center gap-3 rounded-[var(--r-lg)] border border-[#F4D3C8] bg-coral-soft p-4"
-      >
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-coral text-white"><Icon name="bolt" size={18} /></span>
-        <div className="flex-1"><div className="font-bold">Perx Drops are live</div><div className="text-[13px] text-muted">Flash deals you claim with coins</div></div>
-        <span className="text-coral">→</span>
-      </Link>
-
-      {/* Discover Weekly — the AI packs */}
-      {recs.length > 0 && (
+      {/* Discover Weekly — horizontal carousel of AI packs */}
+      {recs.length > 0 ? (
         <>
-          <div className="sec"><h3>Discover Weekly</h3><Link href="/dashboard/employee/discover" className="link">See all →</Link></div>
-          <div className="space-y-4">
+          <div className="sec"><h3>Discover Weekly</h3><Link href="/dashboard/employee/pulse" className="link">Retake →</Link></div>
+          <div className="hscroll -mx-5 px-5">
             {packs.map(({ rec, items }, i) => {
               const top = PACK_TOP[i % PACK_TOP.length];
               const taxFree = items.length > 0 && items.every((o) => o.taxFree);
               const packImg = PACK_IMG[i % PACK_IMG.length];
               return (
-                <div key={rec.id} className="pack">
-                  <div className={`pack-top ${top} flex items-center justify-between gap-3.5`}>
+                <div key={rec.id} className="pack w-[290px]">
+                  <div className={`pack-top ${top} flex items-center justify-between gap-3`}>
                     <div className="min-w-0">
                       <div className="kk">AI Pick · {items.length} providers</div>
                       <h2 className="truncate">{rec.label}</h2>
                     </div>
-                    <Image src={`/perx/packs/${packImg}.png`} alt="" width={64} height={88} unoptimized className="float h-[88px] w-16 shrink-0 rounded-[13px] object-cover shadow-[0_8px_18px_rgba(0,0,0,.18)]" />
+                    <Image src={`/perx/packs/${packImg}.png`} alt="" width={56} height={78} unoptimized className="float h-[78px] w-14 shrink-0 rounded-[13px] object-cover shadow-[0_8px_18px_rgba(0,0,0,.18)]" />
                   </div>
                   <div className="pack-body">
-                    <div className="why"><span className="spark"><Icon name="sparkles" size={15} /></span><span>{rec.rationale}</span></div>
+                    <div className="why"><span className="spark"><Icon name="sparkles" size={15} /></span><span className="line-clamp-2">{rec.rationale}</span></div>
                     <div className="chip-row mb-3.5">
                       {items.map((o) => (
                         <Link key={o.id} href={`/dashboard/employee/offer/${o.id}`} className="provchip">{o.providerName}</Link>
@@ -131,7 +97,6 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
                     </div>
                     <div className="pack-foot">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted">{items.length} providers</span>
                         {taxFree && <span className="badge badge-tax">Tax-free</span>}
                         <span className="price"><Coins amount={toCoins(rec.totalLek)} /></span>
                       </div>
@@ -143,6 +108,14 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
             })}
           </div>
         </>
+      ) : (
+        <Link href="/dashboard/employee/pulse" className="ready mt-5">
+          <div>
+            <div className="kk">READY</div>
+            <div className="t">Build your AI packs</div>
+          </div>
+          <span className="go">→</span>
+        </Link>
       )}
 
       {/* Browse all perks */}
@@ -151,8 +124,15 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
         <BrowseOffers offers={catalog} initialCategory={initialCategory} walletCoins={balance} />
       </div>
 
+      {/* drops (design .drop: coral-soft card) */}
+      <Link href="/dashboard/employee/drops" className="drop mt-5">
+        <span className="ic"><Icon name="bolt" size={18} /></span>
+        <div className="flex-1"><div className="font-bold">Perx Drops are live</div><div className="text-[13px] text-muted">Flash deals you claim with coins</div></div>
+        <span className="text-coral">→</span>
+      </Link>
+
       {/* Quick links + latest pack */}
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="mt-3.5 grid grid-cols-2 gap-3">
         <Link href="/dashboard/employee/passport" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="passport" size={20} /><span>Passport</span></Link>
         <Link href="/dashboard/leaderboard" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="trophy" size={20} /><span>Leaderboard</span></Link>
         <Link href="/dashboard/team" className="tile flex flex-col items-center gap-1.5 text-center text-sm font-semibold"><Icon name="team" size={20} /><span>Team packs</span></Link>

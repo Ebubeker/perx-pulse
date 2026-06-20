@@ -12,13 +12,14 @@ const QUESTIONS: { key: string; q: string; options: string[] }[] = [
   { key: "need", q: "What do you need most?", options: ["Relax", "Energy", "Health", "Focus", "Fun"] },
   { key: "where", q: "Where?", options: ["Near work", "Near home", "A getaway", "Online"] },
 ];
+// budget modes — the EXACT .mode list from design 12-budget-modes.html
 const MODES: { v: Mode; label: string; sub: string; icon: string }[] = [
   { v: "SPEND_ALL", label: "Spend for me", sub: "Pulse uses your full weekly budget", icon: "bot" },
   { v: "SAVE_SOME", label: "Save some", sub: "Keep ~40% as PerxCoin", icon: "piggy" },
   { v: "TREAT_MYSELF", label: "Treat myself", sub: "Go premium, top up if needed", icon: "gift" },
   { v: "TEAM", label: "Team mode", sub: "Bundle with coworkers", icon: "team" },
 ];
-// Generating steps (design 10-generating.html)
+// rotating .step lines from design 10-generating.html
 const GEN_STEPS = [
   "Reading your vibe…",
   "Matching local providers…",
@@ -51,21 +52,19 @@ export function PulseForm() {
   const answered = Object.values(picks).filter(Boolean).length;
   const progress = Math.round(((step + 1) / GEN_STEPS.length) * 100);
 
-  // "Pulse is building your week" — the generating state (design 10-generating.html)
+  // ── Generating state — design 10-generating.html: big charging Mascot + heading + .step + .dots ──
   if (pending) {
     return (
       <main className="mx-auto flex min-h-[80vh] max-w-md flex-col items-center justify-center px-8 text-center">
-        <Mascot mood="charging" size={200} className="float" />
-        <h1 className="mt-6 font-display text-[27px] font-extrabold leading-tight tracking-[-.02em]">Pulse is building<br />your week…</h1>
-        <div className="mt-2 h-5 text-sm text-muted">{GEN_STEPS[step]}</div>
-        <div className="mt-[22px] flex gap-2">
-          <i className="size-[9px] rounded-full bg-coral pulse-dot" />
-          <i className="size-[9px] rounded-full bg-lime-deep pulse-dot" style={{ animationDelay: ".15s" }} />
-          <i className="size-[9px] rounded-full bg-coral pulse-dot" style={{ animationDelay: ".3s" }} />
+        <div className="float" style={{ display: "flex", justifyContent: "center" }}>
+          <Mascot mood="charging" size={200} />
         </div>
-        <div className="mt-6 h-1.5 w-[200px] overflow-hidden rounded-full bg-line">
-          <i className="block h-full rounded-full bg-coral transition-[width] duration-500" style={{ width: `${progress}%` }} />
-        </div>
+        <h1 className="mt-[26px] font-display text-[27px] font-extrabold tracking-[-.02em]">
+          Pulse is building<br />your week…
+        </h1>
+        <div className="step mt-2 h-5 text-sm text-muted">{GEN_STEPS[step]}</div>
+        <div className="dots mt-[22px]"><i></i><i></i><i></i></div>
+        <div className="bar coral mt-6 w-[200px]"><i style={{ width: `${progress}%`, transition: "width .5s" }} /></div>
       </main>
     );
   }
@@ -104,29 +103,28 @@ export function PulseForm() {
           </div>
         ))}
 
+        {/* Smart Budget Mode — the EXACT .mode list from 12-budget-modes.html */}
         <div>
-          <div className="kicker mb-1">04 · Smart budget mode</div>
-          <p className="mb-2.5 text-[13px] text-muted">Reshapes your packs instantly.</p>
-          <div className="space-y-2.5">
-            {MODES.map(({ v, label, sub, icon }) => {
-              const on = mode === v;
-              return (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setMode(v)}
-                  className={`flex w-full items-center gap-3.5 rounded-[18px] border p-4 text-left transition ${on ? "border-coral bg-paper shadow-soft" : "border-line bg-cream"}`}
-                >
-                  <span className={`grid size-[42px] shrink-0 place-items-center rounded-xl ${on ? "bg-coral text-white" : "bg-coral-soft text-coral"}`}><Icon name={icon} size={20} /></span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[15px] font-bold">{label}</span>
-                    <span className="block text-[12.5px] text-muted">{sub}</span>
-                  </span>
-                  <span className={`size-[22px] shrink-0 rounded-full border-2 ${on ? "border-coral bg-[radial-gradient(var(--coral)_40%,#fff_45%)]" : "border-line"}`} />
-                </button>
-              );
-            })}
-          </div>
+          <h2 className="font-display text-[23px] font-bold">Smart Budget Mode</h2>
+          <div className="lead mb-[18px] mt-1 text-sm text-muted">Reshapes your 3 packs instantly.</div>
+          {MODES.map(({ v, label, sub, icon }) => {
+            const on = mode === v;
+            return (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setMode(v)}
+                className={`mode ${on ? "on" : ""}`}
+              >
+                <span className="ic"><Icon name={icon} size={20} /></span>
+                <div>
+                  <div className="t">{label}</div>
+                  <div className="s">{sub}</div>
+                </div>
+                <span className="rad"></span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -134,7 +132,7 @@ export function PulseForm() {
         type="button"
         onClick={submit}
         disabled={pending}
-        className="btn btn-primary btn-lg mt-7 disabled:opacity-60"
+        className="btn btn-primary btn-lg mt-2 disabled:opacity-60"
       >
         {`Build my week${answered ? ` · ${answered}/3` : ""}`}
       </button>

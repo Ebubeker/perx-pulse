@@ -10,6 +10,13 @@ import { Mascot } from "@/components/Mascot";
 
 export const dynamic = "force-dynamic";
 
+// Quick "spend coins" shortcuts (design: horizontal .spend scroller of .s mini-cards).
+const SPEND: { icon: string; title: string; coins: number; bg?: string }[] = [
+  { icon: "gift", title: "Extra day off", coins: 800 },
+  { icon: "food", title: "Lunch on us", coins: 200, bg: "var(--lime-soft)" },
+  { icon: "culture", title: "Cinema night", coins: 150 },
+];
+
 export default async function WalletPage() {
   const m = await getMembership();
   if (!m) redirect("/onboarding");
@@ -28,125 +35,93 @@ export default async function WalletPage() {
     prisma.perkPackage.findMany({ where: { employeeProfileId: m.id, status: "PENDING" }, orderBy: { createdAt: "desc" } }),
   ]);
 
-  const empty = orders.length === 0 && claims.length === 0 && pending.length === 0;
-
   const balance = m.recognitionCoins;
   const allowance = toCoins(m.perksBudgetLek);
   const ringP = Math.min(100, Math.round((balance / Math.max(allowance, 1)) * 100));
 
   return (
     <main className="mx-auto max-w-md px-5 py-5">
-      {/* heading + mascot (design: "Your balance" / "PerxCoin Wallet") */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="greet">
-          <div className="day">Your balance</div>
-          <h1>PerxCoin Wallet</h1>
-        </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="greet"><div className="day">Your balance</div><h1>PerxCoin Wallet</h1></div>
         <Mascot mood="charged" size={74} className="float" />
       </div>
-
-      {/* dark balance card with ring (home pattern) */}
-      <div className="card-dark mt-3.5">
-        <div className="blob" />
-        <div className="relative z-[2] flex items-center gap-4">
-          <div className="ring" style={{ "--p": ringP, "--size": "118px" } as React.CSSProperties}>
-            <div className="ring-c"><b>{balance.toLocaleString("en-US")}</b><span>coins</span></div>
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="kicker flex items-center gap-1.5 text-[var(--txt-on-dark-mut)]"><CoinIcon className="size-3.5" /> Available</div>
-            <div className="mt-1 inline-flex items-center gap-1 font-display text-[15px] font-semibold text-[var(--txt-on-dark)]">{allowance}<CoinIcon className="size-[0.9em]" />/mo from {m.company.brandName || m.company.name}</div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/dashboard/employee#browse" className="coin"><CoinIcon className="size-4" />Redeem</Link>
-              <Link href="/dashboard/recognition" className="rounded-full border border-white/20 px-3.5 py-1.5 text-sm font-semibold text-[var(--txt-on-dark)]">Send kudos</Link>
+      <div className="card-dark" style={{ marginTop: 14 }}><div className="blob" />
+        <div style={{ position: "relative", zIndex: 2 }}>
+          <div className="wcard">
+            <div className="lab"><CoinIcon className="size-4" /> AVAILABLE</div>
+            <div className="bal">{balance.toLocaleString("en-US")}</div>
+            <div style={{ color: "#fff9", fontSize: 13 }}>PerxCoin · earns you perks</div>
+            <div className="wbtns">
+              <Link className="btn btn-lime" href="/dashboard/employee#browse"><Icon name="gift" size={16} /> Redeem</Link>
+              <Link className="btn btn-ghost" href="/dashboard/recognition" style={{ color: "#fff", borderColor: "#fff3" }}><Icon name="kudos" size={16} /> Send kudos</Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Daily Spin row (design: lime-soft accent row → free coins) */}
-      <Link
-        href="/dashboard/recognition"
-        className="row mt-3.5 mb-0 border-[#E3EBBE] bg-lime-soft"
-      >
+      <Link className="row" href="/dashboard/recognition" style={{ marginTop: 14, background: "var(--lime-soft)", borderColor: "#E3EBBE" }}>
         <span className="ico" style={{ background: "var(--lime)", color: "var(--ink)" }}><Icon name="sparkles" size={20} /></span>
-        <div className="grow">
-          <div className="t">Daily Spin</div>
-          <div className="s">Earn free PerxCoin every day</div>
-        </div>
-        <span className="font-bold text-[var(--lime-deep)]">Spin →</span>
+        <div className="grow"><div className="t">Daily Spin</div><div className="s">Flick the spinner — free PerxCoin every day</div></div>
+        <span className="limeink" style={{ fontWeight: 700, color: "var(--lime-deep)" }}>Spin →</span>
       </Link>
 
-      {empty && (
-        <div className="mt-5 flex items-center gap-3 rounded-[26px] border border-dashed border-coral/40 bg-coral-soft p-5">
-          <Mascot mood="sleepy" size={52} />
-          <div>
-            <div className="font-display text-lg font-bold">No vouchers yet</div>
-            <div className="text-sm text-muted">Pick a perk and send it to HR to get started.</div>
-            <Link href="/dashboard/employee" className="link mt-1 inline-block font-semibold text-coral">Browse perks →</Link>
-          </div>
-        </div>
-      )}
+      <div className="sec"><h3>Spend coins</h3></div>
+      <div className="spend">
+        {SPEND.map((s) => (
+          <Link className="s" href="/dashboard/employee#browse" key={s.title}>
+            <div className="ic" style={s.bg ? { background: s.bg } : undefined}><Icon name={s.icon} size={20} /></div>
+            <div className="t">{s.title}</div>
+            <div className="coin sm" style={{ marginTop: 8 }}><Coins amount={s.coins} /></div>
+          </Link>
+        ))}
+      </div>
 
-      {/* This week's vouchers — voucher rows with code chips + status pills */}
       {orders.length > 0 && (
-        <section>
+        <>
           <div className="sec"><h3>This week&apos;s vouchers</h3></div>
           {orders.map((o) => {
             const redeemed = o.status === "REDEEMED";
             return (
-              <div key={o.id} className="row mb-2.5 flex-col items-stretch gap-2.5">
-                <div className="flex items-center gap-3">
+              <div className="row" key={o.id} style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 13, width: "100%" }}>
                   <span className="ico coral"><Icon name="ticket" size={20} /></span>
-                  <div className="grow">
-                    <div className="t truncate">{o.title}</div>
-                    <div className="s truncate">{o.provider.businessName}</div>
-                  </div>
-                  <span className={`pill shrink-0 ${redeemed ? "pill-redeemed" : "pill-ready"}`}>
-                    <span className="dot" />{redeemed ? "Redeemed" : "Ready"}
-                  </span>
+                  <div className="grow"><div className="t">{o.title}</div><div className="s">{o.provider.businessName}</div></div>
+                  <span className={`pill ${redeemed ? "pill-redeemed" : "pill-ready"}`}><span className="dot" />{redeemed ? "Redeemed" : "Ready"}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-[var(--r-sm)] bg-cream px-3 py-2">
-                  <span className="font-mono text-sm font-bold tracking-[0.16em]">{o.code}</span>
-                  <span className="text-xs text-muted">{redeemed ? "used" : "show to redeem"}</span>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--cream)", borderRadius: "var(--r-sm)", padding: "10px 12px" }}>
+                  <span className="code" style={{ fontSize: 16 }}>{o.code}</span>
+                  <span style={{ fontSize: 12, color: "var(--txt-mut)" }}>{redeemed ? "used" : "show to redeem"}</span>
                 </div>
               </div>
             );
           })}
-        </section>
+        </>
       )}
 
-      {/* Flash drops claimed */}
       {claims.length > 0 && (
-        <section>
-          <div className="sec"><h3>Flash drops claimed</h3></div>
+        <>
+          <div className="sec"><h3>Claimed drops</h3></div>
           {claims.map((c) => (
-            <div key={c.id} className="row">
+            <div className="row" key={c.id}>
               <span className="ico"><Icon name="bolt" size={20} /></span>
-              <div className="grow">
-                <div className="t truncate">{c.drop.title}</div>
-                <div className="s truncate">{c.drop.provider.businessName}</div>
-              </div>
-              <span className="shrink-0 rounded-[var(--r-sm)] bg-cream px-2.5 py-1 font-mono text-sm font-bold tracking-wide">{c.code}</span>
+              <div className="grow"><div className="t">{c.drop.title}</div><div className="s">{c.drop.provider.businessName}</div></div>
+              <span className="code" style={{ fontSize: 15 }}>{c.code}</span>
             </div>
           ))}
-        </section>
+        </>
       )}
 
-      {/* Pending packs awaiting HR approval */}
       {pending.length > 0 && (
-        <section>
+        <>
           <div className="sec"><h3>Awaiting HR approval</h3></div>
           {pending.map((p) => (
-            <Link key={p.id} href={`/dashboard/employee/package/${p.id}`} className="row">
+            <Link className="row" href={`/dashboard/employee/package/${p.id}`} key={p.id}>
               <span className="ico"><Icon name="clock" size={20} /></span>
-              <div className="grow">
-                <div className="t truncate">{p.label}</div>
-                <div className="s">Pending approval</div>
-              </div>
+              <div className="grow"><div className="t">{p.label}</div><div className="s">Pending approval</div></div>
               <span className="amt"><Coins amount={toCoins(p.totalLek)} /></span>
             </Link>
           ))}
-        </section>
+        </>
       )}
     </main>
   );

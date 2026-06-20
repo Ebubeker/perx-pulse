@@ -10,7 +10,7 @@ export function SwapButton({ packageId, offerId }: { packageId: string; offerId:
       type="button"
       onClick={() => startTransition(async () => { await swapItem(packageId, offerId); })}
       disabled={pending}
-      className="rounded-full bg-coral-soft px-2.5 py-1 text-xs font-bold text-coral disabled:opacity-50"
+      className="swap disabled:opacity-50"
     >
       {pending ? "…" : "Swap"}
     </button>

@@ -15,6 +15,16 @@ function endsIn(endsAt: Date): string {
   return h >= 24 ? `${Math.floor(h / 24)}d left` : h >= 1 ? `${h}h left` : `${Math.floor(ms / 60000)}m left`;
 }
 
+// Split the soonest countdown into HH:MM:SS chips for the .count row.
+function countChips(endsAt: Date): [string, string, string] {
+  const ms = Math.max(0, endsAt.getTime() - Date.now());
+  const h = Math.floor(ms / 3_600_000);
+  const min = Math.floor((ms % 3_600_000) / 60_000);
+  const s = Math.floor((ms % 60_000) / 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return [pad(Math.min(h, 99)), pad(min), pad(s)];
+}
+
 // Category → tinted photo-placeholder background, mirroring the design's drop cards.
 const PH_BG: Record<string, string> = {
   food: "var(--coral-soft)",
@@ -39,90 +49,71 @@ export default async function EmployeeDropsPage() {
   ]);
   const claimedById = new Map(myClaims.map((c) => [c.dropId, c.code] as const));
   const soonest = drops[0];
+  const chips = soonest ? countChips(soonest.endsAt) : null;
 
   return (
     <main className="mx-auto max-w-md px-5 py-5">
-      {/* topbar: title + mascot + live pill */}
       <div className="topbar">
         <h2 className="flex items-center gap-2"><Icon name="bolt" size={22} className="text-coral" />Perx Drops</h2>
         <Mascot mood="excited" size={52} />
         <span className="pill pill-live"><span className="dot pulse-dot" />Live</span>
       </div>
 
-      {/* dark drop hero (design: kicker / big headline / countdown) */}
-      <div className="card-dark">
-        <div className="blob" />
-        <div className="relative z-[2]">
-          <div className="kicker text-lime">Flash perks · Tirana edition</div>
-          <h1 className="mt-1 font-display text-[28px] font-bold leading-tight text-[var(--txt-on-dark)]">
-            {drops.length} local drop{drops.length === 1 ? "" : "s"},<br />gone in a flash
-          </h1>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-sm font-semibold text-[var(--txt-on-dark)]">
-              <Coins amount={m.recognitionCoins} /> to claim
-            </span>
-            {soonest && (
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-sm font-semibold text-[var(--txt-on-dark)]">
-                <span className="dot pulse-dot size-[7px] rounded-full bg-coral" />{endsIn(soonest.endsAt)}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-3.5 space-y-3.5">
-        {drops.length === 0 && (
-          <div className="flex items-center gap-3 rounded-[26px] border border-dashed border-coral/40 bg-coral-soft p-5">
-            <Mascot mood="sleepy" size={52} />
-            <div>
-              <div className="font-display text-lg font-bold">No live drops right now</div>
-              <div className="text-sm text-muted">Check back soon for flash perks.</div>
-            </div>
-          </div>
+      <div className="drophero">
+        <div className="kk">FRIDAY · TIRANA EDITION</div>
+        <h1>{drops.length} local drop{drops.length === 1 ? "" : "s"},<br />gone in a flash</h1>
+        {chips ? (
+          <>
+            <div className="count"><b>{chips[0]}</b>:<b>{chips[1]}</b>:<b>{chips[2]}</b></div>
+            <span className="muted" style={{ color: "#fff9", fontSize: 12, marginLeft: 8 }}>left to claim</span>
+          </>
+        ) : (
+          <div className="count"><b>00</b>:<b>00</b>:<b>00</b></div>
         )}
-
-        {drops.map((d) => {
-          const claimedCode = claimedById.get(d.id);
-          const left = d.totalSlots - d.claimedSlots;
-          const soldOut = left <= 0;
-          const tooPoor = m.recognitionCoins < d.costCoins;
-          const phBg = PH_BG[d.category] ?? "var(--cream)";
-          return (
-            <div key={d.id} className="overflow-hidden rounded-[var(--r-lg)] border border-line bg-paper shadow-soft">
-              {/* photo placeholder header (design: tinted band with a big glyph) */}
-              <div className="grid h-[108px] place-items-center" style={{ background: phBg }}>
-                <Icon name={d.category} size={48} className="text-ink/70" />
-              </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <b className="font-display text-base font-bold">{d.title}</b>
-                  <span className="badge badge-new shrink-0"><Coins amount={d.costCoins} /></span>
-                </div>
-                <p className="mt-1 text-[13px] text-muted">{d.provider.businessName}{d.area ? ` · ${d.area}` : ""}</p>
-                {d.description && <p className="mt-2 text-[13px] text-muted">{d.description}</p>}
-                {/* timer row + claimed/left badge */}
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[var(--coral-deep)]">
-                    <Icon name="clock" size={13} />
-                    {d.claimedSlots > 0 ? `${d.claimedSlots} claimed · ` : ""}{soldOut ? "sold out" : `${left} left`} · {endsIn(d.endsAt)}
-                  </span>
-                </div>
-                {/* claim / claimed / sold-out */}
-                <div className="mt-3">
-                  {claimedCode ? (
-                    <span className="pill pill-ready"><span className="dot" />Claimed · {claimedCode}</span>
-                  ) : soldOut ? (
-                    <span className="pill pill-redeemed"><span className="dot" />Sold out</span>
-                  ) : (
-                    <ClaimButton dropId={d.id} disabled={tooPoor} />
-                  )}
-                  {!claimedCode && !soldOut && tooPoor && <p className="mt-1.5 text-xs text-muted">Earn more coins to claim this.</p>}
-                </div>
-              </div>
-            </div>
-          );
-        })}
       </div>
+
+      {drops.length === 0 && (
+        <div className="card" style={{ marginTop: 14, display: "flex", gap: 12, alignItems: "center", background: "var(--coral-soft)", borderColor: "#F4D7CE" }}>
+          <Mascot mood="sleepy" size={52} />
+          <div style={{ fontSize: 14 }}><b>No live drops right now.</b> Check back soon for flash perks.</div>
+        </div>
+      )}
+
+      {drops.map((d) => {
+        const claimedCode = claimedById.get(d.id);
+        const left = d.totalSlots - d.claimedSlots;
+        const soldOut = left <= 0;
+        const tooPoor = m.recognitionCoins < d.costCoins;
+        const phBg = PH_BG[d.category] ?? "var(--cream)";
+        return (
+          <div className="dropcard" key={d.id} style={{ marginTop: 14 }}>
+            <div className="ph" style={{ background: phBg }}><Icon name={d.category} size={46} className="text-ink/70" /></div>
+            <div className="bd">
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <b>{d.title}</b>
+                <span className="badge badge-new"><Coins amount={d.costCoins} /></span>
+              </div>
+              <div className="muted" style={{ fontSize: 13, margin: "4px 0 10px" }}>
+                {d.provider.businessName}{d.area ? ` · ${d.area}` : ""}{d.description ? ` — ${d.description}` : ""}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span className="timer">
+                  <Icon name="clock" size={13} className="inline align-[-2px] mr-1" />
+                  {d.claimedSlots > 0 ? `${d.claimedSlots} claimed · ` : ""}{soldOut ? "sold out" : `${left} left`} · {endsIn(d.endsAt)}
+                </span>
+                {claimedCode ? (
+                  <span className="pill pill-ready"><span className="dot pulse-dot" />Claimed · {claimedCode}</span>
+                ) : soldOut ? (
+                  <span className="pill pill-redeemed"><span className="dot" />Sold out</span>
+                ) : (
+                  <ClaimButton dropId={d.id} disabled={tooPoor} />
+                )}
+              </div>
+              {!claimedCode && !soldOut && tooPoor && <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>Earn more coins to claim this.</p>}
+            </div>
+          </div>
+        );
+      })}
     </main>
   );
 }

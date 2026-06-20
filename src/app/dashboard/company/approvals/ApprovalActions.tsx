@@ -7,7 +7,7 @@ export function ApprovalActions({ packageId }: { packageId: string }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   return (
-    <div className="mt-4">
+    <div>
       <div className="flex gap-2">
         <button
           type="button"

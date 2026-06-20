@@ -40,7 +40,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
         <Avatar name={member.displayName} seed={member.id} size={84} />
         <div className="min-w-0">
           <div className="kicker">{member.role}{member.department ? ` · ${member.department.name}` : ""}</div>
-          <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight">{member.displayName}</h1>
+          <h1 className="h1 mt-1">{member.displayName}</h1>
           {member.jobTitle && <p className="mt-0.5 text-muted">{member.jobTitle}</p>}
         </div>
       </div>

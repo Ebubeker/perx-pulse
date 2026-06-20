@@ -32,44 +32,26 @@ export default async function PassportPage() {
 
   return (
     <main className="mx-auto max-w-md px-5 py-5">
-      {/* heading + mascot */}
-      <div className="mb-3 flex items-start justify-between gap-2">
-        <div className="greet">
-          <div className="day">Your year so far</div>
-          <h1>Passport</h1>
-        </div>
-        <Mascot mood={full ? "celebrate" : "cool"} size={58} />
-      </div>
-
-      {/* recap hero (design: coral card, headline + 2×2 stat grid) */}
-      <div className="recap relative overflow-hidden rounded-[var(--r-xl)] bg-coral p-[22px] text-white">
-        <h1 className="max-w-[75%] font-display text-[26px] font-bold leading-tight tracking-[-0.02em]">
-          {full ? "Full passport!" : `A great year, ${m.displayName.split(" ")[0]}`}
-        </h1>
-        <div className="mt-4 grid grid-cols-2 gap-2.5">
-          <div className="rounded-[var(--r-md)] bg-white/[0.12] p-3.5">
-            <b className="block font-display text-[22px] font-bold leading-none">{totalPerks}</b>
-            <span className="text-xs opacity-90">Perks enjoyed</span>
-          </div>
-          <div className="rounded-[var(--r-md)] bg-white/[0.12] p-3.5">
-            <b className="block font-display text-[22px] font-bold leading-none">{topCat}</b>
-            <span className="text-xs opacity-90">Top category</span>
-          </div>
-          <div className="rounded-[var(--r-md)] bg-white/[0.12] p-3.5">
-            <b className="block font-display text-[22px] font-bold leading-none">{have}/{ALL_CATEGORIES.length}</b>
-            <span className="text-xs opacity-90">Stamps explored</span>
-          </div>
-          <div className="rounded-[var(--r-md)] bg-white/[0.12] p-3.5">
-            <b className="block font-display text-[22px] font-bold leading-none">{m.recognitionCoins.toLocaleString("en-US")}</b>
-            <span className="text-xs opacity-90">PerxCoin balance</span>
-          </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+        <div className="greet"><div className="day">Your year so far</div><h1>Passport</h1></div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <Mascot mood={full ? "celebrate" : "cool"} size={58} className="float" />
         </div>
       </div>
 
-      {/* lime info card (design: month-end recap callout) */}
-      <div className="card mt-3.5 flex items-center gap-3 border-[#E3EBBE] bg-lime-soft">
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-lime text-ink"><Icon name="store" size={20} /></span>
-        <div className="text-sm">
+      <div className="recap">
+        <h1>{full ? "Full passport!" : `A great year, ${m.displayName.split(" ")[0]}`}</h1>
+        <div className="rg">
+          <div className="b"><b>{totalPerks}</b><span>Perks enjoyed</span></div>
+          <div className="b"><b>{topCat}</b><span>Top category</span></div>
+          <div className="b"><b>{have}/{ALL_CATEGORIES.length}</b><span>Stamps explored</span></div>
+          <div className="b"><b>{m.recognitionCoins.toLocaleString("en-US")}</b><span>PerxCoin balance</span></div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 14, display: "flex", gap: 12, alignItems: "center", background: "var(--lime-soft)", borderColor: "#E3EBBE" }}>
+        <span style={{ fontSize: 22 }}><Icon name="store" size={22} /></span>
+        <div style={{ fontSize: 14 }}>
           {full ? (
             <><b>You did it:</b> every kind of perk explored. You&apos;re a true Perx explorer.</>
           ) : (
@@ -78,7 +60,6 @@ export default async function PassportPage() {
         </div>
       </div>
 
-      {/* stamps grid (keep ?cat=…#browse links + disc cycling + c.icon render) */}
       <div className="sec"><h3>Stamps</h3><span className="link">{have} / {ALL_CATEGORIES.length} collected</span></div>
       <div className="stamp-grid">
         {ALL_CATEGORIES.map((c, i) => {

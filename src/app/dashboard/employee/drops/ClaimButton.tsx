@@ -20,7 +20,8 @@ export function ClaimButton({ dropId, disabled }: { dropId: string; disabled?: b
           if (res.error) setMsg({ text: res.error });
           else { setMsg({ ok: true, text: `Claimed! Code ${res.code}` }); router.refresh(); }
         })}
-        className="btn btn-primary px-[18px] py-[9px] text-sm disabled:opacity-50"
+        className="btn btn-primary disabled:opacity-50"
+        style={{ padding: "9px 18px" }}
       >
         {pending ? "Claiming…" : "Claim"}
       </button>

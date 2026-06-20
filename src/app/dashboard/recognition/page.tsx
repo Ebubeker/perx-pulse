@@ -2,7 +2,6 @@ import { requireMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { kudosRemainingFor, companyRecognitionFeed } from "@/lib/coins";
 import { Mascot } from "@/components/Mascot";
-import { Coins } from "@/components/Coins";
 import { Icon } from "@/components/Icon";
 import { Avatar } from "@/components/Avatar";
 import { RecognitionForms } from "./RecognitionForms";
@@ -23,26 +22,29 @@ export default async function RecognitionPage() {
     companyRecognitionFeed(m.companyId),
   ]);
 
+  // Did this member earn an Employee-of-the-Month style company grant? Surface it in the lime banner.
+  const award = feed.find((t) => t.kind === "GRANT" && t.toEmployeeId === m.id);
+
   return (
     <main className="mx-auto max-w-md px-5 py-5">
       <div className="flex items-center justify-between gap-2">
         <div className="greet">
-          <div className="day">PerxCoin · Recognition</div>
+          <div className="day">Recognition</div>
           <h1>Give someone their flowers</h1>
         </div>
-        <Mascot mood="love" size={62} className="float" />
+        <Mascot mood="love" size={58} className="float" />
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="stat">
-          <div className="k">Your coins</div>
-          <div className="v text-coral"><Coins amount={m.recognitionCoins} /></div>
+      {award && (
+        <div className="eom mt-4">
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-white/30"><Icon name="medal" size={26} className="text-[#5c6b14]" /></span>
+          <div>
+            <div className="kicker !text-[#5c6b14]">Employee of the month</div>
+            <div className="font-display text-xl font-extrabold">You earned +{award.amount} coins!</div>
+            <div className="text-[13px]">{award.memo || "Nominated by your team"}</div>
+          </div>
         </div>
-        <div className="stat">
-          <div className="k">To give this month</div>
-          <div className="v"><Coins amount={remaining} /></div>
-        </div>
-      </div>
+      )}
 
       <RecognitionForms colleagues={colleagues} remaining={remaining} isAdmin={isAdmin} />
 

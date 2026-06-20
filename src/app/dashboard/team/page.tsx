@@ -54,46 +54,31 @@ export default async function TeamPage() {
                 <h2>{pk.title}</h2>
               </div>
               <div className="pack-body">
-                {pk.description && (
-                  <div className="why"><span className="spark">✦</span><span>{pk.description}</span></div>
+                <div className="why">
+                  <span className="spark"><Icon name="sparkles" size={18} /></span>
+                  <span>{pk.description ? pk.description : `${count} of ${pk.targetSize} joined${full ? " — locked in!" : " — unlocks a group rate."}`}</span>
+                </div>
+
+                {/* Stacked illustrated members (.joined) — overlapping <Avatar size={34}> + +N */}
+                {shown.length > 0 ? (
+                  <div className="joined">
+                    {shown.map((mem) => (
+                      <Avatar key={mem.employeeProfileId} name={mem.employee.displayName} seed={mem.employeeProfileId} size={34} />
+                    ))}
+                    {count > shown.length && (
+                      <span className="grid h-[34px] w-[34px] place-items-center bg-line text-xs font-bold text-muted">
+                        +{count - shown.length}
+                      </span>
+                    )}
+                    <span className="ml-2.5 self-center !border-0 text-[13px] text-muted">joined</span>
+                  </div>
+                ) : (
+                  <p className="mt-2.5 text-sm text-muted">No one yet — be first</p>
                 )}
 
-                {/* Stacked illustrated members (.joined) */}
-                <div className="mb-3.5 flex items-center">
-                  {shown.length > 0 ? (
-                    <>
-                      {shown.map((mem, idx) => (
-                        <span
-                          key={mem.employeeProfileId}
-                          className="rounded-full border-2 border-paper"
-                          style={{ marginLeft: idx === 0 ? 0 : -8, zIndex: shown.length - idx }}
-                        >
-                          <Avatar name={mem.employee.displayName} seed={mem.employeeProfileId} size={34} />
-                        </span>
-                      ))}
-                      {count > shown.length && (
-                        <span
-                          className="grid h-[34px] w-[34px] place-items-center rounded-full border-2 border-paper bg-line text-xs font-bold text-muted"
-                          style={{ marginLeft: -8 }}
-                        >
-                          +{count - shown.length}
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-sm text-muted">No one yet — be first</span>
-                  )}
-                </div>
-
-                <div className="metric !mb-0">
-                  <div className="top">
-                    <span className="k">{count} / {pk.targetSize} joined</span>
-                    {full && <span className="text-coral">Locked in</span>}
-                  </div>
-                  <div className={`bar ${full ? "coral" : ""}`}><i style={{ width: `${pct}%` }} /></div>
-                </div>
+                <div className={`bar mt-3.5 ${full ? "coral" : ""}`}><i style={{ width: `${pct}%` }} /></div>
                 <div className="pack-foot">
-                  <span className="truncate text-xs text-muted">{pk.members.map((mem) => mem.employee.displayName).join(", ") || "No one yet — be first"}</span>
+                  <span className="muted text-[13px]">{count} / {pk.targetSize} joined{full ? " · locked in" : ""}</span>
                   <JoinLeaveButton teamPackId={pk.id} joined={joined} full={full} />
                 </div>
               </div>

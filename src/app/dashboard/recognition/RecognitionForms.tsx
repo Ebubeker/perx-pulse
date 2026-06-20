@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { giveKudos, grantCoins } from "@/lib/coin-actions";
 import { Avatar } from "@/components/Avatar";
+import { CoinIcon } from "@/components/CoinIcon";
 
 type Colleague = { id: string; displayName: string; role: string };
 
@@ -30,90 +31,74 @@ export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleague
   const toName = colleagues.find((c) => c.id === to)?.displayName;
 
   return (
-    <div className="mt-5 space-y-5">
-      {/* Recipient picker — horizontal scroll of illustrated coworker avatars (.kudos) */}
-      <div>
-        <div className="sec !mt-0">
-          <h3>Send kudos</h3>
-          <span className="link">{remaining} left this month</span>
-        </div>
-        {colleagues.length === 0 ? (
-          <p className="rounded-[18px] border border-line bg-paper px-4 py-5 text-center text-sm text-muted">
-            No coworkers to recognize yet.
-          </p>
-        ) : (
-          <div className="-mx-5 flex gap-2.5 overflow-x-auto px-5 pb-1">
-            {colleagues.map((c) => {
-              const on = c.id === to;
-              return (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => setTo(c.id)}
-                  className="w-[78px] shrink-0 text-center"
-                >
-                  <span className={`relative mx-auto mb-1.5 block w-fit rounded-full ${on ? "ring-2 ring-coral ring-offset-2 ring-offset-cream" : ""}`}>
-                    <Avatar name={c.displayName} seed={c.id} size={56} />
-                  </span>
-                  <span className={`block truncate text-xs font-semibold ${on ? "text-coral" : "text-ink"}`}>
-                    {c.displayName.split(" ")[0]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+    <div className="mt-4 space-y-4">
+      {/* Send kudos header */}
+      <div className="sec !mb-3">
+        <h3>Send kudos</h3>
+        <span className="link">{remaining} left this month</span>
       </div>
 
-      {/* Dark send box (.sendbox → card-dark) */}
-      <div className="card-dark">
-        <div className="blob" />
-        <div className="relative z-[2]">
-          <div className="flex items-center justify-between">
-            <div className="font-display text-lg font-bold text-[var(--txt-on-dark)]">
-              Kudos to{" "}
-              <span className="text-lime">{toName ?? "…"}</span>
-            </div>
-            <span className="coin sm">{amount}</span>
-          </div>
-
-          <div className="field !mb-3 !mt-3">
-            <label className="!text-[var(--txt-on-dark-mut)]">Coins</label>
-            <div className="chip-row">
-              {AMOUNTS.map((a) => (
-                <button
-                  key={a}
-                  type="button"
-                  onClick={() => setAmount(a)}
-                  disabled={a > remaining}
-                  className={`chip lime disabled:opacity-30 ${amount === a ? "on lime" : "!border-white/15 !bg-white/10 !text-[var(--txt-on-dark)]"}`}
-                >
-                  {a}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="field !mb-0">
-            <label className="!text-[var(--txt-on-dark-mut)]">Why</label>
-            <input
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              placeholder="Saved the demo at 2am"
-              className="!border-white/15 !bg-white/10 !text-[var(--txt-on-dark)] placeholder:!text-white/40"
-            />
-          </div>
-
-          <button
-            type="button"
-            onClick={sendKudos}
-            disabled={pending || !to || !canGive}
-            className="btn btn-lime btn-lg mt-4 disabled:opacity-50"
-          >
-            {pending ? "Sending…" : !to ? "Pick someone above" : canGive ? `Send ${amount} coins →` : "No coins left this month"}
-          </button>
-          {msg && <p className={`mt-2 text-sm ${msg.ok ? "text-lime" : "text-coral"}`}>{msg.text}</p>}
+      {/* Recipient picker — HORIZONTAL scroll strip of illustrated coworker avatars (.kudos > .k) */}
+      {colleagues.length === 0 ? (
+        <p className="rounded-[18px] border border-line bg-paper px-4 py-5 text-center text-sm text-muted">
+          No coworkers to recognize yet.
+        </p>
+      ) : (
+        <div className="kudos">
+          {colleagues.map((c) => {
+            const on = c.id === to;
+            return (
+              <button key={c.id} type="button" onClick={() => setTo(c.id)} className="k">
+                <span className={`relative mx-auto mb-1.5 block w-fit rounded-full ${on ? "ring-2 ring-coral ring-offset-2 ring-offset-cream" : ""}`}>
+                  <Avatar name={c.displayName} seed={c.id} size={56} />
+                </span>
+                <span className={`block truncate text-xs font-semibold ${on ? "text-coral" : "text-ink"}`}>
+                  {c.displayName.split(" ")[0]}
+                </span>
+              </button>
+            );
+          })}
         </div>
+      )}
+
+      {/* Dark send box (.sendbox) */}
+      <div className="sendbox">
+        <div className="flex items-center justify-between">
+          <div className="font-bold">
+            Kudos to <b className="text-lime">{toName ?? "…"}</b>
+          </div>
+          <span className="coin sm"><CoinIcon /> {amount}</span>
+        </div>
+
+        <div className="chip-row mt-3">
+          {AMOUNTS.map((a) => (
+            <button
+              key={a}
+              type="button"
+              onClick={() => setAmount(a)}
+              disabled={a > remaining}
+              className={`chip lime disabled:opacity-30 ${amount === a ? "on lime" : "!border-white/15 !bg-white/10 !text-[var(--txt-on-dark)]"}`}
+            >
+              {a}
+            </button>
+          ))}
+        </div>
+
+        <input
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+          placeholder="Say why — “thanks for covering my shift!”"
+        />
+
+        <button
+          type="button"
+          onClick={sendKudos}
+          disabled={pending || !to || !canGive}
+          className="btn btn-lime btn-lg mt-3 w-full disabled:opacity-50"
+        >
+          {pending ? "Sending…" : !to ? "Pick someone above" : canGive ? `Send kudos →` : "No coins left this month"}
+        </button>
+        {msg && <p className={`mt-2 text-sm ${msg.ok ? "text-lime" : "text-coral"}`}>{msg.text}</p>}
       </div>
 
       {isAdmin && <GrantForm colleagues={colleagues} />}

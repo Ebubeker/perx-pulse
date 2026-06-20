@@ -16,7 +16,7 @@ export function SubscribeButton() {
           if (res?.error) setError(res.error);
         })}
         disabled={pending}
-        className="btn btn-primary btn-lg disabled:opacity-60"
+        className="btn btn-primary disabled:opacity-60"
       >
         {pending ? "Opening checkout…" : "Subscribe to Perx"}
       </button>

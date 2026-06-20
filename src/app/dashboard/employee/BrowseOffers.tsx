@@ -20,6 +20,17 @@ const CAT_LABEL: Record<string, string> = {
   telecom: "Telecom",
 };
 
+const CAT_COLOR: Record<string, string> = {
+  wellness: "var(--lime)",
+  fitness: "var(--coral)",
+  food: "#E8B339",
+  health: "var(--violet, #7C6BF0)",
+  travel: "var(--brown, #6E4A34)",
+  learning: "var(--ink)",
+  culture: "var(--coral-deep)",
+  telecom: "var(--lime-deep)",
+};
+
 export function BrowseOffers({ offers, initialCategory = "all", walletCoins = 0 }: { offers: CatalogOffer[]; initialCategory?: string; walletCoins?: number }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState(initialCategory);
@@ -50,16 +61,9 @@ export function BrowseOffers({ offers, initialCategory = "all", walletCoins = 0 
 
   return (
     <div>
-      <div className="relative">
-        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg>
-        </span>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search perks, providers, areas…"
-          className="w-full rounded-[var(--r-md)] border-[1.5px] border-line bg-cream py-3.5 pl-11 pr-4 text-[15px] focus:border-coral focus:outline-none"
-        />
+      <div className="search">
+        <span className="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg></span>
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search perks, providers, areas…" />
       </div>
 
       <div className="chip-row mt-3 flex-nowrap overflow-x-auto pb-1">
@@ -104,38 +108,38 @@ export function BrowseOffers({ offers, initialCategory = "all", walletCoins = 0 
       })()}
 
       <p className="mt-3 text-xs text-muted">{filtered.length} of {offers.length} perks</p>
-      <div className="mt-2">
+      <div className="pkggrid mt-2">
         {filtered.map((o) => {
           const on = selected.includes(o.id);
           return (
-            <div key={o.id} className={`row ${on ? "!border-coral" : ""}`}>
-              <Link href={`/dashboard/employee/offer/${o.id}`} className="grow">
-                <div className="t truncate underline-offset-2 hover:underline">{o.title}</div>
-                <div className="s truncate">
-                  {o.providerName}{o.area ? ` · ${o.area}` : ""} · {CAT_LABEL[o.category] ?? o.category}
-                  {o.taxFree ? " · tax-free" : ""}
-                  {o.discountPct > 0 ? ` · −${o.discountPct}%` : ""}
+            <div key={o.id} className={`pkg ${on ? "ring-2 ring-coral" : ""}`}>
+              <div className="pkg-bar" style={{ background: CAT_COLOR[o.category] ?? "var(--coral)" }} />
+              <button
+                type="button"
+                onClick={() => toggle(o.id)}
+                aria-pressed={on}
+                aria-label={on ? "Deselect" : "Select"}
+                className={`absolute right-2.5 top-3 z-[2] flex size-7 items-center justify-center rounded-full border-[1.5px] text-base font-bold transition ${on ? "border-coral bg-coral text-white" : "border-line bg-white text-coral"}`}
+              >
+                {on ? "✓" : "+"}
+              </button>
+              <Link href={`/dashboard/employee/offer/${o.id}`} className="pkg-bd block">
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {o.taxFree && <span className="badge badge-tax">Tax-free</span>}
+                  {o.discountPct > 0 && <span className="badge badge-new">−{o.discountPct}%</span>}
+                </div>
+                <div className="pkg-name line-clamp-2 pr-7">{o.title}</div>
+                <div className="pkg-meta truncate">{o.providerName}{o.area ? ` · ${o.area}` : ""}</div>
+                <div className="mt-2.5 flex items-baseline gap-1.5">
+                  {o.discountPct > 0 && <Coins amount={toCoins(o.priceLek)} strike className="text-xs" />}
+                  <Coins amount={toCoins(o.effLek)} className="font-display text-[17px] font-bold text-ink" />
                 </div>
               </Link>
-              <div className="flex shrink-0 items-center gap-3">
-                <span className="text-right text-sm">
-                  {o.discountPct > 0 && <Coins amount={toCoins(o.priceLek)} strike className="mr-1 text-xs" />}
-                  <Coins amount={toCoins(o.effLek)} className="amt" />
-                </span>
-                <button
-                  type="button"
-                  onClick={() => toggle(o.id)}
-                  aria-pressed={on}
-                  className={`flex size-8 items-center justify-center rounded-full border-[1.5px] text-lg font-bold transition ${on ? "border-coral bg-coral text-white" : "border-line text-coral"}`}
-                >
-                  {on ? "✓" : "+"}
-                </button>
-              </div>
             </div>
           );
         })}
         {filtered.length === 0 && (
-          <div className="row justify-center py-6 text-center text-sm text-muted">No perks match that search.</div>
+          <div className="col-span-2 rounded-[var(--r-md)] border border-line bg-paper px-4 py-6 text-center text-sm text-muted">No perks match that search.</div>
         )}
       </div>
     </div>

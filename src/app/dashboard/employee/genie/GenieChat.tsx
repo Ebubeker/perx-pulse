@@ -6,6 +6,7 @@ import { genieAsk, type GenieResult } from "@/lib/genie-actions";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
 import { Mascot } from "@/components/Mascot";
+import { Icon } from "@/components/Icon";
 
 type Offers = GenieResult["offers"];
 type Msg = { role: "user" | "genie"; text: string; offers?: Offers };
@@ -16,39 +17,31 @@ const SUGGESTIONS = [
   "Something healthy for lunch this week",
 ];
 
+// genie returns a .pack card (design 14-genie.html)
 function GeniePack({ offers }: { offers: Offers }) {
   const totalLek = offers.reduce((s, o) => s + o.effLek, 0);
   const taxFree = offers.length > 0 && offers.every((o) => o.taxFree);
-  // unique provider names → provider chips
   const providers = Array.from(new Set(offers.map((o) => o.providerName)));
+  const rationale = offers.length
+    ? `${offers.length === 1 ? "One pick" : `${offers.length} picks`} that fit — low effort, on budget.`
+    : "";
 
   return (
-    <div className="pack fade-up">
+    <div className="pack fade-up" style={{ marginTop: "6px" }}>
       <div className="pack-top coral">
-        <div className="kk">Genie pick · {offers.length} {offers.length === 1 ? "provider" : "providers"}</div>
+        <span className="pack-arrow">↗</span>
+        <div className="kk">GENIE PICK</div>
         <h2>Your pack</h2>
       </div>
       <div className="pack-body">
-        {/* what's inside */}
-        <ul className="mb-3.5 space-y-1.5">
-          {offers.map((o) => (
-            <li key={o.id} className="flex items-center justify-between gap-3 text-sm">
-              <span className="min-w-0 truncate">
-                <span className="font-medium">{o.title}</span> <span className="text-muted">· {o.providerName}</span>
-              </span>
-              <span className="shrink-0 font-semibold text-ink-soft"><Coins amount={toCoins(o.effLek)} /></span>
-            </li>
-          ))}
-        </ul>
-        {/* provider chips */}
+        <div className="why"><span className="spark"><Icon name="sparkles" size={15} /></span><span>{rationale}</span></div>
         {providers.length > 0 && (
-          <div className="chip-row mb-3.5">
+          <div className="chip-row" style={{ marginBottom: "14px" }}>
             {providers.map((name) => <span key={name} className="provchip">{name}</span>)}
           </div>
         )}
-        {/* foot: tax badge + total */}
         <div className="pack-foot">
-          <span>{taxFree && <span className="badge badge-tax">Tax-free</span>}</span>
+          <span className="muted">{taxFree && <span className="badge badge-tax">TAX-FREE</span>}</span>
           <span className="price"><Coins amount={toCoins(totalLek)} /></span>
         </div>
       </div>
@@ -76,74 +69,63 @@ export function GenieChat() {
   }
 
   return (
-    <div className="mt-5">
-      <div className="space-y-3">
-        {messages.map((msg, i) =>
-          msg.role === "user" ? (
-            <div key={i} className="flex justify-end">
-              <div className="max-w-[80%] rounded-[18px] rounded-br-md bg-ink px-4 py-3 text-[15px] text-[var(--txt-on-dark)]">
+    <div className="mt-5 flex flex-col">
+      {messages.map((msg, i) =>
+        msg.role === "user" ? (
+          <div key={i} className="ask my-2.5">{msg.text}</div>
+        ) : (
+          <div key={i}>
+            {msg.text && (
+              <div className="my-2.5 max-w-[85%] rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm">
                 {msg.text}
               </div>
-            </div>
-          ) : (
-            <div key={i} className="space-y-2">
-              {msg.text && (
-                <div className="flex justify-start">
-                  <div className="max-w-[85%] rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm">
-                    {msg.text}
-                  </div>
-                </div>
-              )}
-              {msg.offers && msg.offers.length > 0 && (
-                <>
-                  <GeniePack offers={msg.offers} />
-                  <Link
-                    href={`/dashboard/employee/offer/${msg.offers[0]!.id}`}
-                    className="btn btn-soft mt-1 w-full"
-                  >
-                    View &amp; tweak this pack
-                  </Link>
-                </>
-              )}
-            </div>
-          )
-        )}
-        {pending && (
-          <div className="flex items-center justify-start gap-2">
-            <Mascot mood="thinking" size={34} />
-            <div className="rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm text-muted">Genie is thinking…</div>
+            )}
+            {msg.offers && msg.offers.length > 0 && (
+              <>
+                <GeniePack offers={msg.offers} />
+                <Link href={`/dashboard/employee/offer/${msg.offers[0]!.id}`} className="btn btn-soft" style={{ marginTop: "12px" }}>
+                  View &amp; tweak this pack
+                </Link>
+              </>
+            )}
           </div>
-        )}
-      </div>
+        )
+      )}
+      {pending && (
+        <div className="mt-2.5 flex items-center gap-2">
+          <Mascot mood="thinking" size={34} />
+          <div className="rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm text-muted">Genie is thinking…</div>
+        </div>
+      )}
 
       {/* suggestion chips (only before first ask) */}
       {messages.length <= 1 && (
         <div className="chip-row mt-4">
           {SUGGESTIONS.map((s) => (
-            <button key={s} onClick={() => send(s)} className="chip text-[13px]">
-              {s}
-            </button>
+            <button key={s} onClick={() => send(s)} className="chip text-[13px]">{s}</button>
           ))}
         </div>
       )}
 
-      {/* rounded prompt input with circular send */}
-      <div className="mt-4 flex items-center gap-2 rounded-full border-[1.5px] border-line bg-paper py-1.5 pl-4 pr-1.5 shadow-soft">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") send(input); }}
-          placeholder="Ask Perx Genie anything…"
-          className="min-w-0 flex-1 border-none bg-transparent text-[15px] focus:outline-none"
-        />
-        <button
-          onClick={() => send(input)}
-          disabled={pending || !input.trim()}
-          aria-label="Ask Perx Genie"
-          className="grid size-11 shrink-0 place-items-center rounded-full bg-coral text-white disabled:opacity-50"
-        >
-          ↑
-        </button>
+      {/* .field-inline input with round .send button */}
+      <div className="mt-3.5">
+        <div className="field-inline">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") send(input); }}
+            placeholder="Ask Pulse anything…"
+          />
+          <button
+            type="button"
+            onClick={() => send(input)}
+            disabled={pending || !input.trim()}
+            aria-label="Ask Perx Genie"
+            className="send disabled:opacity-50"
+          >
+            ↑
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -28,8 +28,10 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
   });
   if (!provider) {
     return (
-      <main className="mx-auto max-w-md px-5 py-16 text-center text-muted">
-        Provider not found. <Link href="/dashboard/employee" className="font-semibold text-coral underline">Back to perks</Link>
+      <main className="page">
+        <div className="card text-center text-muted">
+          Provider not found. <Link href="/dashboard/employee" className="font-semibold text-coral underline">Back to perks</Link>
+        </div>
       </main>
     );
   }
@@ -42,24 +44,26 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
   const metaLine = [CAT_LABEL[provider.category] ?? provider.category, provider.city].filter(Boolean).join(" · ");
 
   return (
-    <main className="mx-auto max-w-md px-5 py-5">
-      {/* ── Provider card (directory pcard style) ── */}
-      <div className="card">
-        <div className="grid h-20 place-items-center rounded-[var(--r-md)] bg-coral-soft text-coral-deep">
+    <main className="page">
+      <Link href="/dashboard/employee" className="link text-sm font-semibold text-muted">← All providers</Link>
+
+      {/* ── Provider header — the directory .pcard style ── */}
+      <div className="pcard" style={{ marginTop: 14 }}>
+        <div className="ph" style={{ height: 120, background: "var(--coral-soft)", color: "var(--coral-deep)" }}>
           <Icon name={CAT_ICON[provider.category] ?? "store"} size={34} />
         </div>
-        <div className="mt-3 flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="font-display text-[20px] font-bold leading-tight">{provider.businessName}</div>
-            <div className="mt-0.5 text-[13px] text-muted">{metaLine}</div>
+            <div className="nm" style={{ fontSize: 22 }}>{provider.businessName}</div>
+            <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>{metaLine}</div>
           </div>
-          <span className="pill pill-ready mt-0.5 shrink-0"><span className="dot" />Active</span>
+          <span className="pill pill-ready shrink-0"><span className="dot" />Active</span>
         </div>
         {provider.description && <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">{provider.description}</p>}
       </div>
 
       {/* ── Stats ── */}
-      <div className="mt-3 grid grid-cols-3 gap-3">
+      <div className="grid g-3 mt-4">
         <div className="stat">
           <div className="k">Offers</div>
           <div className="v">{provider.offers.length}</div>
@@ -79,7 +83,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
 
       {/* ── Good to know ── */}
       {(provider.addressLine || provider.city || provider.areasServed.length > 0 || provider.contactPhone || hours.length > 0) && (
-        <div className="card mt-3">
+        <div className="card mt-4">
           <h2 className="font-display text-base font-bold">Good to know</h2>
           <dl className="mt-3 space-y-1.5 text-sm">
             {(provider.addressLine || provider.city) && (
@@ -105,27 +109,25 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
         </div>
       )}
 
-      {/* ── Their offers as rows ── */}
+      {/* ── Their offers as .row links ── */}
       <div className="sec"><h3>Offers</h3></div>
       {provider.offers.length === 0 ? (
         <div className="card text-center text-sm text-muted">No live offers right now.</div>
       ) : (
-        <ul className="space-y-2.5">
+        <div>
           {provider.offers.map((o) => (
-            <li key={o.id}>
-              <Link href={`/dashboard/employee/offer/${o.id}`} className="row mb-0">
-                <span className="ico coral"><Icon name={CAT_ICON[o.category] ?? "gift"} size={20} /></span>
-                <div className="grow">
-                  <div className="t truncate">{o.title}</div>
-                  <div className="s truncate">
-                    {CAT_LABEL[o.category] ?? o.category}{o.area ? ` · ${o.area}` : ""}{o.taxFree ? " · tax-free" : ""}{o.discountPct > 0 ? ` · −${o.discountPct}%` : ""}
-                  </div>
+            <Link key={o.id} href={`/dashboard/employee/offer/${o.id}`} className="row">
+              <span className="ico coral"><Icon name={CAT_ICON[o.category] ?? "gift"} size={20} /></span>
+              <div className="grow">
+                <div className="t truncate">{o.title}</div>
+                <div className="s truncate">
+                  {CAT_LABEL[o.category] ?? o.category}{o.area ? ` · ${o.area}` : ""}{o.taxFree ? " · tax-free" : ""}{o.discountPct > 0 ? ` · −${o.discountPct}%` : ""}
                 </div>
-                <span className="amt"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /></span>
-              </Link>
-            </li>
+              </div>
+              <span className="amt"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /></span>
+            </Link>
           ))}
-        </ul>
+        </div>
       )}
     </main>
   );

@@ -69,60 +69,56 @@ export default async function CompanyDashboard() {
 
   return (
     <main className="page">
-      <div className="kicker text-coral">{m.company.brandName || m.company.name} · Company</div>
-      <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight md:text-5xl">Dashboard</h1>
+      <div className="sub kicker text-coral">{m.company.brandName || m.company.name} · Company</div>
+      <h1 className="h1">Dashboard</h1>
 
-      {/* KPI stats */}
-      <div className="grid g-4 mt-6">
+      <div className="grid g-4" style={{ marginTop: 22 }}>
         <div className="stat">
-          <div className="k">Coins settled</div>
-          <div className="v text-lime-deep">{toCoins(settledLek).toLocaleString("en-US")}</div>
+          <div className="k">This month settled</div>
+          <div className="v">{toCoins(settledLek).toLocaleString("en-US")} <span style={{ fontSize: 18 }}>coins</span></div>
           <div className="d">of {toCoins(budgetTotalLek).toLocaleString("en-US")} budget · {spendPct}%</div>
-          <div className="bar mt-2.5"><i style={{ width: `${spendPct}%` }} /></div>
+          <div className="bar" style={{ marginTop: 10 }}><i style={{ width: `${spendPct}%` }} /></div>
         </div>
-        <Link href="/dashboard/company/approvals" className="stat block">
+        <Link className="stat" href="/dashboard/company/approvals">
           <div className="k">Pending approvals</div>
-          <div className="v text-coral">{pendingCount}</div>
+          <div className="v">{pendingCount}</div>
           <div className="d text-coral">
-            {pendingCount === 0
-              ? "all caught up"
-              : `${newTodayCount} new today · review →`}
+            {pendingCount === 0 ? "all caught up" : `${newTodayCount} new today · review →`}
           </div>
         </Link>
         <div className="stat">
-          <div className="k">Active people</div>
+          <div className="k">Active employees</div>
           <div className="v">{headcount}</div>
           <div className="d">on your team</div>
         </div>
         <div className="stat">
           <div className="k">Avg. pack value</div>
-          <div className="v">{toCoins(avgPackLek).toLocaleString("en-US")}</div>
-          <div className="d">coins · tax-free</div>
+          <div className="v">{toCoins(avgPackLek).toLocaleString("en-US")} <span style={{ fontSize: 18 }}>coins</span></div>
+          <div className="d">tax-free · 0 tax owed</div>
         </div>
       </div>
 
-      {/* Talent edge + sentiment */}
-      <div className="grid g-2 mt-[18px]">
+      <div className="grid g-2" style={{ marginTop: 18 }}>
         <div className="edge">
-          <Mascot mood="cheer" size={116} />
+          <Mascot mood="cheer" size={116} className="float" />
           <div>
-            <div className="kicker text-lime-deep">Your talent edge</div>
-            <div className="my-1.5 max-w-[360px] text-lg font-bold">
-              Teams on Perx report <span className="big">+34%</span> benefit satisfaction and retain staff 1.4× longer.
+            <div className="kicker" style={{ color: "var(--lime)" }}>YOUR TALENT EDGE</div>
+            <div style={{ fontSize: 18, fontWeight: 700, margin: "6px 0", maxWidth: 360 }}>
+              Teams on Perx report <span className="big" style={{ fontSize: 22 }}>+34%</span> benefit satisfaction and retain staff 1.4× longer.
             </div>
             <Link className="btn btn-lime" href="/dashboard/company/insights">See your Perx Score →</Link>
           </div>
         </div>
         <div className="card">
-          <div className="sec mt-0">
+          <div className="sec" style={{ marginTop: 0 }}>
             <h3>This week&apos;s sentiment</h3>
-            <Link className="link" href="/dashboard/company/insights">Insights →</Link>
+            <Link className="link" href="/dashboard/company/insights">Heatmap →</Link>
           </div>
           {sentiment.length === 0 ? (
             <p className="py-2 text-center text-sm text-muted">No pulses yet this week.</p>
           ) : (
             sentiment.map((x, i) => (
-              <div key={x.mood} className={`metric ${i === sentiment.length - 1 ? "mb-0" : ""}`}>
+              <div key={x.mood} className="metric" style={i === sentiment.length - 1 ? { margin: 0 } : undefined}>
                 <div className="top">
                   <span className="k">{x.mood}</span>
                   <span>{x.pct}%</span>
@@ -136,7 +132,6 @@ export default async function CompanyDashboard() {
         </div>
       </div>
 
-      {/* Budget headroom + recent activity */}
       <div className="sec"><h3>Recent activity</h3></div>
       {recent.length === 0 ? (
         <div className="card text-center text-sm text-muted">
@@ -145,7 +140,7 @@ export default async function CompanyDashboard() {
       ) : (
         <div className="grid g-2">
           {recent.map((p) => (
-            <div key={p.id} className="row mb-0">
+            <div key={p.id} className="row" style={{ margin: 0 }}>
               <Avatar name={p.employee.displayName} seed={p.employeeProfileId} size={42} />
               <div className="grow">
                 <div className="t truncate">
@@ -157,7 +152,7 @@ export default async function CompanyDashboard() {
               </div>
               {p.status === "APPROVED" ? (
                 <Link href={`/dashboard/company/approvals/${p.id}`} className="pill pill-approved shrink-0">
-                  <span className="dot" />Settled
+                  <span className="dot" />Approved
                 </Link>
               ) : (
                 <span className="pill pill-redeemed shrink-0"><span className="dot" />Declined</span>
@@ -168,13 +163,13 @@ export default async function CompanyDashboard() {
       )}
 
       {!subscribed && (
-        <div className="sec"><h3>Plan</h3></div>
-      )}
-      {!subscribed && (
-        <Link href="/dashboard/company/billing" className="card flex items-center gap-3">
-          <span className="pill pill-approved"><span className="dot" />Activate plan →</span>
-          <span className="text-sm text-muted">Unlock unlimited approvals and insights for your team.</span>
-        </Link>
+        <>
+          <div className="sec"><h3>Plan</h3></div>
+          <Link href="/dashboard/company/billing" className="card flex items-center gap-3">
+            <span className="pill pill-approved"><span className="dot" />Activate plan →</span>
+            <span className="text-sm text-muted">Unlock unlimited approvals and insights for your team.</span>
+          </Link>
+        </>
       )}
     </main>
   );

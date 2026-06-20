@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { allItems, isActive, ROLE_HOME, type Role } from "./nav-config";
 import { AccountMenu } from "./AccountMenu";
+import { Logo } from "@/components/Logo";
 import type { Locale } from "@/lib/i18n";
 
 // Design's desktop top-nav (.dnav) for the employer & provider apps.
@@ -23,7 +24,7 @@ export function DesktopNav({
 
   return (
     <header className="dnav">
-      <Link href={ROLE_HOME[role]} className="brand">perx<b>.pulse</b></Link>
+      <Link href={ROLE_HOME[role]} aria-label="Perx"><Logo /></Link>
       <span className="kicker hidden sm:inline" style={{ marginLeft: 2 }}>{role === "provider" ? "Provider" : "Employer"}</span>
       <span className="spacer" />
       <nav className="flex items-center gap-1 overflow-x-auto">
