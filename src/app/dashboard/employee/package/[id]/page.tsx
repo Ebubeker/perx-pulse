@@ -178,7 +178,7 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
 
       {/* AI rationale with a buddy */}
       {pkg.rationale && (
-        <div className="mt-4 flex items-start gap-3 rounded-[var(--r-lg)] border border-paper-line bg-coral-soft/50 p-4">
+        <div className="mt-4 flex items-start gap-3 rounded-[var(--r-lg)] border border-line bg-coral-soft/50 p-4">
           <Mascot mood="thinking" size={50} className="float shrink-0" />
           <div>
             <div className="kicker text-coral-deep">Why this pack</div>
@@ -189,15 +189,15 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
 
       {/* highlights */}
       <div className="mt-4 grid grid-cols-3 gap-2.5">
-        <div className="rounded-[var(--r-md)] border border-paper-line bg-cream-2 px-2 py-3 text-center">
+        <div className="rounded-[var(--r-md)] border border-line bg-paper px-2 py-3 text-center">
           <div className="font-display text-xl font-extrabold">{items.length}</div>
           <div className="text-[11px] text-muted">Providers</div>
         </div>
-        <div className="rounded-[var(--r-md)] border border-paper-line bg-cream-2 px-2 py-3 text-center">
+        <div className="rounded-[var(--r-md)] border border-line bg-paper px-2 py-3 text-center">
           <div className="inline-flex items-center justify-center font-display text-xl font-extrabold"><Coins amount={toCoins(pkg.totalLek)} /></div>
           <div className="text-[11px] text-muted">You pay</div>
         </div>
-        <div className="rounded-[var(--r-md)] border border-paper-line bg-cream-2 px-2 py-3 text-center">
+        <div className="rounded-[var(--r-md)] border border-line bg-paper px-2 py-3 text-center">
           {savedCoins > 0 ? (
             <><div className="inline-flex items-center justify-center font-display text-xl font-extrabold text-lime-deep">−<Coins amount={savedCoins} /></div><div className="text-[11px] text-muted">You save</div></>
           ) : taxFree ? (
@@ -212,7 +212,7 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
       <div className="sec mt-5"><h3>What&apos;s inside</h3></div>
       <div className="space-y-2.5">
         {items.map((o, i) => (
-          <div key={o.id} className="fade-up flex items-center gap-3 rounded-[var(--r-lg)] border border-paper-line bg-cream-2 p-3 shadow-[var(--sh-1)]" style={{ animationDelay: `${i * 0.08}s` }}>
+          <div key={o.id} className="fade-up flex items-center gap-3 rounded-[var(--r-lg)] border border-line bg-paper p-3 shadow-[var(--sh-1)]" style={{ animationDelay: `${i * 0.08}s` }}>
             <span className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-coral-soft">
               {o.imageUrl ? (
                 <Image src={o.imageUrl} alt="" fill sizes="64px" unoptimized className="object-cover" />

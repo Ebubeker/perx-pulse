@@ -112,8 +112,9 @@ export default async function DiscoverPage() {
         <span className="text-coral">→</span>
       </Link>
 
-      <div className="mt-5 text-center">
-        <Link href="/dashboard/employee/pulse" className="text-sm font-semibold text-muted">Retake the Pulse →</Link>
+      <div className="mt-6 space-y-2.5 text-center">
+        <Link href="/dashboard/employee" className="btn btn-soft btn-lg w-full">← Back to dashboard</Link>
+        <Link href="/dashboard/employee/pulse" className="block text-sm font-semibold text-muted">Retake the Pulse →</Link>
       </div>
     </main>
   );
