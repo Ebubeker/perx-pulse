@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { requireMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { getCatalog } from "@/lib/gemini";
@@ -7,7 +8,7 @@ import { Coins } from "@/components/Coins";
 import { Mascot } from "@/components/Mascot";
 import { Icon } from "@/components/Icon";
 import { Avatar } from "@/components/Avatar";
-import { CreateTeamPack, JoinLeaveButton, RallyButton } from "./TeamForms";
+import { CreateTeamPack, JoinLeaveButton } from "./TeamForms";
 
 export const dynamic = "force-dynamic";
 
@@ -49,29 +50,28 @@ export default async function TeamPage() {
         <CreateTeamPack offers={offerChoices} />
       </div>
 
-      {/* Provider team perks — perks built for groups */}
+      {/* Provider team perks — same coupon-card style as the home perks; tap to rally a crew */}
       {teamOffers.length > 0 && (
         <section className="mt-7">
           <div className="sec"><h3>Provider team perks</h3></div>
-          <p className="-mt-1 mb-3 text-sm text-muted">Perks built for groups — rally a crew to unlock them.</p>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <p className="-mt-1 mb-3 text-sm text-muted">Perks built for groups — open one and rally a crew to unlock it.</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {teamOffers.map((o) => (
-              <div key={o.id} className="flex flex-col overflow-hidden rounded-[var(--r-lg)] border border-line bg-paper shadow-[var(--sh-1)]">
-                <div className="relative h-32 w-full overflow-hidden bg-coral">
-                  {o.imageUrl && <Image src={o.imageUrl} alt="" fill sizes="(min-width:1024px) 340px, (min-width:768px) 50vw, 100vw" unoptimized className="object-cover" />}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
-                  <div className="coupon-tex pointer-events-none absolute inset-0" />
-                  <span className="absolute left-3 top-3 z-[2] inline-flex items-center gap-1 rounded-full bg-coral px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white"><Icon name="team" size={12} /> Needs {o.teamSize}</span>
-                  <div className="absolute inset-x-0 bottom-0 z-[2] p-3.5 text-white">
-                    <h3 className="font-display text-base font-bold leading-tight">{o.title}</h3>
-                    <div className="text-[11px] text-white/80">{o.provider.businessName}{o.area ? ` · ${o.area}` : ""}</div>
-                  </div>
+              <Link
+                key={o.id}
+                href={`/dashboard/employee/offer/${o.id}`}
+                className="relative flex aspect-[2/1] flex-col justify-end overflow-hidden rounded-2xl bg-coral shadow-soft transition active:scale-[.99]"
+              >
+                {o.imageUrl && <Image src={o.imageUrl} alt="" fill sizes="(min-width:640px) 480px, 100vw" unoptimized className="object-cover" />}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                <div className="coupon-tex pointer-events-none absolute inset-0 z-[1]" />
+                <span className="absolute left-3.5 top-3.5 z-[2] inline-flex items-center gap-1 rounded-full bg-lime px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-ink"><Icon name="team" size={12} /> Needs {o.teamSize}</span>
+                <span className="absolute right-3.5 top-3.5 z-[2] inline-flex items-center rounded-full bg-coral px-3 py-1.5 font-display text-sm font-bold text-white shadow-[var(--sh-press)]"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /></span>
+                <div className="relative z-[2] p-4 text-white">
+                  <div className="line-clamp-2 font-display text-xl font-bold leading-tight">{o.title}</div>
+                  <div className="mt-0.5 truncate text-sm text-white/85">{o.provider.businessName}{o.area ? ` · ${o.area}` : ""}</div>
                 </div>
-                <div className="flex items-center justify-between gap-2 p-3.5">
-                  <span className="inline-flex items-baseline gap-1 font-display font-bold"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /><span className="text-xs font-normal text-muted">/ person</span></span>
-                  <RallyButton offerId={o.id} teamSize={o.teamSize ?? 2} />
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
