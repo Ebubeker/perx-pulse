@@ -70,22 +70,22 @@ export function GenieChat() {
 
   return (
     <div className="mt-4 flex flex-1 flex-col">
-      {/* message stream */}
-      <div>
+      {/* message stream — flex column so user bubbles sit right, genie bubbles left */}
+      <div className="flex flex-col gap-1">
         {messages.map((msg, i) =>
           msg.role === "user" ? (
-            <div key={i} className="ask my-2.5">{msg.text}</div>
+            <div key={i} className="ask my-1.5">{msg.text}</div>
           ) : (
-            <div key={i}>
+            <div key={i} className="my-1.5 max-w-[85%] self-start md:max-w-lg">
               {msg.text && (
-                <div className="my-2.5 max-w-[85%] rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm">
+                <div className="rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm">
                   {msg.text}
                 </div>
               )}
               {msg.offers && msg.offers.length > 0 && (
                 <>
                   <GeniePack offers={msg.offers} />
-                  <Link href={`/dashboard/employee/offer/${msg.offers[0]!.id}`} className="btn btn-soft" style={{ marginTop: "12px" }}>
+                  <Link href={`/dashboard/employee/offer/${msg.offers[0]!.id}`} className="btn btn-soft mt-3">
                     View &amp; tweak this pack
                   </Link>
                 </>
@@ -94,7 +94,7 @@ export function GenieChat() {
           )
         )}
         {pending && (
-          <div className="mt-2.5 flex items-center gap-2">
+          <div className="my-1.5 flex items-center gap-2 self-start">
             <Mascot mood="thinking" size={34} />
             <div className="rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm text-muted">Genie is thinking…</div>
           </div>

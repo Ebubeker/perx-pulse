@@ -10,7 +10,7 @@ export default async function GeniePage() {
   if (!m) redirect("/onboarding");
 
   return (
-    <main className="mx-auto flex min-h-[calc(100dvh-152px)] max-w-md flex-col px-5 pt-5 md:min-h-[calc(100dvh-96px)]">
+    <main className="mx-auto flex min-h-[calc(100dvh-152px)] max-w-md flex-col px-5 pt-5 md:min-h-[calc(100dvh-96px)] md:max-w-3xl md:px-8">
       <div className="flex items-start justify-between gap-2">
         <div className="greet">
           <div className="day">Perx Genie</div>
