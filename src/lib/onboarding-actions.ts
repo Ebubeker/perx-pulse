@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "./prisma";
 import { WS_COOKIE } from "./account";
+import { refreshEmployeeProfile } from "./ai-profile";
 import type { AccountType } from "@/types/globals";
 
 export type ActionResult = { error: string } | void;
@@ -268,8 +269,9 @@ export async function completeEmployeeOnboarding(input: unknown): Promise<Action
   });
   if (existing) redirect("/dashboard");
 
+  let newProfileId: string | null = null;
   try {
-    await prisma.$transaction(async (tx) => {
+    newProfileId = await prisma.$transaction(async (tx) => {
       // Atomically claim the invitation (defeats double-accept / revoke races).
       const claimed = await tx.invitation.updateMany({
         where: { id: invitation.id, status: "PENDING" },
@@ -277,7 +279,7 @@ export async function completeEmployeeOnboarding(input: unknown): Promise<Action
       });
       if (claimed.count === 0) throw new InviteUnavailable();
 
-      await tx.employeeProfile.create({
+      const created = await tx.employeeProfile.create({
         data: {
           clerkUserId: user.id,
           companyId,
@@ -295,13 +297,18 @@ export async function completeEmployeeOnboarding(input: unknown): Promise<Action
           languages: data.languages ?? [],
           onboardingComplete: true,
         },
+        select: { id: true },
       });
+      return created.id;
     });
   } catch (e) {
     if (e instanceof InviteUnavailable) redirect("/onboarding");
     console.error("[completeEmployeeOnboarding]", e);
     return { error: "We couldn't complete your setup. Please try again." };
   }
+
+  // Seed Perx's AI memory of this new employee from their onboarding answers.
+  if (newProfileId) await refreshEmployeeProfile(newProfileId);
 
   const client = await clerkClient();
   await client.users.updateUserMetadata(user.id, {

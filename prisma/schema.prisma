@@ -116,6 +116,8 @@ model EmployeeProfile {
   interests           String[]
   homeArea            String?
   languages           String[]
+  aiProfile           String? // AI-written memory of this employee, fed into every AI call
+  aiProfileAt         DateTime? // when aiProfile was last regenerated
   onboardingComplete  Boolean     @default(false)
   createdAt           DateTime    @default(now())
 

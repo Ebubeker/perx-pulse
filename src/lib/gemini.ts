@@ -106,6 +106,7 @@ export async function recommendPackages(opts: {
   budgetMode: BudgetMode;
   budgetLek: number;
   personalization: { preferredCategories: string[]; interests: string[]; wellnessGoals: string[]; dietary: string[]; homeArea: string | null };
+  aiProfile?: string | null;
 }): Promise<RecPack[]> {
   const catalog = await getCatalog();
   if (!catalog.length) return [];
@@ -121,6 +122,7 @@ export async function recommendPackages(opts: {
     `Each package combines 2-4 offers (prefer DIFFERENT providers), combined total AT OR UNDER ${budget} Lek. ` +
     `${modeGuidance(opts.budgetMode)} ` +
     `Match the employee's weekly check-in and preferences. Give each a short human label (no emojis) and a one-sentence rationale.\n\n` +
+    (opts.aiProfile ? `What Perx knows about this employee: ${opts.aiProfile}\n` : "") +
     `Weekly check-in: ${JSON.stringify(opts.answers)}\n` +
     `Preferences: ${JSON.stringify(opts.personalization)}\n\n` +
     `CATALOG (use the exact id):\n${menu}\n\n` +
@@ -153,6 +155,7 @@ export async function askGenie(opts: {
   question: string;
   budgetLek: number;
   personalization: { preferredCategories: string[]; interests: string[]; wellnessGoals: string[]; dietary: string[]; homeArea: string | null };
+  aiProfile?: string | null;
 }): Promise<GenieReply> {
   const catalog = await getCatalog();
   const byId = new Map(catalog.map((o) => [o.id, o] as const));
@@ -165,6 +168,7 @@ export async function askGenie(opts: {
     `Answer their question in 2-3 friendly sentences and recommend up to 3 specific offers from the catalog (by exact id). ` +
     `Their monthly perk budget is ${opts.budgetLek} Lek (employer-funded, tax-free). Stay within budget and be concrete. ` +
     `Never use em dashes (the "—" character) in your answer; use commas, periods, or the word "and" instead.\n\n` +
+    (opts.aiProfile ? `What you remember about this employee: ${opts.aiProfile}\n` : "") +
     `Question: ${opts.question}\n` +
     `Their preferences: ${JSON.stringify(opts.personalization)}\n\n` +
     `CATALOG:\n${menu}\n\n` +

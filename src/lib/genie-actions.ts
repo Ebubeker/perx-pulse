@@ -43,6 +43,7 @@ export async function genieAsk(
       dietary: m.dietary,
       homeArea: m.homeArea,
     },
+    aiProfile: m.aiProfile,
   });
   const offers = await resolveOffers(reply.offerIds);
 

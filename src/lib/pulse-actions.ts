@@ -7,6 +7,7 @@ import { BudgetMode } from "@prisma/client";
 import { prisma } from "./prisma";
 import { requireMembership } from "./account";
 import { recommendPackages } from "./gemini";
+import { refreshEmployeeProfile } from "./ai-profile";
 import { effectiveLek, toLek } from "./currency";
 
 // Tap-only Pulse: a small bounded map of chip answers + a known budget mode. These feed an AI
@@ -36,9 +37,12 @@ export async function runPulse(answers: unknown, budgetMode: unknown): Promise<v
       dietary: m.dietary,
       homeArea: m.homeArea,
     },
+    aiProfile: m.aiProfile,
   });
 
   const pulse = await prisma.pulse.create({ data: { employeeProfileId: m.id, answers: safeAnswers, budgetMode: mode } });
+  // This check-in is fresh signal — fold it into Perx's saved memory of the employee.
+  await refreshEmployeeProfile(m.id);
   if (recs.length) {
     await prisma.recommendation.createMany({
       data: recs.map((r) => ({
