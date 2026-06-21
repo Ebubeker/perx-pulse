@@ -15,18 +15,24 @@ const PODIUM = [
   { rank: 3, height: 58, bg: "#D8B48C", color: "#fff" },
 ] as const;
 
-function Board({ subtitle, rows, meId }: { subtitle: string; rows: Ranked[]; meId: string }) {
+function Board({ title, subtitle, rows, meId }: { title: string; subtitle: string; rows: Ranked[]; meId: string }) {
   // Reorder the top-3 for the podium so #1 sits in the middle: [2nd, 1st, 3rd].
   const podium = [rows[1], rows[0], rows[2]];
 
   if (rows.length === 0) {
-    return <p className="mt-3 rounded-[18px] border border-line bg-paper px-4 py-6 text-center text-sm text-muted">No activity yet.</p>;
+    return (
+      <div>
+        <div className="sec"><h3>{title}</h3></div>
+        <p className="rounded-[18px] border border-line bg-paper px-4 py-6 text-center text-sm text-muted">No activity yet.</p>
+      </div>
+    );
   }
 
   return (
     <div>
       <div className="sec">
-        <h3>{subtitle}</h3>
+        <h3>{title}</h3>
+        <span className="text-xs font-medium text-muted">{subtitle}</span>
       </div>
       <div className="podium">
         {PODIUM.map((p, idx) => {
@@ -70,16 +76,24 @@ export function LeaderboardTabs({ earners, givers, meId }: { earners: Ranked[]; 
 
   return (
     <>
-      <div className="seg">
-        <button className={tab === "recognized" ? "on" : ""} onClick={() => setTab("recognized")}>Most recognized</button>
-        <button className={tab === "generous" ? "on" : ""} onClick={() => setTab("generous")}>Most generous</button>
+      {/* mobile: a single tabbed board */}
+      <div className="md:hidden">
+        <div className="seg">
+          <button className={tab === "recognized" ? "on" : ""} onClick={() => setTab("recognized")}>Most recognized</button>
+          <button className={tab === "generous" ? "on" : ""} onClick={() => setTab("generous")}>Most generous</button>
+        </div>
+        {tab === "recognized" ? (
+          <Board title="Most recognized" subtitle="Coins earned all-time" rows={earners} meId={meId} />
+        ) : (
+          <Board title="Most generous" subtitle="Kudos given this month" rows={givers} meId={meId} />
+        )}
       </div>
 
-      {tab === "recognized" ? (
-        <Board subtitle="Coins earned all-time" rows={earners} meId={meId} />
-      ) : (
-        <Board subtitle="Kudos given this month" rows={givers} meId={meId} />
-      )}
+      {/* large screens: both boards side by side */}
+      <div className="mt-5 hidden gap-8 md:grid md:grid-cols-2">
+        <Board title="Most recognized" subtitle="Coins earned all-time" rows={earners} meId={meId} />
+        <Board title="Most generous" subtitle="Kudos given this month" rows={givers} meId={meId} />
+      </div>
     </>
   );
 }
