@@ -176,6 +176,7 @@ model Offer {
   discountPct Int           @default(0) // % off; effective price = priceLek * (100-discountPct)/100
   area        String?
   taxFree     Boolean       @default(false)
+  teamSize    Int? // if set, this is a TEAM perk needing this many people (rally a crew)
   active      Boolean       @default(true)
   createdAt   DateTime      @default(now())
 

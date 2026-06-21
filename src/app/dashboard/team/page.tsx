@@ -2,18 +2,19 @@ import Image from "next/image";
 import { requireMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { getCatalog } from "@/lib/gemini";
-import { toCoins } from "@/lib/currency";
+import { effectiveLek, toCoins } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 import { Mascot } from "@/components/Mascot";
 import { Icon } from "@/components/Icon";
 import { Avatar } from "@/components/Avatar";
-import { CreateTeamPack, JoinLeaveButton } from "./TeamForms";
+import { CreateTeamPack, JoinLeaveButton, RallyButton } from "./TeamForms";
 
 export const dynamic = "force-dynamic";
 
 export default async function TeamPage() {
   const m = await requireMembership();
 
-  const [packs, catalog] = await Promise.all([
+  const [packs, catalog, teamOffers] = await Promise.all([
     prisma.teamPack.findMany({
       where: { companyId: m.companyId },
       include: {
@@ -24,6 +25,12 @@ export default async function TeamPage() {
       orderBy: { createdAt: "desc" },
     }),
     getCatalog(),
+    prisma.offer.findMany({
+      where: { active: true, teamSize: { not: null } },
+      include: { provider: { select: { businessName: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 12,
+    }),
   ]);
   const offerChoices = catalog.map((o) => ({ id: o.id, title: o.title, providerName: o.providerName, coins: toCoins(o.effLek) }));
 
@@ -41,6 +48,34 @@ export default async function TeamPage() {
       <div className="mt-4 md:max-w-xl">
         <CreateTeamPack offers={offerChoices} />
       </div>
+
+      {/* Provider team perks — perks built for groups */}
+      {teamOffers.length > 0 && (
+        <section className="mt-7">
+          <div className="sec"><h3>Provider team perks</h3></div>
+          <p className="-mt-1 mb-3 text-sm text-muted">Perks built for groups — rally a crew to unlock them.</p>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {teamOffers.map((o) => (
+              <div key={o.id} className="flex flex-col overflow-hidden rounded-[var(--r-lg)] border border-line bg-paper shadow-[var(--sh-1)]">
+                <div className="relative h-32 w-full overflow-hidden bg-coral">
+                  {o.imageUrl && <Image src={o.imageUrl} alt="" fill sizes="(min-width:1024px) 340px, (min-width:768px) 50vw, 100vw" unoptimized className="object-cover" />}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+                  <div className="coupon-tex pointer-events-none absolute inset-0" />
+                  <span className="absolute left-3 top-3 z-[2] inline-flex items-center gap-1 rounded-full bg-coral px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white"><Icon name="team" size={12} /> Needs {o.teamSize}</span>
+                  <div className="absolute inset-x-0 bottom-0 z-[2] p-3.5 text-white">
+                    <h3 className="font-display text-base font-bold leading-tight">{o.title}</h3>
+                    <div className="text-[11px] text-white/80">{o.provider.businessName}{o.area ? ` · ${o.area}` : ""}</div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2 p-3.5">
+                  <span className="inline-flex items-baseline gap-1 font-display font-bold"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /><span className="text-xs font-normal text-muted">/ person</span></span>
+                  <RallyButton offerId={o.id} teamSize={o.teamSize ?? 2} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {packs.length === 0 ? (
         <p className="mt-5 rounded-[18px] border border-line bg-paper px-4 py-6 text-center text-sm text-muted">No team packs yet. Start the first one!</p>

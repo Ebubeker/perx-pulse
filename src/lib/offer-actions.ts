@@ -17,6 +17,8 @@ const OfferInput = z.object({
   discountPct: z.coerce.number().int().min(0).max(90).optional(),
   area: z.string().trim().max(60).optional(),
   taxFree: z.boolean().optional(),
+  imageUrl: z.string().trim().max(1_800_000).optional(), // a pasted URL or an uploaded data-URI
+  teamSize: z.coerce.number().int().min(2).max(50).optional(), // set → this is a team perk
 });
 
 export async function createOffer(input: unknown): Promise<OfferResult> {
@@ -31,11 +33,13 @@ export async function createOffer(input: unknown): Promise<OfferResult> {
         providerId: provider.id,
         title: d.title,
         description: d.description || null,
+        imageUrl: d.imageUrl || null,
         category: d.category ?? provider.category,
         priceLek: d.priceLek,
         discountPct: d.discountPct ?? 0,
         area: d.area || provider.city || null,
         taxFree: d.taxFree ?? false,
+        teamSize: d.teamSize ?? null,
         active: true,
       },
     });

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
@@ -54,6 +55,33 @@ export async function createTeamPack(input: unknown): Promise<{ error?: string }
   });
   revalidatePath("/dashboard/team");
   return {};
+}
+
+/** Rally a crew for a provider's TEAM perk — opens a team pack around it (creator auto-joins). */
+export async function rallyTeam(offerId: string): Promise<{ error?: string }> {
+  const m = await requireMembership();
+  const offer = await prisma.offer.findFirst({
+    where: { id: offerId, active: true },
+    select: { id: true, title: true, teamSize: true, priceLek: true, discountPct: true },
+  });
+  if (!offer || !offer.teamSize) return { error: "This isn't a team perk." };
+
+  const offerCoins = toCoins(effectiveLek(offer.priceLek, offer.discountPct));
+  const bonusCoins = computeBonus(offer.teamSize, offerCoins);
+
+  const pack = await prisma.teamPack.create({
+    data: {
+      companyId: m.companyId,
+      createdByEmployeeId: m.id,
+      title: offer.title,
+      targetSize: offer.teamSize,
+      offerId: offer.id,
+      bonusCoins,
+      members: { create: { employeeProfileId: m.id } },
+    },
+  });
+  revalidatePath("/dashboard/team");
+  redirect(`/dashboard/team#${pack.id}`);
 }
 
 export async function joinTeamPack(teamPackId: string): Promise<{ error?: string }> {

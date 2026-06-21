@@ -7,6 +7,7 @@ import { toCoins, effectiveLek } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
 import { Icon, type IconName } from "@/components/Icon";
 import { AddOfferButton } from "./AddOfferButton";
+import { RallyButton } from "@/app/dashboard/team/TeamForms";
 
 export const dynamic = "force-dynamic";
 
@@ -95,11 +96,21 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
         </p>
       </div>
 
-      {/* ── Add to pack ── */}
-      <div className="mt-4">
-        <AddOfferButton offerId={offer.id} />
-        <p className="mt-2 text-center text-xs text-muted">Adds to a pack you can send to HR. Fully employer-funded · the money never touches your hands.</p>
-      </div>
+      {/* ── Add to pack / rally a team ── */}
+      {offer.teamSize ? (
+        <div className="mt-4">
+          <div className="mb-2.5 flex items-center gap-2 rounded-xl bg-coral-soft px-3 py-2.5 text-sm font-semibold text-coral-deep">
+            <Icon name="team" size={18} className="shrink-0" /> Team perk — needs {offer.teamSize} people to do together
+          </div>
+          <RallyButton offerId={offer.id} teamSize={offer.teamSize} className="btn btn-primary btn-lg w-full" />
+          <p className="mt-2 text-center text-xs text-muted">Opens a team pack — rally coworkers and everyone gets a group bonus when it fills.</p>
+        </div>
+      ) : (
+        <div className="mt-4">
+          <AddOfferButton offerId={offer.id} />
+          <p className="mt-2 text-center text-xs text-muted">Adds to a pack you can send to HR. Fully employer-funded · the money never touches your hands.</p>
+        </div>
+      )}
 
       </div>{/* /left column */}
 

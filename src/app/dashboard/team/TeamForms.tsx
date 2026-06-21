@@ -2,7 +2,25 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { createTeamPack, joinTeamPack, leaveTeamPack } from "@/lib/team-actions";
+import { createTeamPack, joinTeamPack, leaveTeamPack, rallyTeam } from "@/lib/team-actions";
+
+export function RallyButton({ offerId, teamSize, className = "btn btn-primary !px-4 !py-2.5 !text-sm" }: { offerId: string; teamSize: number; className?: string }) {
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <span className="inline-flex flex-col items-stretch">
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => startTransition(async () => { const res = await rallyTeam(offerId); if (res?.error) setError(res.error); })}
+        className={`${className} disabled:opacity-60`}
+      >
+        {pending ? "Starting…" : `Rally ${teamSize} →`}
+      </button>
+      {error && <span className="mt-1 text-[11px] text-coral">{error}</span>}
+    </span>
+  );
+}
 
 type OfferChoice = { id: string; title: string; providerName: string; coins: number };
 
