@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-/** Employee-only floating Genie button — a circular Perx character. Hidden on the Genie page. */
+/** Employee-only floating Genie button — the Perx character itself, no chrome. Hidden on the Genie page. */
 export function GenieFab({ label }: { label: string }) {
   const pathname = usePathname() ?? "";
   if (pathname.startsWith("/dashboard/employee/genie")) return null;
@@ -12,16 +12,15 @@ export function GenieFab({ label }: { label: string }) {
     <Link
       href="/dashboard/employee/genie"
       aria-label={label}
-      className="group fixed bottom-20 right-4 z-30 overflow-hidden rounded-full bg-violet shadow-soft ring-2 ring-paper transition active:scale-95 md:bottom-6"
-      style={{ width: "3.5rem", height: "3.5rem" }}
+      className="fixed bottom-20 right-4 z-30 drop-shadow-[0_6px_14px_rgba(0,0,0,0.18)] transition hover:scale-105 active:scale-95 md:bottom-6"
     >
       <Image
         src="/perx/characters/perx-mood-cool.png"
         alt=""
-        fill
-        sizes="56px"
+        width={80}
+        height={80}
         unoptimized
-        className="scale-[1.6] object-cover transition group-hover:scale-[1.72]"
+        className="h-20 w-20"
       />
     </Link>
   );
