@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Icon } from "./icons";
 
-/** Employee-only floating Genie button — keeps the bottom bar at 4 tabs. Hidden on the Genie page. */
+/** Employee-only floating Genie button — a circular Perx character. Hidden on the Genie page. */
 export function GenieFab({ label }: { label: string }) {
   const pathname = usePathname() ?? "";
   if (pathname.startsWith("/dashboard/employee/genie")) return null;
@@ -12,10 +12,17 @@ export function GenieFab({ label }: { label: string }) {
     <Link
       href="/dashboard/employee/genie"
       aria-label={label}
-      className="fixed bottom-20 right-4 z-30 flex size-13 items-center justify-center rounded-full bg-violet text-white shadow-soft md:bottom-6"
-      style={{ width: "3.25rem", height: "3.25rem" }}
+      className="group fixed bottom-20 right-4 z-30 overflow-hidden rounded-full bg-violet shadow-soft ring-2 ring-paper transition active:scale-95 md:bottom-6"
+      style={{ width: "3.5rem", height: "3.5rem" }}
     >
-      <Icon name="genie" size={24} />
+      <Image
+        src="/perx/characters/perx-mood-cool.png"
+        alt=""
+        fill
+        sizes="56px"
+        unoptimized
+        className="scale-[1.6] object-cover transition group-hover:scale-[1.72]"
+      />
     </Link>
   );
 }

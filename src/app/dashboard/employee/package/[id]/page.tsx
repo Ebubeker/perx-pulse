@@ -257,11 +257,7 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      <p className="mt-3 text-center text-xs text-muted">
-        The money never passes through your hands — TeamSystem funds each provider directly.
-      </p>
-
-      <form action={submitPackage.bind(null, pkg.id)} className="mt-2">
+      <form action={submitPackage.bind(null, pkg.id)} className="mt-4">
         <button type="submit" className="btn btn-primary btn-lg">Choose this week →</button>
       </form>
       </div>{/* /right column */}
