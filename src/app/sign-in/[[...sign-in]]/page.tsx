@@ -1,13 +1,11 @@
 import { SignIn } from "@clerk/nextjs";
 import { Logo } from "@/components/Logo";
-import { Mascot } from "@/components/Mascot";
 
 export default function Page() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-cream px-6 py-10">
       <div className="flex flex-col items-center text-center">
-        <Mascot mood="charged" size={96} className="float" />
-        <Logo className="mt-4" />
+        <Logo />
         <p className="mt-3 max-w-xs text-[15px] text-muted">Your perks, your coins — welcome back to Perx Pulse.</p>
       </div>
       <SignIn
