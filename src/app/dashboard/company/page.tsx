@@ -137,9 +137,9 @@ export default async function CompanyDashboard() {
             <div>
               <div className="kicker text-lime">Your talent edge</div>
               <p className="mt-2 max-w-[330px] text-[17px] font-semibold leading-snug">
-                Teams on Perx report <span className="text-lime">+34%</span> benefit satisfaction and retain staff 1.4× longer.
+                Ask Perx anything about your team, and get an AI brief on wellbeing, demand, and where to spend.
               </p>
-              <Link href="/dashboard/company/insights" className="btn btn-lime mt-4 px-5">See your Perx Score →</Link>
+              <Link href="/dashboard/company/insights" className="btn btn-lime mt-4 px-5">Open AI insights →</Link>
             </div>
           </div>
         </div>

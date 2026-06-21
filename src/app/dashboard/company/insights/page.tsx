@@ -4,6 +4,8 @@ import { companyInsights } from "@/lib/insights";
 import { ALL_CATEGORIES } from "@/lib/passport";
 import { toCoins } from "@/lib/currency";
 import { Icon } from "@/components/Icon";
+import { CompanyChat } from "./CompanyChat";
+import { CompanyBrief } from "./CompanyBrief";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +57,6 @@ export default async function InsightsPage() {
     ? `conic-gradient(${donutStops}${acc < 100 ? `, #C9C2AE ${acc}% 100%` : ""})`
     : "conic-gradient(#E7E0CF 0 100%)";
   const leadPct = legend[0]?.pct ?? 0;
-  const leadLabel = legend[0]?.label ?? "—";
 
   // ── Gauge: half-circle, lime arc filled to the real Perx Score. The design maps the
   // score value 1:1 to degrees of the 180° visible arc (e.g. 92 → 92deg), so we do the same.
@@ -72,7 +73,13 @@ export default async function InsightsPage() {
 
   return (
     <main className="page" style={{ maxWidth: 920 }}>
-      <h1 className="h1">Heatmap</h1>
+      <h1 className="h1">Insights</h1>
+
+      {/* ── AI layer: a copilot you can talk to + an auto-generated team brief ── */}
+      <div className="grid g-2" style={{ marginTop: 20, alignItems: "start" }}>
+        <CompanyChat />
+        <CompanyBrief />
+      </div>
 
       {/* ── Perx Score: scorecard with gauge + sub-metrics ── */}
       <div className="grid g-2" style={{ marginTop: 20, alignItems: "start" }}>
@@ -138,16 +145,7 @@ export default async function InsightsPage() {
           </div>
         </div>
         <div>
-          <div className="card" style={{ background: "var(--ink)", color: "#fff" }}>
-            <div className="kicker" style={{ color: "var(--lime)" }}>AI INSIGHT</div>
-            <div style={{ fontSize: 18, fontWeight: 700, margin: "8px 0 4px" }}>
-              {demandTotal ? `${leadLabel} leads your team's demand.` : "No demand signal yet — encourage your team to redeem."}
-            </div>
-            <p style={{ color: "#fff9", fontSize: 14 }}>
-              Fund more providers where demand is highest to keep your Perx Score climbing.
-            </p>
-          </div>
-          <div className="card" style={{ marginTop: 14 }}>
+          <div className="card">
             <div className="kicker">BUDGET UTILIZATION</div>
             <div style={{ fontSize: 18, fontWeight: 700, margin: "6px 0" }}>
               {toCoins(ins.budgetUsed).toLocaleString("en-US")} of {toCoins(ins.budgetTotal).toLocaleString("en-US")} coins · {budgetPct}%
