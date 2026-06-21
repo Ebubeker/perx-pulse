@@ -16,7 +16,7 @@ export function TopBar({ role, locale, labels, workspaces, active, orgName }: { 
   const title = labels[titleKey] ?? "";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur md:hidden">
       <div className="mx-auto flex h-14 max-w-2xl items-center gap-2 px-4">
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
           {back ? (

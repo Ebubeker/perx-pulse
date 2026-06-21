@@ -56,7 +56,7 @@ export function Sidebar({
         )}
       </div>
 
-      {role !== "employee" && workspaces.length > 1 && (
+      {workspaces.length > 1 && (
         <div className="px-4 pb-3">
           <WorkspaceSwitcher workspaces={workspaces} active={active} align="left" />
         </div>
