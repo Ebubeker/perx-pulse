@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
@@ -138,43 +139,109 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
     );
   }
 
-  /* ──────────────────────────  DRAFT — the pack detail (design 13)  ────────────────────────── */
+  /* ──────────────────────────  DRAFT — the pack detail (design 13, enriched)  ────────────────────────── */
   const budgetLek = m.perksBudgetLek || pkg.totalLek;
   const afterLek = Math.max(0, budgetLek - pkg.totalLek);
   const ringPct = Math.min(100, Math.round((pkg.totalLek / Math.max(1, budgetLek)) * 100));
+  const heroImgs = items.map((o) => o.imageUrl).filter((u): u is string => !!u).slice(0, 4);
+  const savedCoins = toCoins(items.reduce((s, o) => s + (o.priceLek - o.effLek), 0));
 
   return (
-    <main className="mx-auto max-w-md px-5 py-5">
-      <div className="pack">
-        <div className="pack-top coral">
-          <div className="kk">{items.length} providers · your pack</div>
-          <h2>{pkg.label}</h2>
+    <main className="mx-auto max-w-md px-5 py-5 md:max-w-5xl md:px-8 md:py-7">
+     <div className="md:grid md:grid-cols-12 md:items-start md:gap-8">
+      <div className="md:col-span-7">
+      {/* photo hero — the offers' real images behind the pack title */}
+      <div className="relative overflow-hidden rounded-[var(--r-lg)] shadow-soft">
+        <div className="absolute inset-0 flex">
+          {heroImgs.length > 0 ? (
+            heroImgs.map((src, i) => (
+              <div key={i} className="relative flex-1">
+                <Image src={src} alt="" fill sizes="(min-width:768px) 640px, 100vw" unoptimized className="object-cover" />
+              </div>
+            ))
+          ) : (
+            <div className="flex-1 bg-coral" />
+          )}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/25" />
+        <div className="coupon-tex pointer-events-none absolute inset-0" />
+        <Mascot mood="cool" size={74} className="float absolute right-3 top-3 z-[2] drop-shadow-lg" />
+        <div className="relative z-[2] flex min-h-[200px] flex-col justify-end p-5 text-white">
+          <span className="mb-2 inline-flex w-fit items-center gap-1 rounded-full bg-lime px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-ink"><Icon name="sparkles" size={12} /> AI Pick</span>
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-mono text-[10px] uppercase tracking-[.16em] text-white/75">{items.length} providers{taxFree ? " · tax-free" : ""}</div>
+              <h1 className="font-display text-[26px] font-extrabold leading-tight">{pkg.label}</h1>
+            </div>
+            <span className="inline-flex shrink-0 items-center rounded-full bg-coral px-3 py-1.5 font-display text-base font-bold text-white shadow-[var(--sh-press)]"><Coins amount={toCoins(pkg.totalLek)} /></span>
+          </div>
         </div>
       </div>
 
+      {/* AI rationale with a buddy */}
       {pkg.rationale && (
-        <div className="why" style={{ margin: "16px 2px" }}>
-          <span className="spark"><Icon name="sparkles" size={16} /></span>
-          <span className="text-sm text-muted">{pkg.rationale}</span>
+        <div className="mt-4 flex items-start gap-3 rounded-[var(--r-lg)] border border-line bg-coral-soft/50 p-4">
+          <Mascot mood="thinking" size={50} className="float shrink-0" />
+          <div>
+            <div className="kicker text-coral-deep">Why this pack</div>
+            <p className="mt-1 text-sm text-ink-soft">{pkg.rationale}</p>
+          </div>
         </div>
       )}
 
-      <div style={{ background: "var(--cream-2)", border: "1px solid var(--paper-line)", borderRadius: "var(--r-lg)", padding: "4px 16px 8px" }}>
+      {/* highlights */}
+      <div className="mt-4 grid grid-cols-3 gap-2.5">
+        <div className="rounded-[var(--r-md)] border border-line bg-paper px-2 py-3 text-center">
+          <div className="font-display text-xl font-extrabold">{items.length}</div>
+          <div className="text-[11px] text-muted">Providers</div>
+        </div>
+        <div className="rounded-[var(--r-md)] border border-line bg-paper px-2 py-3 text-center">
+          <div className="inline-flex items-center justify-center font-display text-xl font-extrabold"><Coins amount={toCoins(pkg.totalLek)} /></div>
+          <div className="text-[11px] text-muted">You pay</div>
+        </div>
+        <div className="rounded-[var(--r-md)] border border-line bg-paper px-2 py-3 text-center">
+          {savedCoins > 0 ? (
+            <><div className="inline-flex items-center justify-center font-display text-xl font-extrabold text-lime-deep">−<Coins amount={savedCoins} /></div><div className="text-[11px] text-muted">You save</div></>
+          ) : taxFree ? (
+            <><div className="font-display text-xl font-extrabold text-coral">0%</div><div className="text-[11px] text-muted">Tax</div></>
+          ) : (
+            <><div className="font-display text-xl font-extrabold">{ringPct}%</div><div className="text-[11px] text-muted">Of budget</div></>
+          )}
+        </div>
+      </div>
+
+      {/* items with real photos */}
+      <div className="sec mt-5"><h3>What&apos;s inside</h3></div>
+      <div className="space-y-2.5">
         {items.map((o, i) => (
-          <div key={o.id} className="item" style={i === items.length - 1 ? { borderBottom: "none" } : undefined}>
-            <span className="logo"><Icon name={CAT_ICON[o.category] ?? "gift"} size={20} /></span>
-            <div className="grow">
-              <div className="t">{o.providerName}</div>
-              <div className="s">{o.title}{o.area ? ` · ${o.area}` : ""}</div>
+          <div key={o.id} className="fade-up flex items-center gap-3 rounded-[var(--r-lg)] border border-line bg-paper p-3 shadow-[var(--sh-1)]" style={{ animationDelay: `${i * 0.08}s` }}>
+            <span className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-coral-soft">
+              {o.imageUrl ? (
+                <Image src={o.imageUrl} alt="" fill sizes="64px" unoptimized className="object-cover" />
+              ) : (
+                <span className="grid h-full place-items-center text-coral-deep"><Icon name={CAT_ICON[o.category] ?? "gift"} size={24} /></span>
+              )}
+            </span>
+            <div className="min-w-0 grow">
+              <div className="truncate font-display font-bold leading-tight">{o.providerName}</div>
+              <div className="truncate text-xs text-muted">{o.title}{o.area ? ` · ${o.area}` : ""}</div>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                {o.discountPct > 0 && <span className="badge badge-new">−{o.discountPct}%</span>}
+                {o.taxFree && <span className="badge badge-tax">Tax-free</span>}
+              </div>
             </div>
-            <div style={{ textAlign: "right" }}>
-              <div className="pr"><Coins amount={toCoins(o.effLek)} /></div>
+            <div className="shrink-0 text-right">
+              <div className="font-display font-bold"><Coins amount={toCoins(o.effLek)} /></div>
               <SwapButton packageId={pkg.id} offerId={o.id} />
             </div>
           </div>
         ))}
       </div>
 
+      </div>{/* /left column */}
+
+      <div className="mt-6 md:col-span-5 md:mt-0">
+      {/* budget ring impact */}
       <div className="impact">
         <div className="ring" style={{ "--p": ringPct, "--size": "96px" } as React.CSSProperties}>
           <div className="ring-c"><b>{toCoins(afterLek).toLocaleString("en-US")}</b><span>after this</span></div>
@@ -197,6 +264,8 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
       <form action={submitPackage.bind(null, pkg.id)} className="mt-2">
         <button type="submit" className="btn btn-primary btn-lg">Choose this week →</button>
       </form>
+      </div>{/* /right column */}
+     </div>{/* /grid */}
     </main>
   );
 }

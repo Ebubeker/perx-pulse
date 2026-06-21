@@ -24,6 +24,15 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const active = await getActiveWorkspace(w.available);
   const role: Role = active === "employee" ? "employee" : active === "provider" ? "provider" : "company";
 
+  // Org name for the active workspace: provider business name when wearing the provider
+  // hat, otherwise the company's brand/legal name.
+  const orgName: string | null =
+    active === "provider"
+      ? w.provider?.businessName ?? null
+      : w.membership
+        ? w.membership.company.brandName || w.membership.company.name
+        : null;
+
   let pendingCount = 0;
   if (active === "company" && w.membership) {
     pendingCount = await prisma.perkPackage.count({
@@ -41,6 +50,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       pendingCount={pendingCount}
       workspaces={w.available}
       active={active!}
+      orgName={orgName}
     >
       {children}
     </AppShell>

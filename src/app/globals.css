@@ -235,6 +235,14 @@ h1,h2,h3,h4 { font-family: var(--f-display); font-weight: 700; letter-spacing: -
 .no-scrollbar{scrollbar-width:none}
 .no-scrollbar::-webkit-scrollbar{display:none;height:0;width:0}
 
+/* coupon texture — subtle printed-ticket pattern + soft top sheen for depth on image cards */
+.coupon-tex{
+  background-image:
+    radial-gradient(120% 75% at 50% 0%, rgba(255,255,255,.16), transparent 55%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 1px, transparent 1px 7px);
+  mix-blend-mode: soft-light;
+}
+
 /* home (08) */
 .hcard{display:flex;align-items:center;gap:18px}
 .hcard .info{flex:1;min-width:0}

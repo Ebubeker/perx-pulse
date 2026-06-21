@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/Logo";
+import { Icon } from "@/components/Icon";
 import { AccountMenu } from "./AccountMenu";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { resolveHeader, ROLE_HOME, type Role } from "./nav-config";
 import type { Locale } from "@/lib/i18n";
 import type { Workspace } from "@/lib/account";
 
-export function TopBar({ role, locale, labels, workspaces, active }: { role: Role; locale: Locale; labels: Record<string, string>; workspaces: Workspace[]; active: Workspace }) {
+export function TopBar({ role, locale, labels, workspaces, active, orgName }: { role: Role; locale: Locale; labels: Record<string, string>; workspaces: Workspace[]; active: Workspace; orgName?: string | null }) {
   const pathname = usePathname() ?? ROLE_HOME[role];
   const { titleKey, back } = resolveHeader(pathname, role);
   const title = labels[titleKey] ?? "";
@@ -26,9 +27,15 @@ export function TopBar({ role, locale, labels, workspaces, active }: { role: Rol
               <span className="truncate font-display text-[17px] font-bold">{title}</span>
             </>
           ) : (
-            <Link href={ROLE_HOME[role]} aria-label="Perx" className="md:hidden">
-              <Logo />
-            </Link>
+            <div className="flex min-w-0 items-center gap-2 md:hidden">
+              <Link href={ROLE_HOME[role]} aria-label="Perx"><Logo /></Link>
+              {orgName && (
+                <span className="hidden min-w-0 max-w-[34vw] items-center gap-1 truncate rounded-full bg-cream px-2 py-0.5 text-[11px] font-semibold text-ink-soft min-[360px]:inline-flex">
+                  <Icon name="building" size={11} className="shrink-0 text-coral" />
+                  <span className="truncate">{orgName}</span>
+                </span>
+              )}
+            </div>
           )}
         </div>
         <WorkspaceSwitcher workspaces={workspaces} active={active} />

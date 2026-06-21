@@ -17,6 +17,7 @@ export function DesktopNav({
   pendingCount,
   workspaces,
   active,
+  orgName,
 }: {
   role: Role;
   locale: Locale;
@@ -24,6 +25,7 @@ export function DesktopNav({
   pendingCount: number;
   workspaces: Workspace[];
   active: Workspace;
+  orgName?: string | null;
 }) {
   const pathname = usePathname() ?? ROLE_HOME[role];
   const items = allItems(role);
@@ -32,7 +34,7 @@ export function DesktopNav({
     <header className="dnav md:hidden">
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-5 py-3">
         <Link href={ROLE_HOME[role]} aria-label="Perx" className="shrink-0"><Logo /></Link>
-        <span className="kicker mr-1 hidden sm:inline">{role === "provider" ? "Provider" : "Employer"}</span>
+        <span className="kicker mr-1 hidden sm:inline">{orgName ? `${orgName} · ` : ""}{role === "provider" ? "Provider" : "Employer"}</span>
         <nav className="flex min-w-0 items-center gap-1 overflow-x-auto">
           {items.map((item) => {
             const active = isActive(pathname, item);

@@ -5,37 +5,51 @@ import { useRouter } from "next/navigation";
 import { giveKudos, grantCoins } from "@/lib/coin-actions";
 import { Avatar } from "@/components/Avatar";
 import { CoinIcon } from "@/components/CoinIcon";
+import { Mascot } from "@/components/Mascot";
 
 type Colleague = { id: string; displayName: string; role: string };
 
 const AMOUNTS = [5, 10, 20, 50];
 
-export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleagues: Colleague[]; remaining: number; isAdmin: boolean }) {
+export function RecognitionForms({ colleagues, balance, isAdmin }: { colleagues: Colleague[]; balance: number; isAdmin: boolean }) {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState(10);
   const [memo, setMemo] = useState("");
   const [msg, setMsg] = useState<{ ok?: boolean; text: string } | null>(null);
+  const [success, setSuccess] = useState<{ amount: number; toName: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
   function sendKudos() {
     setMsg(null);
+    const sentAmount = amount;
+    const sentTo = colleagues.find((c) => c.id === to)?.displayName ?? "your teammate";
     startTransition(async () => {
       const res = await giveKudos(to, amount, memo);
       if (res.error) setMsg({ text: res.error });
-      else { setMsg({ ok: true, text: "Kudos sent" }); setMemo(""); router.refresh(); }
+      else {
+        setSuccess({ amount: sentAmount, toName: sentTo });
+        setMemo("");
+        setTo("");
+        router.refresh();
+      }
     });
   }
 
-  const canGive = remaining > 0;
+  const canGive = balance > 0;
+  const tooMuch = amount > balance;
   const toName = colleagues.find((c) => c.id === to)?.displayName;
 
   return (
-    <div className="mt-4 space-y-4">
-      {/* Send kudos header */}
-      <div className="sec !mb-3">
-        <h3>Send kudos</h3>
-        <span className="link">{remaining} left this month</span>
+    <div className="space-y-4">
+      {/* Big mascot presence for sending kudos */}
+      <div className="flex items-center gap-3.5">
+        <Mascot mood="love" size={92} className="float shrink-0" />
+        <div className="min-w-0">
+          <div className="kicker">Send kudos</div>
+          <h3 className="font-display text-xl font-extrabold leading-tight">Recognize a teammate</h3>
+          <p className="mt-0.5 text-[13px] text-muted">Straight from your wallet · <b className="text-ink">{balance}</b> coins to give</p>
+        </div>
       </div>
 
       {/* Recipient picker — HORIZONTAL scroll strip of illustrated coworker avatars (.kudos > .k) */}
@@ -48,11 +62,11 @@ export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleague
           {colleagues.map((c) => {
             const on = c.id === to;
             return (
-              <button key={c.id} type="button" onClick={() => setTo(c.id)} className="k">
-                <span className={`relative mx-auto mb-1.5 block w-fit rounded-full ${on ? "ring-2 ring-coral ring-offset-2 ring-offset-cream" : ""}`}>
-                  <Avatar name={c.displayName} seed={c.id} size={56} />
+              <button key={c.id} type="button" onClick={() => setTo(c.id)} className={`k rounded-2xl py-2 transition ${on ? "bg-coral-soft" : "hover:bg-black/[.04]"}`}>
+                <span className="mx-auto mb-1.5 block w-fit">
+                  <Avatar name={c.displayName} seed={c.id} size={54} />
                 </span>
-                <span className={`block truncate text-xs font-semibold ${on ? "text-coral" : "text-ink"}`}>
+                <span className={`block truncate px-1 text-xs font-semibold ${on ? "text-coral-deep" : "text-muted"}`}>
                   {c.displayName.split(" ")[0]}
                 </span>
               </button>
@@ -76,7 +90,7 @@ export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleague
               key={a}
               type="button"
               onClick={() => setAmount(a)}
-              disabled={a > remaining}
+              disabled={a > balance}
               className={`chip lime disabled:opacity-30 ${amount === a ? "on lime" : "!border-white/15 !bg-white/10 !text-[var(--txt-on-dark)]"}`}
             >
               {a}
@@ -93,15 +107,29 @@ export function RecognitionForms({ colleagues, remaining, isAdmin }: { colleague
         <button
           type="button"
           onClick={sendKudos}
-          disabled={pending || !to || !canGive}
+          disabled={pending || !to || !canGive || tooMuch}
           className="btn btn-lime btn-lg mt-3 w-full disabled:opacity-50"
         >
-          {pending ? "Sending…" : !to ? "Pick someone above" : canGive ? `Send kudos →` : "No coins left this month"}
+          {pending ? "Sending…" : !to ? "Pick someone above" : !canGive ? "Your wallet is empty" : tooMuch ? "Not enough coins" : "Send kudos →"}
         </button>
         {msg && <p className={`mt-2 text-sm ${msg.ok ? "text-lime" : "text-coral"}`}>{msg.text}</p>}
       </div>
 
       {isAdmin && <GrantForm colleagues={colleagues} />}
+
+      {/* Success celebration overlay — character celebrating + "Sent successfully" */}
+      {success && (
+        <div className="spinreward" onClick={() => setSuccess(null)}>
+          <div className="panel" onClick={(e) => e.stopPropagation()}>
+            <Mascot mood="celebrate" size={118} className="float mx-auto" />
+            <div className="kicker mt-1 text-coral">Kudos delivered</div>
+            <h2 className="mt-1 font-display text-2xl font-extrabold leading-tight">Sent successfully!</h2>
+            <div className="big">+{success.amount}<CoinIcon className="size-9" /></div>
+            <div className="text-[13px] text-muted">to <b className="text-ink">{success.toName}</b> · straight from your wallet</div>
+            <button type="button" onClick={() => setSuccess(null)} className="btn btn-lime btn-lg mt-[18px]">Done</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

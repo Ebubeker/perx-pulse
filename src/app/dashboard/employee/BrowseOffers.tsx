@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { toCoins } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
 import { Icon, type IconName } from "@/components/Icon";
@@ -55,28 +56,31 @@ export function BrowseOffers({ offers, initialCategory = "all" }: { offers: Cata
 
       <p className="mt-3 text-xs text-muted">{filtered.length} of {offers.length} perks</p>
 
-      {/* voucher cards — 2 columns, taller */}
-      <div className="mt-2 grid grid-cols-2 gap-3 md:gap-4">
+      {/* perk cards — landscape 2:1 banners, one per row on mobile, two per row on wider screens */}
+      <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {filtered.map((o) => (
           <Link
             key={o.id}
             href={`/dashboard/employee/offer/${o.id}`}
-            className="relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-[var(--r-md)] shadow-soft transition active:scale-[.99]"
+            className="relative flex aspect-[2/1] flex-col justify-end overflow-hidden rounded-2xl shadow-soft transition active:scale-[.99]"
             style={{ background: CAT_COLOR[o.category] ?? "var(--coral)" }}
           >
-            <Icon name={CAT_ICON[o.category] ?? "gift"} size={104} className="pointer-events-none absolute -right-3 -top-3 text-white/15" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-            <div className="absolute left-3 top-3 z-[2] flex flex-wrap gap-1.5">
-              {o.taxFree && <span className="badge badge-tax">Tax-free</span>}
-              {o.discountPct > 0 && <span className="badge badge-new">−{o.discountPct}%</span>}
-            </div>
-            <div className="relative z-[2] p-3.5 text-white">
-              <div className="font-display text-base font-bold leading-tight line-clamp-2">{o.title}</div>
-              <div className="truncate text-xs text-white/85">{o.providerName}{o.area ? ` · ${o.area}` : ""}</div>
-              <div className="mt-1 flex items-baseline gap-1.5">
-                {o.discountPct > 0 && <span className="text-xs text-white/60 line-through"><Coins amount={toCoins(o.priceLek)} /></span>}
-                <span className="font-display text-lg font-bold"><Coins amount={toCoins(o.effLek)} /></span>
-              </div>
+            {o.imageUrl ? (
+              <Image src={o.imageUrl} alt="" fill sizes="(min-width:640px) 480px, 100vw" unoptimized className="object-cover" />
+            ) : (
+              <Icon name={CAT_ICON[o.category] ?? "gift"} size={104} className="pointer-events-none absolute -right-3 -top-3 text-white/15" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+            <div className="coupon-tex pointer-events-none absolute inset-0 z-[1]" />
+            {o.discountPct > 0 && (
+              <span className="badge badge-new absolute left-3.5 top-3.5 z-[2]">−{o.discountPct}%</span>
+            )}
+            <span className="absolute right-3.5 top-3.5 z-[2] inline-flex items-center rounded-full bg-coral px-3 py-1.5 font-display text-sm font-bold text-white shadow-[var(--sh-press)]">
+              <Coins amount={toCoins(o.effLek)} />
+            </span>
+            <div className="relative z-[2] p-4 text-white">
+              <div className="font-display text-xl font-bold leading-tight line-clamp-2">{o.title}</div>
+              <div className="mt-0.5 truncate text-sm text-white/85">{o.providerName}{o.area ? ` · ${o.area}` : ""}</div>
             </div>
           </Link>
         ))}

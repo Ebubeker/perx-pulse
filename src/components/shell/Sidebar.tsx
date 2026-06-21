@@ -17,6 +17,7 @@ export function Sidebar({
   pendingCount,
   workspaces,
   active,
+  orgName,
 }: {
   role: Role;
   locale: Locale;
@@ -24,6 +25,7 @@ export function Sidebar({
   pendingCount: number;
   workspaces: Workspace[];
   active: Workspace;
+  orgName?: string | null;
 }) {
   const pathname = usePathname() ?? ROLE_HOME[role];
 
@@ -44,9 +46,15 @@ export function Sidebar({
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line bg-paper md:flex">
-      <Link href={ROLE_HOME[role]} aria-label="Perx" className="px-5 pb-3 pt-5">
-        <Logo />
-      </Link>
+      <div className="px-5 pb-4 pt-5">
+        <Link href={ROLE_HOME[role]} aria-label="Perx"><Logo /></Link>
+        {orgName && (
+          <div className="mt-2.5 inline-flex max-w-full items-center gap-1.5 rounded-full bg-cream px-2.5 py-1 text-xs font-semibold text-ink-soft">
+            <Icon name="building" size={13} className="shrink-0 text-coral" />
+            <span className="truncate">{orgName}</span>
+          </div>
+        )}
+      </div>
 
       {role !== "employee" && workspaces.length > 1 && (
         <div className="px-4 pb-3">

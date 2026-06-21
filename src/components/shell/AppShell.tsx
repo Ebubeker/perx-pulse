@@ -20,6 +20,7 @@ export function AppShell({
   pendingCount,
   workspaces,
   active,
+  orgName,
   children,
 }: {
   role: Role;
@@ -28,14 +29,15 @@ export function AppShell({
   pendingCount: number;
   workspaces: Workspace[];
   active: Workspace;
+  orgName?: string | null;
   children: ReactNode;
 }) {
   if (role === "company" || role === "provider") {
     return (
       <div className="min-h-dvh md:pl-60">
-        <Sidebar role={role} locale={locale} labels={labels} pendingCount={pendingCount} workspaces={workspaces} active={active} />
+        <Sidebar role={role} locale={locale} labels={labels} pendingCount={pendingCount} workspaces={workspaces} active={active} orgName={orgName} />
         {/* mobile-only top bar; the sidebar takes over from md up */}
-        <DesktopNav role={role} locale={locale} labels={labels} pendingCount={pendingCount} workspaces={workspaces} active={active} />
+        <DesktopNav role={role} locale={locale} labels={labels} pendingCount={pendingCount} workspaces={workspaces} active={active} orgName={orgName} />
         <div className="pb-10">{children}</div>
       </div>
     );
@@ -43,8 +45,8 @@ export function AppShell({
 
   return (
     <div className="min-h-dvh md:pl-60">
-      <Sidebar role={role} locale={locale} labels={labels} pendingCount={pendingCount} workspaces={workspaces} active={active} />
-      <TopBar role={role} locale={locale} labels={labels} workspaces={workspaces} active={active} />
+      <Sidebar role={role} locale={locale} labels={labels} pendingCount={pendingCount} workspaces={workspaces} active={active} orgName={orgName} />
+      <TopBar role={role} locale={locale} labels={labels} workspaces={workspaces} active={active} orgName={orgName} />
       <div className="pb-24 md:pb-10">{children}</div>
       <BottomTabBar role={role} labels={labels} pendingCount={pendingCount} />
       <GenieFab label={labels["nav.genie"] ?? "Genie"} />
