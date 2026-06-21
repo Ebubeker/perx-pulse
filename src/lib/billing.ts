@@ -18,12 +18,20 @@ export function billingConfigured(): boolean {
 }
 
 /** Create a real Lemon Squeezy (test-mode) hosted checkout for a company. Returns the checkout URL. */
-export async function createCheckout(opts: { companyId: string; email: string; name?: string }): Promise<string> {
+export async function createCheckout(opts: {
+  companyId: string;
+  email: string;
+  name?: string;
+  /** Override the variant price for this checkout (cents). Used for the dynamic seat-based plan. */
+  customPriceCents?: number;
+}): Promise<string> {
   const e = env();
   const body = {
     data: {
       type: "checkouts",
       attributes: {
+        // Dynamic seat-based price overrides the variant's default price (test mode).
+        ...(opts.customPriceCents && opts.customPriceCents > 0 ? { custom_price: Math.round(opts.customPriceCents) } : {}),
         checkout_data: {
           email: opts.email,
           name: opts.name,

@@ -7,6 +7,19 @@ import { requireProvider } from "./account";
 
 export type OfferResult = { error: string } | { ok: true };
 
+/** Shape the client wizard sends (coins are converted to priceLek before calling). */
+export interface OfferInputShape {
+  title: string;
+  description?: string;
+  category?: string;
+  priceLek: number;
+  discountPct?: string | number;
+  area?: string;
+  taxFree?: boolean;
+  imageUrl?: string;
+  teamSize?: number;
+}
+
 const CATEGORIES = ["wellness", "fitness", "food", "health", "travel", "learning", "culture", "telecom"] as const;
 
 const OfferInput = z.object({
@@ -49,6 +62,39 @@ export async function createOffer(input: unknown): Promise<OfferResult> {
   }
 
   revalidatePath("/dashboard/provider");
+  return { ok: true };
+}
+
+/** Edit one of the provider's own offers. Scoped — no cross-tenant writes. */
+export async function updateOffer(offerId: string, input: unknown): Promise<OfferResult> {
+  const provider = await requireProvider();
+  const parsed = OfferInput.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Please check the offer details." };
+  const d = parsed.data;
+
+  try {
+    const res = await prisma.offer.updateMany({
+      where: { id: offerId, providerId: provider.id },
+      data: {
+        title: d.title,
+        description: d.description || null,
+        imageUrl: d.imageUrl || null,
+        category: d.category ?? provider.category,
+        priceLek: d.priceLek,
+        discountPct: d.discountPct ?? 0,
+        area: d.area || provider.city || null,
+        taxFree: d.taxFree ?? false,
+        teamSize: d.teamSize ?? null,
+      },
+    });
+    if (res.count === 0) return { error: "Offer not found." };
+  } catch (e) {
+    console.error("[updateOffer]", e);
+    return { error: "Could not save changes. Please try again." };
+  }
+
+  revalidatePath("/dashboard/provider");
+  revalidatePath(`/dashboard/provider/offers/${offerId}/edit`);
   return { ok: true };
 }
 

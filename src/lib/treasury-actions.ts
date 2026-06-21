@@ -29,6 +29,8 @@ export async function topUpTreasury(coins: number): Promise<{ error?: string; ok
   });
 
   revalidatePath("/dashboard/recognition");
+  revalidatePath("/dashboard/company/billing");
+  revalidatePath("/dashboard/company");
   return { ok: true, balance: updated.treasuryCoins };
 }
 

@@ -88,6 +88,8 @@ const TITLES: { prefix: string; key: string }[] = [
   { prefix: "/dashboard/company/billing", key: "nav.billing" },
   { prefix: "/dashboard/company/settings", key: "nav.settings" },
   { prefix: "/dashboard/company", key: "nav.overview" },
+  { prefix: "/dashboard/provider/offers/new", key: "page.newOffer" },
+  { prefix: "/dashboard/provider/offers", key: "page.editOffer" },
   { prefix: "/dashboard/provider/drops", key: "nav.drops" },
   { prefix: "/dashboard/provider", key: "nav.home" },
   { prefix: "/dashboard/recognition", key: "nav.recognition" },

@@ -49,6 +49,8 @@ const en: Dict = {
   "page.pack": "Your pack",
   "page.offer": "Offer",
   "page.provider": "Provider",
+  "page.newOffer": "Add an offer",
+  "page.editOffer": "Edit offer",
   "nav.wallet": "My perks",
   "action.signout": "Sign out",
 };
@@ -96,6 +98,8 @@ const sq: Dict = {
   "page.pack": "Paketa jote",
   "page.offer": "Oferta",
   "page.provider": "Ofruesi",
+  "page.newOffer": "Shto një ofertë",
+  "page.editOffer": "Ndrysho ofertën",
   "nav.wallet": "Përfitimet e mia",
   "action.signout": "Dil",
 };
