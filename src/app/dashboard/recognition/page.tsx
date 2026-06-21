@@ -2,16 +2,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { requireMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
-import { walletHistory, coinSummary, companyRecognitionFeed, bestValueOffers, type HistoryKind } from "@/lib/coins";
+import { walletHistory, coinSummary, companyRecognitionFeed, companyRecognitionStats, spreadDistributedThisMonth, bestValueOffers, type HistoryKind } from "@/lib/coins";
 import { toCoins, toLek, toEur } from "@/lib/currency";
 import { Coins } from "@/components/Coins";
 import { CoinIcon } from "@/components/CoinIcon";
 import { Mascot } from "@/components/Mascot";
 import { Icon, type IconName } from "@/components/Icon";
 import { Avatar } from "@/components/Avatar";
-import { RecognitionForms } from "./RecognitionForms";
+import { RecognitionForms, GrantForm } from "./RecognitionForms";
+import { TreasuryPanel } from "./TreasuryPanel";
 
 export const dynamic = "force-dynamic";
+
+type Membership = Awaited<ReturnType<typeof requireMembership>>;
 
 const HIST_ICON: Record<HistoryKind, IconName> = {
   spin: "sparkles", monthly: "gift", award: "trophy", "kudos-in": "heart", "kudos-out": "kudos", spend: "ticket", adjust: "coin",
@@ -23,6 +26,97 @@ function fmtDate(d: Date): string {
 
 export default async function CoinsPage() {
   const m = await requireMembership();
+  if (m.role === "ADMIN" || m.role === "HR") return <EmployerRecognition m={m} />;
+  return <EmployeeWallet m={m} />;
+}
+
+/* ─────────────────────────  COMPANY · Treasury & recognition  ───────────────────────── */
+
+async function EmployerRecognition({ m }: { m: Membership }) {
+  const [employees, feed, stats, distributed] = await Promise.all([
+    prisma.employeeProfile.findMany({
+      where: { companyId: m.companyId, role: "EMPLOYEE" },
+      select: { id: true, displayName: true, role: true },
+      orderBy: { displayName: "asc" },
+    }),
+    companyRecognitionFeed(m.companyId),
+    companyRecognitionStats(m.companyId),
+    spreadDistributedThisMonth(m.companyId),
+  ]);
+
+  const employerName = m.company.brandName || m.company.name;
+  const treasury = m.company.treasuryCoins;
+  const spread = m.company.monthlySpreadCoins;
+  const monthlyDraw = spread * employees.length;
+  const coversMonths = monthlyDraw > 0 ? Math.floor(treasury / monthlyDraw) : null;
+
+  return (
+    <main className="mx-auto max-w-md px-5 py-5 md:max-w-5xl md:px-8 md:py-7">
+      {/* header */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="greet">
+          <div className="day">{employerName}</div>
+          <h1>Recognition &amp; coins</h1>
+        </div>
+        <Mascot mood="charged" size={72} className="float" />
+      </div>
+
+      {/* treasury hero — purchased pool, NOT a personal wallet */}
+      <div className="card-dark mt-4">
+        <div className="blob" />
+        <div className="relative z-[2] flex flex-col gap-5 md:flex-row md:items-end md:justify-between md:gap-8">
+          <div>
+            <div className="kicker text-[var(--txt-on-dark-mut)]">Treasury balance</div>
+            <div className="mt-1 flex items-end gap-2 font-display text-[54px] font-bold leading-none text-[var(--txt-on-dark)]">
+              {treasury.toLocaleString("en-US")}<CoinIcon className="mb-2 size-8 text-lime" />
+            </div>
+            <div className="mt-2 text-sm text-[var(--txt-on-dark)]">≈ {toLek(treasury).toLocaleString("en-US")} Lek <span className="text-[var(--txt-on-dark-mut)]">· purchased at 100 Lek / coin</span></div>
+            <div className="mt-1 text-xs text-[var(--txt-on-dark-mut)]">
+              Spread {spread} coins × {employees.length} {employees.length === 1 ? "employee" : "employees"} / month
+              {coversMonths !== null && <> · covers ~{coversMonths} {coversMonths === 1 ? "month" : "months"}</>}
+            </div>
+          </div>
+          <div className="grid w-full grid-cols-3 gap-2 md:w-auto">
+            <Stat label="Given (mo)" value={`${stats.givenCoins.toLocaleString("en-US")}`} />
+            <Stat label="People" value={`${stats.recipients}`} />
+            <Stat label="Kudos" value={`${stats.kudosCount}`} />
+          </div>
+        </div>
+      </div>
+
+      {/* buy coins + distribute the monthly spread */}
+      <section className="mt-6">
+        <TreasuryPanel spread={spread} employeeCount={employees.length} distributed={distributed} />
+      </section>
+
+      {/* award an individual + recognition wall, two columns on desktop */}
+      <div className="mt-8 grid gap-6 md:grid-cols-2 md:gap-8">
+        <section>
+          <div className="flex items-center gap-3.5">
+            <Mascot mood="love" size={84} className="float shrink-0" />
+            <div className="min-w-0">
+              <div className="kicker">Recognize someone</div>
+              <h3 className="font-display text-xl font-extrabold leading-tight">Send a company award</h3>
+              <p className="mt-0.5 text-[13px] text-muted">Spot bonuses, milestones, top performers — funded by the treasury.</p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <GrantForm colleagues={employees} treasury={treasury} />
+          </div>
+        </section>
+
+        <section>
+          <div className="sec"><h3>Recognition wall</h3><span className="link">{feed.length} recent</span></div>
+          <RecognitionWall feed={feed} />
+        </section>
+      </div>
+    </main>
+  );
+}
+
+/* ─────────────────────────  EMPLOYEE · Personal PerxCoin wallet  ───────────────────────── */
+
+async function EmployeeWallet({ m }: { m: Membership }) {
   const isAdmin = m.role === "ADMIN" || m.role === "HR";
 
   const [colleagues, feed, history, summary, bestValue, orders, claims, pending] = await Promise.all([
@@ -44,7 +138,7 @@ export default async function CoinsPage() {
   const balance = m.recognitionCoins;
   const lek = toLek(balance);
   const eur = toEur(lek);
-  const allowance = toCoins(m.perksBudgetLek);
+  const allowance = m.company.monthlySpreadCoins;
   const employerName = m.company.brandName || m.company.name;
   // A real company award — not the daily-spin grants (those are coin earnings, not recognition).
   const award = feed.find((t) => t.kind === "GRANT" && t.toEmployeeId === m.id && !/spin/i.test(t.memo ?? ""));
@@ -200,38 +294,49 @@ export default async function CoinsPage() {
       {/* recognition wall */}
       <section className="mt-9">
         <div className="sec"><h3>Recognition wall</h3></div>
-        {feed.length === 0 ? (
-          <p className="rounded-[18px] border border-line bg-paper px-4 py-6 text-center text-sm text-muted">
-            No recognition yet. Be the first to call out great work.
-          </p>
-        ) : (
-          <div className="grid gap-2.5 md:grid-cols-2">
-            {feed.map((t) => {
-              const fromName = t.kind === "GRANT" ? "Company" : t.from?.displayName ?? "Someone";
-              const toName = t.to?.displayName ?? "Someone";
-              return (
-                <div key={t.id} className="row mb-0 flex-col items-stretch !gap-1.5">
-                  <div className="flex items-center gap-2">
-                    {t.kind === "GRANT" ? (
-                      <span className="ico coral shrink-0"><Icon name="trophy" size={20} /></span>
-                    ) : (
-                      <Avatar name={fromName} seed={t.fromEmployeeId ?? fromName} size={42} className="shrink-0" />
-                    )}
-                    <p className="grow text-sm">
-                      <span className="font-semibold">{fromName}</span>
-                      <span className="text-muted"> → </span>
-                      <span className="font-semibold">{toName}</span>
-                    </p>
-                    <span className="coin sm shrink-0">+{t.amount}</span>
-                  </div>
-                  {t.memo && <p className="pl-[54px] text-sm text-ink-soft">“{t.memo}”</p>}
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <RecognitionWall feed={feed} />
       </section>
     </main>
+  );
+}
+
+/* ─────────────────────────  shared bits  ───────────────────────── */
+
+type FeedRow = Awaited<ReturnType<typeof companyRecognitionFeed>>[number];
+
+function RecognitionWall({ feed }: { feed: FeedRow[] }) {
+  if (feed.length === 0) {
+    return (
+      <p className="rounded-[18px] border border-line bg-paper px-4 py-6 text-center text-sm text-muted">
+        No recognition yet. Be the first to call out great work.
+      </p>
+    );
+  }
+  return (
+    <div className="grid gap-2.5 md:grid-cols-2">
+      {feed.map((t) => {
+        const fromName = t.kind === "GRANT" ? "Company" : t.from?.displayName ?? "Someone";
+        const toName = t.to?.displayName ?? "Someone";
+        return (
+          <div key={t.id} className="row mb-0 flex-col items-stretch !gap-1.5">
+            <div className="flex items-center gap-2">
+              {t.kind === "GRANT" ? (
+                <span className="ico coral shrink-0"><Icon name="trophy" size={20} /></span>
+              ) : (
+                <Avatar name={fromName} seed={t.fromEmployeeId ?? fromName} size={42} className="shrink-0" />
+              )}
+              <p className="grow text-sm">
+                <span className="font-semibold">{fromName}</span>
+                <span className="text-muted"> → </span>
+                <span className="font-semibold">{toName}</span>
+              </p>
+              <span className="coin sm shrink-0">+{t.amount}</span>
+            </div>
+            {t.memo && <p className="pl-[54px] text-sm text-ink-soft">“{t.memo}”</p>}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

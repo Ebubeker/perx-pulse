@@ -52,6 +52,7 @@ export const NAV_SECONDARY: Record<Role, NavItem[]> = {
     { key: "leaderboard", labelKey: "nav.leaderboard", href: "/dashboard/leaderboard", match: "prefix", icon: "trophy" },
     { key: "team", labelKey: "nav.team", href: "/dashboard/team", match: "prefix", icon: "team" },
     { key: "billing", labelKey: "nav.billing", href: "/dashboard/company/billing", match: "prefix", icon: "card" },
+    { key: "settings", labelKey: "nav.settings", href: "/dashboard/company/settings", match: "prefix", icon: "settings" },
   ],
   provider: [],
 };
@@ -85,6 +86,7 @@ const TITLES: { prefix: string; key: string }[] = [
   { prefix: "/dashboard/company/insights", key: "nav.insights" },
   { prefix: "/dashboard/company/people", key: "nav.people" },
   { prefix: "/dashboard/company/billing", key: "nav.billing" },
+  { prefix: "/dashboard/company/settings", key: "nav.settings" },
   { prefix: "/dashboard/company", key: "nav.overview" },
   { prefix: "/dashboard/provider/drops", key: "nav.drops" },
   { prefix: "/dashboard/provider", key: "nav.home" },

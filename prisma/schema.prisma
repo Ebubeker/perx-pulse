@@ -61,6 +61,8 @@ model Company {
   billingContactName  String?
   billingContactEmail String?
   defaultBudgetLek    Int      @default(12000)
+  treasuryCoins       Int      @default(0) // company-purchased coin pool that funds spreads & awards
+  monthlySpreadCoins  Int      @default(120) // coins distributed to each employee per month
   currency            String   @default("ALL")
   onboardingComplete  Boolean  @default(false)
   createdAt           DateTime @default(now())
@@ -340,6 +342,7 @@ enum CoinTxnKind {
   KUDOS // employee recognizes a colleague
   SPEND // employee burns coins to redeem (future)
   ADJUST // manual correction
+  TOPUP // company buys coins into its treasury (1 coin = 100 Lek)
 }
 
 /// The PerxCoin ledger. Every coin movement is one append-only row (from → to).

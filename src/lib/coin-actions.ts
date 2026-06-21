@@ -42,7 +42,7 @@ export async function giveKudos(toEmployeeId: string, amount: number, memo: stri
   return {};
 }
 
-/** HR mints coins to an employee — a company award, not drawn from anyone's allowance. */
+/** HR awards coins to an employee — drawn from the company treasury (coins it purchased), never minted. */
 export async function grantCoins(toEmployeeId: string, amount: number, memo: string): Promise<{ error?: string }> {
   const m = await requireCompanyAdmin();
   if (!Number.isInteger(amount) || amount <= 0 || amount > MAX_GRANT) return { error: "Pick a valid amount." };
@@ -50,13 +50,24 @@ export async function grantCoins(toEmployeeId: string, amount: number, memo: str
   const recipient = await prisma.employeeProfile.findFirst({ where: { id: toEmployeeId, companyId: m.companyId }, select: { id: true } });
   if (!recipient) return { error: "Pick a colleague from your company." };
 
-  await prisma.$transaction([
-    prisma.coinTxn.create({
-      data: { companyId: m.companyId, kind: "GRANT", fromEmployeeId: null, toEmployeeId, amount, memo: memo.trim().slice(0, 280) || "Company award" },
-    }),
-    prisma.employeeProfile.update({ where: { id: toEmployeeId }, data: { recognitionCoins: { increment: amount } } }),
-  ]);
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Atomic, guarded debit from the treasury — an award can never overdraw the purchased pool.
+      const debit = await tx.$executeRaw`UPDATE "perx"."Company" SET "treasuryCoins" = "treasuryCoins" - ${amount}
+        WHERE "id" = ${m.companyId} AND "treasuryCoins" >= ${amount}`;
+      if (debit === 0) throw new Error("NO_TREASURY");
+      await tx.coinTxn.create({
+        data: { companyId: m.companyId, kind: "GRANT", fromEmployeeId: null, toEmployeeId, amount, memo: memo.trim().slice(0, 280) || "Company award" },
+      });
+      await tx.employeeProfile.update({ where: { id: toEmployeeId }, data: { recognitionCoins: { increment: amount } } });
+    });
+  } catch (e) {
+    if ((e as Error)?.message === "NO_TREASURY") return { error: "Not enough in the treasury — top up to fund this award." };
+    console.error("[grantCoins]", e);
+    return { error: "Could not grant — try again." };
+  }
 
   revalidatePath("/dashboard/recognition");
+  revalidatePath("/dashboard/employee");
   return {};
 }

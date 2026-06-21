@@ -18,6 +18,31 @@ export async function companyRecognitionFeed(companyId: string, take = 15) {
   });
 }
 
+/** Company-side recognition rollup for the current month: coins given to employees + kudos exchanged. */
+export async function companyRecognitionStats(companyId: string) {
+  const since = monthStart();
+  const [grants, kudos] = await Promise.all([
+    prisma.coinTxn.findMany({ where: { companyId, kind: "GRANT", createdAt: { gte: since } }, select: { amount: true, toEmployeeId: true, memo: true } }),
+    prisma.coinTxn.aggregate({ where: { companyId, kind: "KUDOS", createdAt: { gte: since } }, _count: true }),
+  ]);
+  // Spin grants are employee earnings, not company-funded recognition — exclude them.
+  const given = grants.filter((g) => !/spin/i.test(g.memo ?? ""));
+  return {
+    givenCoins: given.reduce((s, g) => s + g.amount, 0),
+    recipients: new Set(given.map((g) => g.toEmployeeId)).size,
+    kudosCount: kudos._count,
+  };
+}
+
+/** Has this month's monthly spread already been distributed for the company? */
+export async function spreadDistributedThisMonth(companyId: string): Promise<boolean> {
+  const x = await prisma.coinTxn.findFirst({
+    where: { companyId, kind: "GRANT", memo: "Monthly allowance", createdAt: { gte: monthStart() } },
+    select: { id: true },
+  });
+  return !!x;
+}
+
 export type HistoryKind = "spin" | "monthly" | "award" | "kudos-in" | "kudos-out" | "spend" | "adjust";
 export interface HistoryRow {
   id: string;

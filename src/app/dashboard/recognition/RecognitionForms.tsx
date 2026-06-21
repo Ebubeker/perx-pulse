@@ -134,7 +134,7 @@ export function RecognitionForms({ colleagues, balance, isAdmin }: { colleagues:
   );
 }
 
-function GrantForm({ colleagues }: { colleagues: Colleague[] }) {
+export function GrantForm({ colleagues, treasury }: { colleagues: Colleague[]; treasury?: number }) {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState(100);
   const [memo, setMemo] = useState("");
@@ -142,22 +142,27 @@ function GrantForm({ colleagues }: { colleagues: Colleague[] }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
+  const overTreasury = typeof treasury === "number" && amount > treasury;
+
   function grant() {
     setMsg(null);
     startTransition(async () => {
       const res = await grantCoins(to, amount, memo);
       if (res.error) setMsg({ text: res.error });
-      else { setMsg({ ok: true, text: "Coins granted ✓" }); setMemo(""); router.refresh(); }
+      else { setMsg({ ok: true, text: "Award sent ✓" }); setMemo(""); router.refresh(); }
     });
   }
 
   return (
     <div className="card border-coral/30 bg-coral-soft">
-      <div className="flex items-center gap-2">
-        <span className="badge badge-new">HR</span>
-        <h2 className="font-display text-base font-bold text-coral-deep">Company award</h2>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="badge badge-new">HR</span>
+          <h2 className="font-display text-base font-bold text-coral-deep">Company award</h2>
+        </div>
+        {typeof treasury === "number" && <span className="text-xs font-semibold text-muted">Treasury: {treasury.toLocaleString("en-US")} coins</span>}
       </div>
-      <p className="mb-3 mt-1 text-xs text-muted">Mint coins straight to an employee — milestones, spot bonuses.</p>
+      <p className="mb-3 mt-1 text-xs text-muted">Award coins straight to an employee — milestones, spot bonuses. Drawn from your treasury.</p>
       <div className="flex gap-2">
         <select value={to} onChange={(e) => setTo(e.target.value)} className="min-w-0 flex-1 rounded-[18px] border-[1.5px] border-line bg-paper px-3 py-2.5 text-sm">
           <option value="">Pick a colleague…</option>
@@ -179,8 +184,8 @@ function GrantForm({ colleagues }: { colleagues: Colleague[] }) {
         placeholder="3-year work anniversary"
         className="mt-2 w-full rounded-[18px] border-[1.5px] border-line bg-paper px-3 py-2.5 text-sm"
       />
-      <button type="button" onClick={grant} disabled={pending || !to} className="btn btn-primary btn-lg mt-3 disabled:opacity-50">
-        {pending ? "Granting…" : `Grant ${amount || 0} coins`}
+      <button type="button" onClick={grant} disabled={pending || !to || overTreasury} className="btn btn-primary btn-lg mt-3 disabled:opacity-50">
+        {pending ? "Sending…" : overTreasury ? "Top up the treasury first" : `Award ${amount || 0} coins`}
       </button>
       {msg && <p className={`mt-2 text-sm ${msg.ok ? "text-lime-deep" : "text-coral"}`}>{msg.text}</p>}
     </div>
