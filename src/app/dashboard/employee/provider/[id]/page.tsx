@@ -121,7 +121,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
               <div className="grow">
                 <div className="t truncate">{o.title}</div>
                 <div className="s truncate">
-                  {CAT_LABEL[o.category] ?? o.category}{o.area ? ` · ${o.area}` : ""}{o.taxFree ? " · tax-free" : ""}{o.discountPct > 0 ? ` · −${o.discountPct}%` : ""}
+                  {CAT_LABEL[o.category] ?? o.category}{o.area ? ` · ${o.area}` : ""}{o.discountPct > 0 ? ` · −${o.discountPct}%` : ""}
                 </div>
               </div>
               <span className="amt"><Coins amount={toCoins(effectiveLek(o.priceLek, o.discountPct))} /></span>

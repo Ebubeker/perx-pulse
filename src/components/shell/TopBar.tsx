@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { AccountMenu } from "./AccountMenu";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { resolveHeader, ROLE_HOME, type Role } from "./nav-config";
 import type { Locale } from "@/lib/i18n";
+import type { Workspace } from "@/lib/account";
 
-export function TopBar({ role, locale, labels }: { role: Role; locale: Locale; labels: Record<string, string> }) {
+export function TopBar({ role, locale, labels, workspaces, active }: { role: Role; locale: Locale; labels: Record<string, string>; workspaces: Workspace[]; active: Workspace }) {
   const pathname = usePathname() ?? ROLE_HOME[role];
   const { titleKey, back } = resolveHeader(pathname, role);
   const title = labels[titleKey] ?? "";
@@ -29,6 +31,7 @@ export function TopBar({ role, locale, labels }: { role: Role; locale: Locale; l
             </Link>
           )}
         </div>
+        <WorkspaceSwitcher workspaces={workspaces} active={active} />
         <AccountMenu locale={locale} signOutLabel={labels["action.signout"] ?? "Sign out"} />
       </div>
     </header>

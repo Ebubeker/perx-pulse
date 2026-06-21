@@ -29,10 +29,7 @@ export default async function PassportPage() {
     <main className="mx-auto max-w-md px-5 py-5">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
         <div className="greet"><div className="day">Your year so far</div><h1>Passport</h1></div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <Mascot mood={full ? "celebrate" : "cool"} size={58} className="float" />
-          <Link href="/dashboard/employee/achievements" className="btn-icon" aria-label="Achievements"><Icon name="medal" size={18} /></Link>
-        </div>
+        <Mascot mood={full ? "celebrate" : "cool"} size={58} className="float" />
       </div>
 
       <div className="recap">
@@ -56,7 +53,7 @@ export default async function PassportPage() {
         </div>
       </div>
 
-      <div className="sec"><h3>Awards</h3><Link href="/dashboard/employee/achievements" className="link">All achievements →</Link></div>
+      <div className="sec"><h3>Awards</h3><span className="link">{have} / {ALL_CATEGORIES.length}</span></div>
       <div className="stamp-grid">
         {ALL_CATEGORIES.map((c) => {
           const got = collected.has(c.key);

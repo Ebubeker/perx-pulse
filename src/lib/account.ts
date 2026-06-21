@@ -1,7 +1,18 @@
 import { currentUser } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "./prisma";
 import type { AccountType, CompanyRole } from "@/types/globals";
+
+// A "workspace" is a hat the same person can wear. One Clerk user may hold several
+// (e.g. a company that is also a provider) — they switch between them in the shell.
+export type Workspace = "company" | "employee" | "provider";
+export const WS_COOKIE = "perx_ws";
+export const WS_HOME: Record<Workspace, string> = {
+  company: "/dashboard/company",
+  employee: "/dashboard/employee",
+  provider: "/dashboard/provider",
+};
 
 /** Account-type, onboarding, and invite flags from Clerk metadata (read fresh). */
 export async function getAccount() {
@@ -64,4 +75,34 @@ export async function requireCompanyAdmin() {
   if (!m) redirect("/onboarding");
   if (m.role !== "ADMIN" && m.role !== "HR") redirect("/dashboard");
   return m;
+}
+
+/**
+ * Every workspace this user can access, derived from real DB rows (not the single
+ * `accountType` flag). A company admin who also has a Provider profile gets both.
+ * Order matters: the first entry is the default landing workspace.
+ */
+export async function getWorkspaces() {
+  const user = await currentUser();
+  if (!user) return null;
+  const [membership, provider] = await Promise.all([
+    prisma.employeeProfile.findFirst({
+      where: { clerkUserId: user.id },
+      include: { company: true, department: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.provider.findUnique({ where: { clerkUserId: user.id } }),
+  ]);
+  const available: Workspace[] = [];
+  if (membership) available.push(membership.role === "EMPLOYEE" ? "employee" : "company");
+  if (provider) available.push("provider");
+  return { userId: user.id, membership, provider, available };
+}
+
+/** The workspace the user is currently viewing: their saved preference, else the default. */
+export async function getActiveWorkspace(available: Workspace[]): Promise<Workspace | null> {
+  if (available.length === 0) return null;
+  const pref = (await cookies()).get(WS_COOKIE)?.value;
+  if (pref && (available as string[]).includes(pref)) return pref as Workspace;
+  return available[0] ?? null;
 }

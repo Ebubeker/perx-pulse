@@ -24,8 +24,7 @@ export default async function ProviderDropsPage() {
 
   return (
     <main className="page">
-      <div className="kicker text-coral">Grow your demand</div>
-      <h1 className="h1 mt-1">Flash drops &amp; campaigns</h1>
+      <h1 className="h1">Flash drops &amp; campaigns</h1>
       <p className="mt-2 max-w-xl text-sm text-muted">
         Fill dead capacity. Employees claim instantly with their PerxCoins — pure demand, zero CAC.
       </p>

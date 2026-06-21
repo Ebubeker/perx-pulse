@@ -1,10 +1,12 @@
 "use server";
 
 import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "./prisma";
+import { WS_COOKIE } from "./account";
 import type { AccountType } from "@/types/globals";
 
 export type ActionResult = { error: string } | void;
@@ -201,12 +203,19 @@ export async function setupProvider(input: unknown): Promise<ActionResult> {
     return { error: "We couldn't save your profile. Please try again." };
   }
 
+  // A user who already runs a company is ADDING the provider hat — keep their
+  // employer account type so they don't lose the company side. Capabilities are
+  // derived from DB rows, so the Provider profile alone grants provider access.
+  const hasCompanySeat = await prisma.employeeProfile.findFirst({ where: { clerkUserId: userId }, select: { id: true } });
   const client = await clerkClient();
   await client.users.updateUserMetadata(userId, {
-    publicMetadata: { accountType: "provider", onboardingComplete: true },
+    publicMetadata: { accountType: hasCompanySeat ? "company" : "provider", onboardingComplete: true },
   });
 
-  redirect("/dashboard");
+  // Land them in the provider workspace they just created.
+  (await cookies()).set(WS_COOKIE, "provider", { path: "/", httpOnly: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 365 });
+
+  redirect("/dashboard/provider");
 }
 
 const chips = z.array(z.string().trim().min(1).max(40)).max(20).optional();

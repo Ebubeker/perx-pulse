@@ -113,7 +113,7 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
           <span className="grid size-[54px] shrink-0 place-items-center rounded-full bg-white/20 text-white"><Icon name={CAT_ICON[firstCat] ?? "gift"} size={24} /></span>
           <div className="text-left">
             <div className="font-extrabold">New award unlocked!</div>
-            <div className="text-[13px] text-white/90">{CAT_LABEL[firstCat] ?? "Wellness"} — view in Achievements</div>
+            <div className="text-[13px] text-white/90">{CAT_LABEL[firstCat] ?? "Wellness"} — view in Passport</div>
           </div>
         </div>
 
@@ -147,7 +147,7 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
     <main className="mx-auto max-w-md px-5 py-5">
       <div className="pack">
         <div className="pack-top coral">
-          <div className="kk">{items.length} providers · {taxFree ? "tax-free" : "your pack"}</div>
+          <div className="kk">{items.length} providers · your pack</div>
           <h2>{pkg.label}</h2>
         </div>
       </div>
@@ -186,7 +186,7 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
           </div>
           {taxFree
             ? <span className="badge badge-tax">TAX-FREE · 0 tax</span>
-            : <span style={{ fontSize: "12px", color: "#fff9" }}>Mixed tax — HR sees the breakdown</span>}
+            : <span style={{ fontSize: "12px", color: "#fff9" }}>Mixed tax · HR sees the breakdown</span>}
         </div>
       </div>
 

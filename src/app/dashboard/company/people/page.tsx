@@ -8,6 +8,9 @@ import { InviteForm } from "./InviteForm";
 
 export const dynamic = "force-dynamic";
 
+const ROLE_LABEL: Record<string, string> = { ADMIN: "Admin", HR: "HR", FINANCE: "Finance", EMPLOYEE: "Employee" };
+const roleLabel = (r: string) => ROLE_LABEL[r] ?? r;
+
 export default async function PeoplePage() {
   const admin = await requireCompanyAdmin();
   const [members, invites, departments, usedByMember] = await Promise.all([
@@ -36,12 +39,11 @@ export default async function PeoplePage() {
     <main className="page">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 10 }}>
         <div>
-          <div className="sub kicker text-coral">{members.length} active · {invites.length} invited</div>
           <h1 className="h1">Team &amp; budgets</h1>
         </div>
       </div>
 
-      <div className="grid g-2 mt-6 items-start" style={{ gridTemplateColumns: "minmax(0,1.7fr) minmax(0,1fr)" }}>
+      <div className="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         {/* Team table — the design's real <table className="ptable"> */}
         <div>
           <table className="ptable" style={{ marginTop: 0 }}>
@@ -52,7 +54,6 @@ export default async function PeoplePage() {
                 <th>Monthly budget</th>
                 <th>Used</th>
                 <th>Status</th>
-                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -68,7 +69,10 @@ export default async function PeoplePage() {
                         <b className="font-display">{m.displayName}</b>
                       </Link>
                     </td>
-                    <td>{m.department ? m.department.name : m.role}</td>
+                    <td>
+                      <div className="font-medium">{roleLabel(m.role)}</div>
+                      {m.department && <div className="text-xs text-muted">{m.department.name}</div>}
+                    </td>
                     <td><b className="font-display"><Coins amount={toCoins(m.perksBudgetLek)} /></b></td>
                     <td className={over ? "text-coral font-semibold" : ""}>{pct}%</td>
                     <td>
@@ -76,7 +80,6 @@ export default async function PeoplePage() {
                         <span className="dot" />{over ? "Over" : "Active"}
                       </span>
                     </td>
-                    <td className="text-muted">⋯</td>
                   </tr>
                 );
               })}
@@ -93,13 +96,12 @@ export default async function PeoplePage() {
                       <b className="font-display text-muted">{i.email}</b>
                     </span>
                   </td>
-                  <td>{i.role}</td>
+                  <td>{roleLabel(i.role)}</td>
                   <td><b className="font-display">—</b></td>
                   <td>—</td>
                   <td>
                     <span className="pill pill-pending"><span className="dot" />Invited</span>
                   </td>
-                  <td className="text-muted">⋯</td>
                 </tr>
               ))}
             </tbody>
@@ -110,7 +112,7 @@ export default async function PeoplePage() {
         </div>
 
         {/* Invite form */}
-        <div className="card">
+        <div className="card lg:sticky lg:top-6">
           <h3 className="mb-4 font-display text-[18px] font-bold">Invite an employee</h3>
           <InviteForm departments={departments.map((d) => ({ id: d.id, name: d.name }))} />
         </div>
