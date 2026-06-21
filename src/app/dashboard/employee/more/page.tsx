@@ -8,8 +8,7 @@ const ITEMS: { href: string; icon: IconName; label: string; sub: string }[] = [
   { href: "/dashboard/employee/spin", icon: "sparkles", label: "Daily Spin", sub: "Free coins every day" },
   { href: "/dashboard/employee/drops", icon: "bolt", label: "Perx Drops", sub: "Flash deals near you" },
   { href: "/dashboard/leaderboard", icon: "trophy", label: "Leaderboard", sub: "Who's most recognized" },
-  { href: "/dashboard/employee/achievements", icon: "medal", label: "Achievements", sub: "Your award badges" },
-  { href: "/dashboard/employee/passport", icon: "passport", label: "Passport", sub: "Your year so far" },
+  { href: "/dashboard/employee/passport", icon: "passport", label: "Passport", sub: "Your awards & year so far" },
   { href: "/dashboard/employee/genie", icon: "genie", label: "Perx Genie", sub: "Ask the AI concierge" },
   { href: "/dashboard/team", icon: "team", label: "Team packs", sub: "Pool perks with coworkers" },
 ];

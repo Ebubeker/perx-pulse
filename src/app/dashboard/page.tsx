@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getAccount, getMembership } from "@/lib/account";
+import { getAccount, getWorkspaces, getActiveWorkspace, WS_HOME } from "@/lib/account";
 
 export const dynamic = "force-dynamic";
 
@@ -8,9 +8,9 @@ export default async function DashboardIndex() {
   if (!account) redirect("/sign-in");
   if (!account.onboardingComplete) redirect("/onboarding");
 
-  if (account.accountType === "provider") redirect("/dashboard/provider");
+  const w = await getWorkspaces();
+  if (!w || w.available.length === 0) redirect("/onboarding");
 
-  const membership = await getMembership();
-  if (membership?.role === "EMPLOYEE") redirect("/dashboard/employee");
-  redirect("/dashboard/company");
+  const active = await getActiveWorkspace(w.available);
+  redirect(WS_HOME[active!]);
 }

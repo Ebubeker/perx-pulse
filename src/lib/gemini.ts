@@ -163,7 +163,8 @@ export async function askGenie(opts: {
   const prompt =
     `You are Perx Genie, a warm, concise benefits concierge for an employee in Tirana, Albania. ` +
     `Answer their question in 2-3 friendly sentences and recommend up to 3 specific offers from the catalog (by exact id). ` +
-    `Their monthly perk budget is ${opts.budgetLek} Lek (employer-funded, tax-free). Stay within budget and be concrete.\n\n` +
+    `Their monthly perk budget is ${opts.budgetLek} Lek (employer-funded, tax-free). Stay within budget and be concrete. ` +
+    `Never use em dashes (the "—" character) in your answer; use commas, periods, or the word "and" instead.\n\n` +
     `Question: ${opts.question}\n` +
     `Their preferences: ${JSON.stringify(opts.personalization)}\n\n` +
     `CATALOG:\n${menu}\n\n` +
@@ -177,7 +178,9 @@ export async function askGenie(opts: {
     });
     const parsed = GenieSchema.parse(JSON.parse((resp as { text?: string }).text || "{}"));
     const offerIds = parsed.offerIds.filter((id) => byId.has(id)).slice(0, 3);
-    if (parsed.answer.trim()) return { answer: parsed.answer.trim(), offerIds };
+    // Genie never speaks with em dashes — swap any the model emits for a comma.
+    const answer = parsed.answer.trim().replace(/\s*—\s*/g, ", ");
+    if (answer) return { answer, offerIds };
   } catch (e) {
     console.error("[genie] falling back:", (e as Error)?.message || e);
   }
@@ -187,7 +190,7 @@ export async function askGenie(opts: {
     .filter((o) => q.includes(o.category) || opts.personalization.preferredCategories.includes(o.category))
     .slice(0, 3);
   return {
-    answer: "Here are a few options from your catalog that fit. Tap any to explore — it's all tax-free and inside your budget.",
+    answer: "Here are a few options from your catalog that fit. Tap any to explore. It's all tax-free and inside your budget.",
     offerIds: picks.map((o) => o.id),
   };
 }

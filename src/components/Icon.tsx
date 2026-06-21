@@ -5,7 +5,7 @@ import {
   Home, Compass, Coins, Users, LayoutGrid, Inbox, BarChart3, Store, Zap, Trophy,
   BookUser, CreditCard, Wand2, LogOut, MoreHorizontal, Gift, Ticket, Settings,
   Medal, Sparkles, PiggyBank, Bot, Heart, HandHeart, MapPin, Map as MapIcon, Phone,
-  Lock, Check, X, ShoppingBag, Building2, ChevronLeft, ChevronRight, Flower2,
+  Lock, Check, X, ShoppingBag, Building2, ChevronLeft, ChevronRight, ChevronDown, Flower2,
   Dumbbell, UtensilsCrossed, Stethoscope, Plane, BookOpen, Drama, Smartphone, Clock,
 } from "lucide-react";
 
@@ -21,7 +21,7 @@ const ICONS = {
   gift: Gift, ticket: Ticket, settings: Settings, medal: Medal, sparkles: Sparkles,
   piggy: PiggyBank, bot: Bot, heart: Heart, kudos: HandHeart, pin: MapPin,
   map: MapIcon, phone: Phone, lock: Lock, check: Check, x: X, shopping: ShoppingBag,
-  building: Building2, chevronLeft: ChevronLeft, chevronRight: ChevronRight, clock: Clock,
+  building: Building2, chevronLeft: ChevronLeft, chevronRight: ChevronRight, chevronDown: ChevronDown, clock: Clock,
   // passport / offer categories
   wellness: Flower2, fitness: Dumbbell, food: UtensilsCrossed, health: Stethoscope,
   travel: Plane, learning: BookOpen, culture: Drama, telecom: Smartphone,

@@ -7,7 +7,7 @@ type Payout = { name: string; gross: number; fee: number; net: number };
 const lek = (n: number) => `${n.toLocaleString("en-US")} L`;
 
 /** Per-provider settlement split (the design's `.flow` rows), revealed line by line on mount. */
-export function SettlementReveal({ employer, payouts, fee, net }: { employer: number; payouts: Payout[]; fee: number; net: number }) {
+export function SettlementReveal({ employer, payouts, fee }: { employer: number; payouts: Payout[]; fee: number }) {
   const [step, setStep] = useState(0); // 0 = nothing, 1..= each payout, last = perx take
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export function SettlementReveal({ employer, payouts, fee, net }: { employer: nu
   return (
     <div className="card">
       <h3 className="display" style={{ fontSize: 17, marginBottom: 10 }}>
-        Payment split ({toCoins(employer).toLocaleString("en-US")} coins → {lek(net)})
+        Payment split ({toCoins(employer).toLocaleString("en-US")} coins → {lek(employer)})
       </h3>
       {payouts.map((p, i) => (
         <div key={p.name} className={`flow ${reveal(step >= i + 1)}`}>

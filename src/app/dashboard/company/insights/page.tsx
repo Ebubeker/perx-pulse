@@ -4,7 +4,6 @@ import { companyInsights } from "@/lib/insights";
 import { ALL_CATEGORIES } from "@/lib/passport";
 import { toCoins } from "@/lib/currency";
 import { Icon } from "@/components/Icon";
-import { Mascot } from "@/components/Mascot";
 
 export const dynamic = "force-dynamic";
 
@@ -73,11 +72,7 @@ export default async function InsightsPage() {
 
   return (
     <main className="page" style={{ maxWidth: 920 }}>
-      <div className="sub kicker text-coral">ANONYMOUS · AGGREGATED · NO SPYING</div>
       <h1 className="h1">Heatmap</h1>
-      <p className="text-muted" style={{ maxWidth: 480 }}>
-        Know what your people value — without spying. Every number is anonymous and aggregated across {ins.headcount} employee{ins.headcount === 1 ? "" : "s"}.
-      </p>
 
       {/* ── Perx Score: scorecard with gauge + sub-metrics ── */}
       <div className="grid g-2" style={{ marginTop: 20, alignItems: "start" }}>
@@ -118,28 +113,6 @@ export default async function InsightsPage() {
               </div>
             ))}
           </div>
-          <div className="card" style={{ marginTop: 14, display: "flex", gap: 12, alignItems: "center", background: "var(--lime-soft)", borderColor: "#E3EBBE" }}>
-            <Mascot mood="cheer" size={56} />
-            <div style={{ fontSize: 14 }}>
-              <b>Coins moved this month:</b> {ins.coinsMovedThisMonth.toLocaleString("en-US")}. Add more provider categories to lift diversity and your score.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* KPI stats */}
-      <div className="grid g-3" style={{ marginTop: 18 }}>
-        <div className="stat">
-          <div className="v">{ins.participationPct}%</div>
-          <div className="d">took a Pulse</div>
-        </div>
-        <div className="stat">
-          <div className="v">{ins.engagementPct}%</div>
-          <div className="d">redeemed a perk</div>
-        </div>
-        <div className="stat">
-          <div className="v text-lime-deep">{ins.coinsMovedThisMonth.toLocaleString("en-US")}</div>
-          <div className="d">coins moved</div>
         </div>
       </div>
 

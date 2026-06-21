@@ -23,7 +23,7 @@ function GeniePack({ offers }: { offers: Offers }) {
   const taxFree = offers.length > 0 && offers.every((o) => o.taxFree);
   const providers = Array.from(new Set(offers.map((o) => o.providerName)));
   const rationale = offers.length
-    ? `${offers.length === 1 ? "One pick" : `${offers.length} picks`} that fit — low effort, on budget.`
+    ? `${offers.length === 1 ? "One pick" : `${offers.length} picks`} that fit, low effort and on budget.`
     : "";
 
   return (
@@ -51,7 +51,7 @@ function GeniePack({ offers }: { offers: Offers }) {
 
 export function GenieChat() {
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "genie", text: "Hi, I'm Perx Genie. Tell me how your week is going or what you're in the mood for, and I'll hand back a pack — not a wall of text." },
+    { role: "genie", text: "Hi, I'm Perx Genie. Tell me what you're in the mood for and I'll put together a pack for you." },
   ]);
   const [input, setInput] = useState("");
   const [pending, startTransition] = useTransition();
@@ -69,36 +69,39 @@ export function GenieChat() {
   }
 
   return (
-    <div className="mt-5 flex flex-col">
-      {messages.map((msg, i) =>
-        msg.role === "user" ? (
-          <div key={i} className="ask my-2.5">{msg.text}</div>
-        ) : (
-          <div key={i}>
-            {msg.text && (
-              <div className="my-2.5 max-w-[85%] rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm">
-                {msg.text}
-              </div>
-            )}
-            {msg.offers && msg.offers.length > 0 && (
-              <>
-                <GeniePack offers={msg.offers} />
-                <Link href={`/dashboard/employee/offer/${msg.offers[0]!.id}`} className="btn btn-soft" style={{ marginTop: "12px" }}>
-                  View &amp; tweak this pack
-                </Link>
-              </>
-            )}
+    <div className="mt-4 flex flex-1 flex-col">
+      {/* message stream */}
+      <div>
+        {messages.map((msg, i) =>
+          msg.role === "user" ? (
+            <div key={i} className="ask my-2.5">{msg.text}</div>
+          ) : (
+            <div key={i}>
+              {msg.text && (
+                <div className="my-2.5 max-w-[85%] rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm">
+                  {msg.text}
+                </div>
+              )}
+              {msg.offers && msg.offers.length > 0 && (
+                <>
+                  <GeniePack offers={msg.offers} />
+                  <Link href={`/dashboard/employee/offer/${msg.offers[0]!.id}`} className="btn btn-soft" style={{ marginTop: "12px" }}>
+                    View &amp; tweak this pack
+                  </Link>
+                </>
+              )}
+            </div>
+          )
+        )}
+        {pending && (
+          <div className="mt-2.5 flex items-center gap-2">
+            <Mascot mood="thinking" size={34} />
+            <div className="rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm text-muted">Genie is thinking…</div>
           </div>
-        )
-      )}
-      {pending && (
-        <div className="mt-2.5 flex items-center gap-2">
-          <Mascot mood="thinking" size={34} />
-          <div className="rounded-[18px] rounded-bl-md border border-line bg-paper px-4 py-3 text-sm text-muted">Genie is thinking…</div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* suggestion chips (only before first ask) */}
+      {/* suggestion chips sit right under the intro */}
       {messages.length <= 1 && (
         <div className="chip-row mt-4">
           {SUGGESTIONS.map((s) => (
@@ -107,8 +110,12 @@ export function GenieChat() {
         </div>
       )}
 
-      {/* .field-inline input with round .send button */}
-      <div className="mt-3.5">
+      {/* spacer pushes the input to the bottom */}
+      <div className="flex-1" />
+
+      {/* composer pinned to the bottom */}
+      <div className="pt-3">
+        {/* .field-inline input with round .send button */}
         <div className="field-inline">
           <input
             value={input}

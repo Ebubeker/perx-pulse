@@ -27,7 +27,6 @@ export default async function BillingPage() {
 
   return (
     <main className="page">
-      <div className="sub kicker text-coral">Perx for Teams</div>
       <h1 className="h1">Billing</h1>
 
       {/* Current plan — dark .plan card */}

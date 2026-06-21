@@ -40,7 +40,6 @@ export default async function SettlementPage({ params }: { params: Promise<{ id:
   const payouts = [...byProvider.values()];
   const gross = payouts.reduce((s, p) => s + p.gross, 0);
   const fee = payouts.reduce((s, p) => s + p.fee, 0);
-  const net = payouts.reduce((s, p) => s + p.net, 0);
 
   const budgetPct = budgetTotalLek ? Math.min(100, Math.round((gross / budgetTotalLek) * 100)) : 0;
   const remainingLek = Math.max(0, budgetTotalLek - gross);
@@ -76,10 +75,10 @@ export default async function SettlementPage({ params }: { params: Promise<{ id:
           <div className="ai" style={{ marginBottom: 14 }}>
             <span className="text-lime-deep shrink-0"><Icon name="sparkles" size={20} /></span>
             <div style={{ fontSize: 14 }}>
-              <b>AI note for {pkg.employee.displayName}:</b> “Approved! Enjoy the reset — we&apos;ve settled it straight to your providers and kept it fully tax-free.”
+              <b>AI note for {pkg.employee.displayName}:</b> “Approved! Enjoy the reset. We&apos;ve settled it straight to your providers.”
             </div>
           </div>
-          <SettlementReveal employer={gross} payouts={payouts} fee={fee} net={net} />
+          <SettlementReveal employer={gross} payouts={payouts} fee={fee} />
         </div>
       </div>
 
@@ -95,7 +94,7 @@ export default async function SettlementPage({ params }: { params: Promise<{ id:
       </div>
 
       <p className="mt-6 text-center text-xs text-muted">
-        Funds move from your budget straight to the providers. {pkg.employee.displayName} never touches the money — fully tax-free.
+        Funds move from your budget straight to the providers. {pkg.employee.displayName} never touches the money.
       </p>
     </main>
   );

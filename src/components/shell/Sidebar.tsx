@@ -4,11 +4,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { AccountMenu } from "./AccountMenu";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { Icon } from "./icons";
 import { NAV_PRIMARY, NAV_SECONDARY, isActive, ROLE_HOME, type Role, type NavItem } from "./nav-config";
 import type { Locale } from "@/lib/i18n";
+import type { Workspace } from "@/lib/account";
 
-export function Sidebar({ role, locale, labels, pendingCount, orgName }: { role: Role; locale: Locale; labels: Record<string, string>; pendingCount: number; orgName?: string | null }) {
+export function Sidebar({
+  role,
+  locale,
+  labels,
+  pendingCount,
+  workspaces,
+  active,
+  orgName,
+}: {
+  role: Role;
+  locale: Locale;
+  labels: Record<string, string>;
+  pendingCount: number;
+  workspaces: Workspace[];
+  active: Workspace;
+  orgName?: string | null;
+}) {
   const pathname = usePathname() ?? ROLE_HOME[role];
 
   const Row = ({ item }: { item: NavItem }) => {
@@ -37,6 +55,12 @@ export function Sidebar({ role, locale, labels, pendingCount, orgName }: { role:
           </div>
         )}
       </div>
+
+      {role !== "employee" && workspaces.length > 1 && (
+        <div className="px-4 pb-3">
+          <WorkspaceSwitcher workspaces={workspaces} active={active} align="left" />
+        </div>
+      )}
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3">
         {NAV_PRIMARY[role].map((item) => <Row key={item.key} item={item} />)}

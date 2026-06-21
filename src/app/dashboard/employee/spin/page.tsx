@@ -9,5 +9,5 @@ export default async function SpinPage() {
   const m = await getMembership();
   if (!m) redirect("/onboarding");
   const { spunToday, streak } = await getSpinState(m.id);
-  return <SpinWheel balance={m.recognitionCoins} spunToday={spunToday} streak={streak} />;
+  return <SpinWheel balance={m.recognitionCoins} spunToday={spunToday} streak={streak} dev={process.env.NODE_ENV !== "production"} />;
 }
