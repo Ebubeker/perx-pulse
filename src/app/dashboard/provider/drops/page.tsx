@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { requireProvider } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { setDropActive } from "@/lib/drop-actions";
@@ -50,9 +51,15 @@ export default async function ProviderDropsPage() {
                 const slotsLeft = Math.max(0, d.totalSlots - d.claimedSlots);
                 return (
                   <div key={d.id} className={`dropcard ${!d.active ? "opacity-60" : ""}`}>
-                    {/* coral photo header — bolt mark + live pill */}
-                    <div className="ph relative justify-items-stretch !grid-cols-1 bg-coral px-5 py-4 text-white" style={{ height: "auto" }}>
-                      <div className="flex items-start justify-between gap-3">
+                    {/* photo/coral header — bolt mark + live pill */}
+                    <div className="ph relative !grid-cols-1 overflow-hidden bg-coral px-5 py-4 text-white" style={{ height: "auto" }}>
+                      {d.imageUrl && (
+                        <>
+                          <Image src={d.imageUrl} alt="" fill sizes="420px" unoptimized className="object-cover" />
+                          <div className="absolute inset-0 bg-black/45" />
+                        </>
+                      )}
+                      <div className="relative z-[2] flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="kicker text-white/85">Flash drop</div>
                           <div className="mt-1 flex items-center gap-2">

@@ -4,28 +4,27 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { claimDrop } from "@/lib/drop-actions";
 
-export function ClaimButton({ dropId, disabled }: { dropId: string; disabled?: boolean }) {
+export function ClaimButton({ dropId, disabled, cost }: { dropId: string; disabled?: boolean; cost: number }) {
   const [pending, startTransition] = useTransition();
-  const [msg, setMsg] = useState<{ ok?: boolean; text: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div>
       <button
         type="button"
         disabled={pending || disabled}
         onClick={() => startTransition(async () => {
-          setMsg(null);
+          setError(null);
           const res = await claimDrop(dropId);
-          if (res.error) setMsg({ text: res.error });
-          else { setMsg({ ok: true, text: `Claimed! Code ${res.code}` }); router.refresh(); }
+          if (res.error) setError(res.error);
+          else router.refresh(); // card flips to the claimed state with the code
         })}
-        className="btn btn-primary disabled:opacity-50"
-        style={{ padding: "9px 18px" }}
+        className="btn btn-primary w-full disabled:opacity-50"
       >
-        {pending ? "Claiming…" : "Claim"}
+        {pending ? "Claiming…" : disabled ? `Need ${cost} coins` : "Claim now"}
       </button>
-      {msg && <p className={`text-sm font-semibold ${msg.ok ? "text-coral" : "text-coral-deep"}`}>{msg.text}</p>}
+      {error && <p className="mt-1.5 text-center text-xs text-coral">{error}</p>}
     </div>
   );
 }

@@ -16,6 +16,7 @@ const DropInput = z.object({
   description: z.string().trim().max(200).optional().or(z.literal("")),
   category: z.enum(CATEGORIES),
   area: z.string().trim().max(60).optional().or(z.literal("")),
+  imageUrl: z.string().trim().max(1_800_000).optional(),
   costCoins: z.coerce.number().int().min(1).max(5000),
   totalSlots: z.coerce.number().int().min(1).max(500),
   hours: z.coerce.number().int().min(1).max(336), // up to 14 days
@@ -33,6 +34,7 @@ export async function createDrop(input: unknown): Promise<{ error?: string }> {
       providerId: p.id,
       title: d.title,
       description: d.description || null,
+      imageUrl: d.imageUrl || null,
       category: d.category as OfferCategory,
       area: d.area || null,
       costCoins: d.costCoins,

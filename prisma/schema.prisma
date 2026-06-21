@@ -341,6 +341,7 @@ model Drop {
   providerId   String
   title        String
   description  String?
+  imageUrl     String? // flash-perk photo (uploaded data-URI or URL)
   category     OfferCategory
   area         String?
   costCoins    Int
