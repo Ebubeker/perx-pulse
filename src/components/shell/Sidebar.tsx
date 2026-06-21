@@ -8,7 +8,7 @@ import { Icon } from "./icons";
 import { NAV_PRIMARY, NAV_SECONDARY, isActive, ROLE_HOME, type Role, type NavItem } from "./nav-config";
 import type { Locale } from "@/lib/i18n";
 
-export function Sidebar({ role, locale, labels, pendingCount }: { role: Role; locale: Locale; labels: Record<string, string>; pendingCount: number }) {
+export function Sidebar({ role, locale, labels, pendingCount, orgName }: { role: Role; locale: Locale; labels: Record<string, string>; pendingCount: number; orgName?: string | null }) {
   const pathname = usePathname() ?? ROLE_HOME[role];
 
   const Row = ({ item }: { item: NavItem }) => {
@@ -28,9 +28,15 @@ export function Sidebar({ role, locale, labels, pendingCount }: { role: Role; lo
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line bg-paper md:flex">
-      <Link href={ROLE_HOME[role]} aria-label="Perx" className="px-5 py-5">
-        <Logo />
-      </Link>
+      <div className="px-5 pb-4 pt-5">
+        <Link href={ROLE_HOME[role]} aria-label="Perx"><Logo /></Link>
+        {orgName && (
+          <div className="mt-2.5 inline-flex max-w-full items-center gap-1.5 rounded-full bg-cream px-2.5 py-1 text-xs font-semibold text-ink-soft">
+            <Icon name="building" size={13} className="shrink-0 text-coral" />
+            <span className="truncate">{orgName}</span>
+          </div>
+        )}
+      </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3">
         {NAV_PRIMARY[role].map((item) => <Row key={item.key} item={item} />)}

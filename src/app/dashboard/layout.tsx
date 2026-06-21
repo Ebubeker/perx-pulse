@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { getAccount, getMembership } from "@/lib/account";
+import { getAccount, getMembership, getProvider } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { getLocale, getShellLabels } from "@/lib/i18n";
 import { AppShell } from "@/components/shell/AppShell";
@@ -20,11 +20,15 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   let role: Role;
   let pendingCount = 0;
+  let orgName: string | null = null;
 
   if (account.accountType === "provider") {
     role = "provider";
+    const provider = await getProvider();
+    orgName = provider?.businessName ?? null;
   } else {
     const membership = await getMembership();
+    orgName = membership ? membership.company.brandName || membership.company.name : null;
     if (membership?.role === "EMPLOYEE") {
       role = "employee";
     } else {
@@ -40,7 +44,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const [locale, labels] = await Promise.all([getLocale(), getShellLabels()]);
 
   return (
-    <AppShell role={role} locale={locale} labels={labels} pendingCount={pendingCount}>
+    <AppShell role={role} locale={locale} labels={labels} pendingCount={pendingCount} orgName={orgName}>
       {children}
     </AppShell>
   );

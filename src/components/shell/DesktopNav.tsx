@@ -13,11 +13,13 @@ export function DesktopNav({
   locale,
   labels,
   pendingCount,
+  orgName,
 }: {
   role: Role;
   locale: Locale;
   labels: Record<string, string>;
   pendingCount: number;
+  orgName?: string | null;
 }) {
   const pathname = usePathname() ?? ROLE_HOME[role];
   const items = allItems(role);
@@ -25,7 +27,7 @@ export function DesktopNav({
   return (
     <header className="dnav">
       <Link href={ROLE_HOME[role]} aria-label="Perx"><Logo /></Link>
-      <span className="kicker hidden sm:inline" style={{ marginLeft: 2 }}>{role === "provider" ? "Provider" : "Employer"}</span>
+      <span className="kicker hidden sm:inline" style={{ marginLeft: 2 }}>{orgName ? `${orgName} · ` : ""}{role === "provider" ? "Provider" : "Employer"}</span>
       <span className="spacer" />
       <nav className="flex items-center gap-1 overflow-x-auto">
         {items.map((item) => {

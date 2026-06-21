@@ -17,18 +17,20 @@ export function AppShell({
   locale,
   labels,
   pendingCount,
+  orgName,
   children,
 }: {
   role: Role;
   locale: Locale;
   labels: Record<string, string>;
   pendingCount: number;
+  orgName?: string | null;
   children: ReactNode;
 }) {
   if (role === "company" || role === "provider") {
     return (
       <div className="min-h-dvh">
-        <DesktopNav role={role} locale={locale} labels={labels} pendingCount={pendingCount} />
+        <DesktopNav role={role} locale={locale} labels={labels} pendingCount={pendingCount} orgName={orgName} />
         <div className="pb-10">{children}</div>
       </div>
     );
@@ -36,8 +38,8 @@ export function AppShell({
 
   return (
     <div className="min-h-dvh md:pl-60">
-      <Sidebar role={role} locale={locale} labels={labels} pendingCount={pendingCount} />
-      <TopBar role={role} locale={locale} labels={labels} />
+      <Sidebar role={role} locale={locale} labels={labels} pendingCount={pendingCount} orgName={orgName} />
+      <TopBar role={role} locale={locale} labels={labels} orgName={orgName} />
       <div className="pb-24 md:pb-10">{children}</div>
       <BottomTabBar role={role} labels={labels} pendingCount={pendingCount} />
       <GenieFab label={labels["nav.genie"] ?? "Genie"} />

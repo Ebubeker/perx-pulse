@@ -181,6 +181,7 @@ model Offer {
 
   provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
   orders   Order[]
+  teamPacks TeamPack[]
 
   @@index([providerId])
 }
@@ -376,11 +377,15 @@ model TeamPack {
   title               String
   description         String?
   targetSize          Int       @default(4)
+  offerId             String? // optional catalog perk this group is built around (gives it an image)
+  bonusCoins          Int       @default(0) // group cashback each member gets when the pack fills
+  lockedAt            DateTime? // set once the group fills + the bonus is paid (idempotent)
   endsAt              DateTime?
   createdAt           DateTime  @default(now())
 
   company Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
   creator EmployeeProfile  @relation("TeamPackCreator", fields: [createdByEmployeeId], references: [id], onDelete: Cascade)
+  offer   Offer?           @relation(fields: [offerId], references: [id], onDelete: SetNull)
   members TeamPackMember[]
 
   @@index([companyId])
