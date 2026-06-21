@@ -24,7 +24,7 @@ export const NAV_PRIMARY: Record<Role, NavItem[]> = {
     { key: "home", labelKey: "nav.home", href: "/dashboard/employee", match: "exact", icon: "home", also: ["/dashboard/employee/discover", "/dashboard/employee/pulse", "/dashboard/employee/package", "/dashboard/employee/offer", "/dashboard/employee/provider"] },
     { key: "coins", labelKey: "nav.coins", href: "/dashboard/recognition", match: "prefix", icon: "coin", also: ["/dashboard/leaderboard"] },
     { key: "team", labelKey: "nav.team", href: "/dashboard/team", match: "prefix", icon: "team" },
-    { key: "more", labelKey: "nav.more", href: "/dashboard/employee/more", match: "prefix", icon: "more", also: ["/dashboard/employee/wallet", "/dashboard/employee/drops", "/dashboard/employee/passport", "/dashboard/employee/spin", "/dashboard/employee/genie"] },
+    { key: "more", labelKey: "nav.more", href: "/dashboard/employee/more", match: "prefix", icon: "more", also: ["/dashboard/employee/drops", "/dashboard/employee/passport", "/dashboard/employee/spin", "/dashboard/employee/genie"] },
   ],
   company: [
     { key: "overview", labelKey: "nav.overview", href: "/dashboard/company", match: "exact", icon: "grid" },
@@ -41,7 +41,6 @@ export const NAV_PRIMARY: Record<Role, NavItem[]> = {
 // Desktop sidebar only (also reachable in-page via each role's home launchpad on mobile).
 export const NAV_SECONDARY: Record<Role, NavItem[]> = {
   employee: [
-    { key: "wallet", labelKey: "nav.wallet", href: "/dashboard/employee/wallet", match: "prefix", icon: "card" },
     { key: "spin", labelKey: "nav.spin", href: "/dashboard/employee/spin", match: "prefix", icon: "sparkles" },
     { key: "drops", labelKey: "nav.drops", href: "/dashboard/employee/drops", match: "prefix", icon: "bolt" },
     { key: "leaderboard", labelKey: "nav.leaderboard", href: "/dashboard/leaderboard", match: "prefix", icon: "trophy" },
@@ -76,7 +75,6 @@ const TITLES: { prefix: string; key: string }[] = [
   { prefix: "/dashboard/employee/package", key: "page.pack" },
   { prefix: "/dashboard/employee/offer", key: "page.offer" },
   { prefix: "/dashboard/employee/provider", key: "page.provider" },
-  { prefix: "/dashboard/employee/wallet", key: "nav.wallet" },
   { prefix: "/dashboard/employee/genie", key: "nav.genie" },
   { prefix: "/dashboard/employee/drops", key: "nav.drops" },
   { prefix: "/dashboard/employee/passport", key: "nav.passport" },

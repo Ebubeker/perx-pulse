@@ -64,7 +64,7 @@ export async function spinDaily(): Promise<SpinResult> {
       return { won, index, bonus, streak, balance: up.recognitionCoins };
     });
     revalidatePath("/dashboard/employee/spin");
-    revalidatePath("/dashboard/employee/wallet");
+    revalidatePath("/dashboard/recognition");
     revalidatePath("/dashboard/employee");
     return out;
   } catch (e) {

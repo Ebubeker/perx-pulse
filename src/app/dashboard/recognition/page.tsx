@@ -4,6 +4,7 @@ import { requireMembership } from "@/lib/account";
 import { prisma } from "@/lib/prisma";
 import { walletHistory, coinSummary, companyRecognitionFeed, bestValueOffers, type HistoryKind } from "@/lib/coins";
 import { toCoins, toLek, toEur } from "@/lib/currency";
+import { Coins } from "@/components/Coins";
 import { CoinIcon } from "@/components/CoinIcon";
 import { Mascot } from "@/components/Mascot";
 import { Icon, type IconName } from "@/components/Icon";
@@ -24,7 +25,7 @@ export default async function CoinsPage() {
   const m = await requireMembership();
   const isAdmin = m.role === "ADMIN" || m.role === "HR";
 
-  const [colleagues, feed, history, summary, bestValue] = await Promise.all([
+  const [colleagues, feed, history, summary, bestValue, orders, claims, pending] = await Promise.all([
     prisma.employeeProfile.findMany({
       where: { companyId: m.companyId, id: { not: m.id } },
       select: { id: true, displayName: true, role: true },
@@ -34,7 +35,11 @@ export default async function CoinsPage() {
     walletHistory(m.id),
     coinSummary(m.id),
     bestValueOffers(m.recognitionCoins),
+    prisma.order.findMany({ where: { employeeProfileId: m.id }, include: { provider: { select: { businessName: true } } }, orderBy: { createdAt: "desc" } }),
+    prisma.dropClaim.findMany({ where: { employeeProfileId: m.id }, include: { drop: { select: { title: true, provider: { select: { businessName: true } } } } }, orderBy: { createdAt: "desc" } }),
+    prisma.perkPackage.findMany({ where: { employeeProfileId: m.id, status: "PENDING" }, orderBy: { createdAt: "desc" } }),
   ]);
+  const hasVouchers = orders.length > 0 || claims.length > 0 || pending.length > 0;
 
   const balance = m.recognitionCoins;
   const lek = toLek(balance);
@@ -121,6 +126,46 @@ export default async function CoinsPage() {
           )}
         </section>
       </div>
+
+      {/* your vouchers & codes — merged from the old wallet page */}
+      {hasVouchers && (
+        <section className="mt-9">
+          <div className="sec"><h3>Your vouchers &amp; codes</h3></div>
+          <p className="-mt-1 mb-3 text-sm text-muted">Redemption codes to show at the provider, claimed drops, and packs awaiting HR.</p>
+          <div className="grid gap-2.5 md:grid-cols-2">
+            {orders.map((o) => {
+              const redeemed = o.status === "REDEEMED";
+              return (
+                <div key={o.id} className="row mb-0 flex-col items-stretch !gap-2.5">
+                  <div className="flex w-full items-center gap-3">
+                    <span className="ico coral shrink-0"><Icon name="ticket" size={20} /></span>
+                    <div className="min-w-0 grow"><div className="t truncate">{o.title}</div><div className="s">{o.provider.businessName}</div></div>
+                    <span className={`pill ${redeemed ? "pill-redeemed" : "pill-ready"}`}><span className="dot" />{redeemed ? "Redeemed" : "Ready"}</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-[var(--r-sm)] bg-cream px-3 py-2.5">
+                    <span className="code text-base">{o.code}</span>
+                    <span className="text-xs text-muted">{redeemed ? "used" : "show to redeem"}</span>
+                  </div>
+                </div>
+              );
+            })}
+            {claims.map((c) => (
+              <div key={c.id} className="row mb-0">
+                <span className="ico shrink-0"><Icon name="bolt" size={20} /></span>
+                <div className="min-w-0 grow"><div className="t truncate">{c.drop.title}</div><div className="s">{c.drop.provider.businessName}</div></div>
+                <span className="code text-[15px]">{c.code}</span>
+              </div>
+            ))}
+            {pending.map((p) => (
+              <Link key={p.id} href={`/dashboard/employee/package/${p.id}`} className="row mb-0">
+                <span className="ico shrink-0"><Icon name="clock" size={20} /></span>
+                <div className="min-w-0 grow"><div className="t truncate">{p.label}</div><div className="s">Awaiting HR approval</div></div>
+                <span className="amt"><Coins amount={toCoins(p.totalLek)} /></span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* maximize your coins — best-value perks */}
       {bestValue.length > 0 && (

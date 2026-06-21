@@ -43,7 +43,7 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
       {/* header — character on top, name below */}
       <div className="flex items-start justify-between gap-3">
         <Mascot mood="charged" size={96} className="float" />
-        <Link href="/dashboard/employee/wallet" className="grid size-11 shrink-0 place-items-center rounded-full bg-coral text-white shadow-[var(--sh-press)]" aria-label="Wallet">
+        <Link href="/dashboard/recognition" className="grid size-11 shrink-0 place-items-center rounded-full bg-coral text-white shadow-[var(--sh-press)]" aria-label="Wallet">
           <Icon name="ticket" size={20} />
         </Link>
       </div>
@@ -65,7 +65,7 @@ export default async function EmployeeHome({ searchParams }: { searchParams: Pro
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/dashboard/employee/spin" className="coin"><Icon name="sparkles" size={16} />Earn more</Link>
-            <Link href="/dashboard/employee/wallet" className="rounded-full border border-white/20 px-3.5 py-1.5 text-sm font-semibold text-[var(--txt-on-dark)]">Vouchers</Link>
+            <Link href="/dashboard/recognition" className="rounded-full border border-white/20 px-3.5 py-1.5 text-sm font-semibold text-[var(--txt-on-dark)]">Vouchers</Link>
           </div>
         </div>
       </div>

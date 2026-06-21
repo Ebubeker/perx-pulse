@@ -4,7 +4,7 @@ import { Icon, type IconName } from "@/components/Icon";
 export const dynamic = "force-dynamic";
 
 const ITEMS: { href: string; icon: IconName; label: string; sub: string }[] = [
-  { href: "/dashboard/employee/wallet", icon: "card", label: "Wallet", sub: "Your vouchers & balance" },
+  { href: "/dashboard/recognition", icon: "card", label: "Coins & vouchers", sub: "Balance, codes, kudos & history" },
   { href: "/dashboard/employee/spin", icon: "sparkles", label: "Daily Spin", sub: "Free coins every day" },
   { href: "/dashboard/employee/drops", icon: "bolt", label: "Perx Drops", sub: "Flash deals near you" },
   { href: "/dashboard/leaderboard", icon: "trophy", label: "Leaderboard", sub: "Who's most recognized" },

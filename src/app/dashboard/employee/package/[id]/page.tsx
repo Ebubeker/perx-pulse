@@ -134,7 +134,7 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
           </div>
         )}
 
-        <Link href="/dashboard/employee/wallet" className="btn btn-primary btn-lg mt-6">Open my wallet →</Link>
+        <Link href="/dashboard/recognition" className="btn btn-primary btn-lg mt-6">Open my coins →</Link>
       </main>
     );
   }
